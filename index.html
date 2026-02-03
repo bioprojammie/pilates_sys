@@ -4,22 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pilates </title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>皮拉提斯管理系統</title> <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
         
-        /* 畫布強制白色背景，解決變黑問題 */
+        /* 畫布強制白色背景 */
         canvas { touch-action: none; display: block; width: 100%; height: 100%; cursor: crosshair; background-color: #ffffff; }
-        
-        /* 畫布容器 */
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; }
         
-        /* 黑底模式專用畫布 (畫重點用) */
-        .paint-canvas { background-color: transparent !important; }
-        
+        /* 隱藏卷軸但保留功能 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* UI 元件樣式 */
         .tag { display: inline-flex; align-items: center; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; margin-right: 4px; margin-bottom: 4px; font-weight: bold; border: 1px solid #dbeafe; }
         .cal-card { background: white; border-left: 3px solid #6366f1; padding: 6px; margin-bottom: 6px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.8rem; cursor: pointer; transition: transform 0.1s; }
         .cal-card:active { transform: scale(0.98); background: #f5f3ff; }
@@ -30,7 +28,7 @@
 
     <nav class="bg-white shadow-sm z-20 flex-none h-16 flex items-center justify-between px-4">
         <div class="font-bold text-xl text-indigo-600 flex items-center gap-2 select-none">
-            <i class="fa-solid fa-file-signature"></i> Pilates Course system
+            <i class="fa-solid fa-person-running"></i> Pilates Pro
         </div>
         <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button onclick="switchTab('page-list')" id="nav-list" class="px-4 py-2 rounded-md text-sm font-bold shadow bg-white text-indigo-600 transition">總表</button>
@@ -106,8 +104,10 @@
                     <tbody id="studentListBody" class="divide-y divide-gray-100"></tbody>
                 </table>
             </div>
-            <div class="text-center mt-8 pb-8">
-                 <button onclick="clearAllSystem()" class="text-xs text-gray-400 underline p-2 hover:text-red-500">重置所有資料</button>
+            
+            <div class="text-center mt-8 pb-8 flex flex-col items-center gap-2">
+                 <button onclick="clearAllSystem()" class="text-xs text-gray-400 underline p-2 hover:text-red-500">重置所有系統資料</button>
+                 <span class="text-[10px] text-gray-300">v7.9</span>
             </div>
         </div>
 
@@ -199,8 +199,8 @@
     <div id="contractModal" class="fixed inset-0 z-50 bg-black bg-opacity-90 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')"><div class="bg-white p-4 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">合約與簽名詳情</h3><button onclick="document.getElementById('contractModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark fa-lg"></i></button></div><div id="contractContent" class="space-y-4"></div></div></div>
 
     <script>
-        let students = JSON.parse(localStorage.getItem('p78_st')) || [];
-        let records = JSON.parse(localStorage.getItem('p78_rc')) || [];
+        let students = JSON.parse(localStorage.getItem('p79_st')) || [];
+        let records = JSON.parse(localStorage.getItem('p79_rc')) || [];
         let curSid = null, editRecId = null;
         let tempSchedule = [];
         const pads = {};
@@ -227,7 +227,6 @@
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 
-                // Set default white background for signatures to prevent transparency issues
                 if(id !== 'canvasPaint') {
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(0, 0, canvas.width/ratio, canvas.height/ratio);
@@ -235,7 +234,6 @@
 
                 if(id === 'canvasPaint' && paintBaseImg) drawImageFit(paintBaseImg, canvas, ctx, parent.clientWidth, parent.clientHeight);
                 
-                // If editing a record that has a signature, redraw it!
                 if(id === 'padCheckin' && editRecId) {
                     const r = records.find(x => x.id === editRecId);
                     if(r && r.sig) {
@@ -424,10 +422,9 @@
         }
         function loadEdit(rid){const r=records.find(x=>x.id===rid);if(r.type==='renew')return;editRecId=rid;document.getElementById('editStatus').innerText=r.status==='done'?"編輯紀錄":"編輯預排";document.getElementById('editNote').value=r.note||'';if(r.img){document.getElementById('editImg').src=r.img;document.getElementById('editImg').classList.remove('hidden');document.getElementById('imgPlaceholder').classList.add('hidden');document.getElementById('btnPaint').classList.remove('hidden')}document.getElementById('editor').scrollIntoView({behavior:'smooth'})}
         function clearPad(id){const p=pads[id];if(!p)return;p.ctx.clearRect(0,0,p.c.width,p.c.height);if(id!=='canvasPaint'){p.ctx.fillStyle='#ffffff';p.ctx.fillRect(0,0,p.c.width,p.c.height);}if(id==='padCheckin')updateCheckinBtn(false)}
-        function save(){localStorage.setItem('p78_st',JSON.stringify(students));localStorage.setItem('p78_rc',JSON.stringify(records))}
+        function save(){localStorage.setItem('p79_st',JSON.stringify(students));localStorage.setItem('p79_rc',JSON.stringify(records))}
         function clearAllSystem(){if(confirm("警告：清除後資料無法復原")){localStorage.clear();location.reload()}}
         switchTab('page-list');
     </script>
 </body>
 </html>
-
