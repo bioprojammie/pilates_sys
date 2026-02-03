@@ -6,8 +6,8 @@
 
 🔗 立即使用 (Live Demo)
 點擊下方連結即可開啟系統：
-
 👉 https://bioprojammie.github.io/pilates_sys/
+
 ✨ 主要功能
 📱 iPad 最佳化體驗：支援「加入主畫面」全螢幕模式，操作流暢如原生 App。
 
