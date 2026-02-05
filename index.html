@@ -4,29 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pilates Pro V8.1</title>
+    <title>皮拉提斯管理系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
         canvas { touch-action: none; display: block; width: 100%; height: 100%; cursor: crosshair; background-color: #ffffff; }
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; }
-        .paint-canvas { background-color: transparent !important; } /* 畫圖模式背景透明 */
+        .paint-canvas { background-color: transparent !important; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .tag { display: inline-flex; align-items: center; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; margin-right: 4px; margin-bottom: 4px; font-weight: bold; border: 1px solid #dbeafe; }
         .cal-card { background: white; border-left: 3px solid #6366f1; padding: 6px; margin-bottom: 6px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.8rem; cursor: pointer; transition: transform 0.1s; }
         .cal-card:active { transform: scale(0.98); background: #f5f3ff; }
-        
-        /* 照片列表樣式 */
-        .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb; cursor: pointer; }
-        .img-thumb:hover { border-color: #6366f1; }
+        .img-thumb { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 2px solid #e5e7eb; cursor: pointer; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col text-gray-800 w-full">
 
     <nav class="bg-white shadow-sm z-20 flex-none h-16 flex items-center justify-between px-4">
         <div class="font-bold text-xl text-indigo-600 flex items-center gap-2 select-none">
-            <i class="fa-solid fa-person-running"></i> Pilates V8.1
+            <i class="fa-solid fa-person-running"></i> Pilates Pro
         </div>
         <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button onclick="switchTab('page-list')" id="nav-list" class="px-4 py-2 rounded-md text-sm font-bold shadow bg-white text-indigo-600 transition">總表</button>
@@ -39,12 +36,12 @@
         <div id="page-create" class="hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm max-w-2xl mx-auto space-y-5">
                 <h2 class="text-lg font-bold border-b pb-2 text-gray-700">建立學生檔案</h2>
-                <input type="text" id="cName" placeholder="學生姓名" class="w-full p-4 border rounded-xl bg-gray-50 text-lg">
-                <input type="number" id="cCredits" placeholder="初始堂數" class="w-full p-4 border rounded-xl bg-gray-50 text-lg">
-                <input type="text" id="cBody" placeholder="身體狀況備註" class="w-full p-4 border border-red-100 bg-red-50 text-red-600 rounded-xl">
+                <input type="text" id="cName" placeholder="學生姓名" class="w-full p-4 border rounded-xl bg-gray-50 text-lg focus:bg-white transition">
+                <input type="number" id="cCredits" placeholder="初始堂數" class="w-full p-4 border rounded-xl bg-gray-50 text-lg focus:bg-white transition">
+                <input type="text" id="cBody" placeholder="身體狀況備註" class="w-full p-4 border border-red-100 bg-red-50 text-red-600 rounded-xl focus:bg-white transition">
                 
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                    <label class="font-bold text-blue-600 text-xs block mb-2">預設上課時間</label>
+                    <label class="font-bold text-blue-600 text-xs block mb-2">預設固定上課時間</label>
                     <div class="flex gap-2 mb-2 items-center">
                         <select id="schDay" class="p-3 rounded-lg border bg-white flex-1 font-bold text-gray-700"><option value="週一">週一</option><option value="週二">週二</option><option value="週三">週三</option><option value="週四">週四</option><option value="週五">週五</option><option value="週六">週六</option><option value="週日">週日</option></select>
                         <select id="schHour" class="p-3 rounded-lg border bg-white font-mono font-bold"><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option></select>
@@ -55,7 +52,11 @@
                     <div id="scheduleTags" class="min-h-[30px] flex flex-wrap"></div>
                 </div>
 
-                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100"><label class="font-bold text-indigo-600 text-xs block mb-2">1. 上傳合約</label><input type="file" id="cContractFile" accept="image/*" class="w-full text-sm text-gray-500"></div>
+                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                    <label class="font-bold text-indigo-600 text-xs block mb-2">1. 上傳合約 (照片/截圖)</label>
+                    <input type="file" id="cContractFile" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-200 file:text-indigo-800 hover:file:bg-indigo-300 cursor-pointer">
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-gray-50 p-4 rounded-xl border"><div class="flex justify-between mb-1"><label class="font-bold text-gray-400 text-xs">2. 學生簽名</label><button onclick="clearPad('padNewContractStudent')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-32"><canvas id="padNewContractStudent"></canvas></div></div>
                     <div class="bg-gray-50 p-4 rounded-xl border"><div class="flex justify-between mb-1"><label class="font-bold text-gray-400 text-xs">3. 老師簽名</label><button onclick="clearPad('padNewContractTeacher')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-32"><canvas id="padNewContractTeacher"></canvas></div></div>
@@ -78,58 +79,58 @@
             <div class="mt-8 p-6 bg-gray-100 rounded-2xl border border-gray-200 text-center">
                 <button onclick="backupData()" class="bg-white border text-gray-700 px-4 py-2 rounded-lg text-sm mr-2"><i class="fa-solid fa-download"></i> 備份</button>
                 <label class="bg-white border text-gray-700 px-4 py-2 rounded-lg text-sm cursor-pointer"><i class="fa-solid fa-upload"></i> 還原<input type="file" id="importFile" accept=".json" class="hidden" onchange="restoreData(this)"></label>
-                <div class="mt-4"><button onclick="clearAllSystem()" class="text-xs text-red-300 underline">清除重置</button><span class="text-[10px] text-gray-300 block mt-1">v8.1</span></div>
+                <div class="mt-4"><button onclick="clearAllSystem()" class="text-xs text-red-300 underline">清除重置</button><span class="text-[10px] text-gray-300 block mt-1">v8.2</span></div>
             </div>
         </div>
 
         <div id="page-detail" class="hidden">
-            <button onclick="switchTab('page-list')" class="text-gray-500 font-bold flex items-center gap-1 bg-white px-3 py-2 rounded-lg shadow-sm mb-4 w-fit"><i class="fa-solid fa-chevron-left"></i> 返回</button>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex-1"><div class="flex items-center gap-3 mb-1"><h2 id="dName" class="text-3xl font-bold text-gray-800"></h2><button onclick="viewContract()" class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">合約</button></div><div id="dSchedule" class="flex flex-wrap gap-1 mt-1"></div><p id="dBody" class="text-xs text-red-500 font-bold mt-2 bg-red-50 inline-block px-2 py-1 rounded border border-red-100"></p></div>
+            <button onclick="switchTab('page-list')" class="text-gray-500 font-bold flex items-center gap-1 bg-white px-3 py-2 rounded-lg shadow-sm mb-4 w-fit"><i class="fa-solid fa-chevron-left"></i> 返回總表</button>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-1"><div class="flex items-center gap-3 mb-1"><h2 id="dName" class="text-3xl font-bold text-gray-800"></h2><button onclick="viewContract()" class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded hover:bg-gray-200">合約</button></div><div id="dSchedule" class="flex flex-wrap gap-1 mt-1"></div><p id="dBody" class="text-xs text-red-500 font-bold mt-2 bg-red-50 inline-block px-2 py-1 rounded border border-red-100"></p></div>
                 <div class="bg-indigo-600 rounded-xl p-4 text-white shadow-md flex items-center gap-6"><div class="text-center"><p class="text-indigo-200 text-xs font-bold uppercase">剩餘堂數</p><p id="dCredits" class="text-4xl font-mono font-bold leading-none">0</p></div><button onclick="openRenewModal()" class="bg-white text-indigo-600 px-3 py-2 rounded-lg font-bold text-sm shadow hover:bg-indigo-50 transition active:scale-95"><i class="fa-solid fa-plus"></i> 購課</button></div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 space-y-5">
-                    <div id="editor" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
                         <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                            <span id="editStatus" class="text-xs font-bold px-2 py-1 rounded bg-gray-100 text-gray-500">新課程</span>
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Step 1. 課程內容規劃</span>
                             <button onclick="resetEditor()" class="text-xs text-indigo-500 font-bold hover:underline">＋ 新增一堂</button>
                         </div>
-                        
-                        <div class="space-y-3 mb-6">
+                        <div class="space-y-3">
                             <div class="flex gap-2 overflow-x-auto pb-2" id="imgList"></div>
-                            <div id="addImgBtn" class="h-24 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100" onclick="document.getElementById('fileInput').click()">
-                                <i class="fa-solid fa-camera text-2xl mb-1"></i><span class="text-xs font-bold">新增照片</span>
+                            <div id="addImgBtn" class="h-20 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-100" onclick="document.getElementById('fileInput').click()">
+                                <i class="fa-solid fa-camera text-xl mb-1"></i><span class="text-xs font-bold">上傳照片</span>
                             </div>
                             <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleAddImage(this)">
-                            
-                            <textarea id="editNote" rows="2" placeholder="輸入課程筆記..." class="w-full p-3 rounded-xl bg-gray-50 text-sm border-0 focus:ring-2 focus:ring-indigo-200"></textarea>
-                            <button onclick="savePlan()" class="w-full py-2 border border-indigo-200 text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-50">暫存更新 (不影響簽名)</button>
-                        </div>
-
-                        <div class="space-y-3 pt-4 border-t border-gray-100">
-                            <div class="flex justify-between items-end">
-                                <label class="text-xs font-bold text-gray-400 uppercase">學生簽名</label>
-                                <button onclick="resetSignature()" class="text-xs text-red-400 px-2 hover:bg-red-50 rounded hidden" id="resignBtn">重簽</button>
-                                <button onclick="clearPad('padCheckin')" class="text-xs text-red-400 px-2 hover:bg-red-50 rounded" id="clearSigBtn">清除</button>
-                            </div>
-                            
-                            <div class="relative">
-                                <div class="canvas-box h-24 bg-gray-50"><canvas id="padCheckin"></canvas></div>
-                                <div id="sigLockOverlay" class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center hidden z-10">
-                                    <div class="text-center">
-                                        <i class="fa-solid fa-lock text-green-600 text-2xl mb-1"></i>
-                                        <p class="text-xs text-gray-500 font-bold">簽名已鎖定</p>
-                                        <img id="lockedSigImg" class="h-10 mt-1 border rounded mx-auto">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button id="btnConfirm" onclick="confirmClass()" class="w-full bg-gray-200 text-gray-400 py-3 rounded-xl font-bold text-lg shadow-sm transition-all cursor-not-allowed" disabled>確認扣課</button>
+                            <textarea id="editNote" rows="3" placeholder="輸入課程筆記..." class="w-full p-3 rounded-xl bg-gray-50 text-sm border-0 focus:ring-2 focus:ring-indigo-200"></textarea>
+                            <button onclick="saveContentOnly()" class="w-full py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-100 transition"><i class="fa-solid fa-floppy-disk"></i> 儲存/更新內容 (不影響簽名)</button>
                         </div>
                     </div>
+
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-xs font-bold text-green-600 uppercase tracking-wider">Step 2. 學生簽到</span>
+                            <button onclick="unlockSignature()" id="btnUnlockSig" class="text-xs text-red-300 underline hidden">撤銷重簽</button>
+                            <button onclick="clearPad('padCheckin')" id="btnClearSig" class="text-xs text-gray-400">清除</button>
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="canvas-box h-28 bg-gray-50"><canvas id="padCheckin"></canvas></div>
+                            <div id="signedOverlay" class="absolute inset-0 bg-white bg-opacity-95 flex flex-col items-center justify-center hidden z-10">
+                                <i class="fa-solid fa-circle-check text-green-500 text-3xl mb-1"></i>
+                                <span class="text-xs font-bold text-gray-600">已完成簽到</span>
+                                <img id="existingSigImg" class="h-10 mt-1 border rounded opacity-50">
+                            </div>
+                        </div>
+
+                        <button id="btnConfirm" onclick="confirmAttendance()" class="w-full bg-gray-200 text-gray-400 py-3 rounded-xl font-bold text-lg shadow-sm transition-all cursor-not-allowed mt-3" disabled>確認出席 (扣課)</button>
+                        <p id="statusMsg" class="text-center text-xs text-gray-400 mt-2 h-4"></p>
+                    </div>
                 </div>
+
                 <div class="lg:col-span-7">
                     <div class="bg-white p-6 rounded-2xl shadow-sm h-full min-h-[400px]">
                         <h3 class="font-bold text-gray-400 text-xs uppercase tracking-wider mb-4">歷史紀錄 Timeline</h3>
@@ -141,29 +142,17 @@
     </main>
 
     <div id="renewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden opacity-0 transition-opacity duration-200 backdrop-blur-sm"><div class="bg-white w-[90%] max-w-lg p-6 rounded-3xl shadow-2xl transform scale-95 transition-transform duration-200" id="renewContent"><h3 class="text-xl font-bold mb-4 text-center">購買 / 續約</h3><div class="space-y-4"><input type="number" id="renewAmount" class="w-full p-4 border rounded-2xl text-2xl font-bold text-center outline-none focus:ring-2 focus:ring-indigo-500" placeholder="輸入堂數"><div class="grid grid-cols-2 gap-3"><div class="bg-gray-50 p-2 rounded-xl border"><div class="flex justify-between mb-1"><label class="text-xs font-bold text-gray-400">學生簽名</label><button onclick="clearPad('padRenewStudent')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-24 bg-white"><canvas id="padRenewStudent"></canvas></div></div><div class="bg-gray-50 p-2 rounded-xl border"><div class="flex justify-between mb-1"><label class="text-xs font-bold text-gray-400">老師簽名</label><button onclick="clearPad('padRenewTeacher')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-24 bg-white"><canvas id="padRenewTeacher"></canvas></div></div></div><div class="flex gap-3 mt-2"><button onclick="closeRenewModal()" class="flex-1 py-3 text-gray-500 font-bold bg-gray-100 rounded-xl hover:bg-gray-200">取消</button><button onclick="submitRenew()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700">確認購買</button></div></div></div></div>
-    
-    <div id="paintModal" class="fixed inset-0 z-50 bg-gray-900 hidden flex flex-col">
-        <div class="flex justify-between items-center p-4 bg-gray-800 text-white safe-top"><button onclick="closePaintModal()" class="px-4 py-2 text-gray-300 font-bold hover:text-white">取消</button><h3 class="font-bold">圖片標註</h3><button onclick="savePaint()" class="px-4 py-2 bg-indigo-500 rounded-lg font-bold shadow hover:bg-indigo-600">完成</button></div>
-        <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden" id="paintContainer"><canvas id="canvasPaint" class="paint-canvas"></canvas></div>
-        <div class="p-6 bg-gray-800 flex justify-center gap-6 safe-bottom">
-            <button onclick="setPen('#ef4444')" class="w-12 h-12 rounded-full bg-red-500 border-4 border-gray-700 ring-2 ring-white transform hover:scale-110 transition"></button>
-            <button onclick="setPen('#facc15')" class="w-12 h-12 rounded-full bg-yellow-400 border-4 border-gray-700 transform hover:scale-110 transition"></button>
-            <button onclick="setPen('#3b82f6')" class="w-12 h-12 rounded-full bg-blue-500 border-4 border-gray-700 transform hover:scale-110 transition"></button>
-            <button onclick="setPen('#22c55e')" class="w-12 h-12 rounded-full bg-green-500 border-4 border-gray-700 transform hover:scale-110 transition"></button>
-        </div>
-    </div>
-    
+    <div id="paintModal" class="fixed inset-0 z-50 bg-gray-900 hidden flex flex-col"><div class="flex justify-between items-center p-4 bg-gray-800 text-white safe-top"><button onclick="closePaintModal()" class="px-4 py-2 text-gray-300 font-bold hover:text-white">取消</button><h3 class="font-bold">圖片標註</h3><button onclick="savePaint()" class="px-4 py-2 bg-indigo-500 rounded-lg font-bold shadow hover:bg-indigo-600">完成</button></div><div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden" id="paintContainer"><canvas id="canvasPaint" class="paint-canvas"></canvas></div><div class="p-6 bg-gray-800 flex justify-center gap-6 safe-bottom"><button onclick="setPen('#ef4444')" class="w-12 h-12 rounded-full bg-red-500 border-4 border-gray-700 ring-2 ring-white hover:scale-110 transition"></button><button onclick="setPen('#facc15')" class="w-12 h-12 rounded-full bg-yellow-400 border-4 border-gray-700 hover:scale-110 transition"></button><button onclick="setPen('#3b82f6')" class="w-12 h-12 rounded-full bg-blue-500 border-4 border-gray-700 hover:scale-110 transition"></button><button onclick="setPen('#22c55e')" class="w-12 h-12 rounded-full bg-green-500 border-4 border-gray-700 hover:scale-110 transition"></button></div></div>
     <div id="contractModal" class="fixed inset-0 z-50 bg-black bg-opacity-90 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')"><div class="bg-white p-4 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">合約與簽名詳情</h3><button onclick="document.getElementById('contractModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark fa-lg"></i></button></div><div id="contractContent" class="space-y-4"></div></div></div>
 
     <script>
-        let students = JSON.parse(localStorage.getItem('p81_st')) || [];
-        let records = JSON.parse(localStorage.getItem('p81_rc')) || [];
+        let students = JSON.parse(localStorage.getItem('p82_st')) || [];
+        let records = JSON.parse(localStorage.getItem('p82_rc')) || [];
         let curSid = null, editRecId = null;
         let tempSchedule = [], currentDraftImages = [];
-        let paintImgIndex = -1; // 追蹤正在畫哪張圖
+        let paintImgIndex = -1;
         const pads = {};
         let paintBaseImg = null;
-        let isSigLocked = false; // 簽名鎖定狀態
 
         function compressImage(src, maxWidth=800, quality=0.6) { return new Promise((resolve) => { if(!src) resolve(null); const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; if (width > maxWidth) { height = Math.round((height *= maxWidth / width)); width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,width,height); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', quality)); }; img.src = src; }); }
         function fileToDataURL(file) { return new Promise((resolve) => { if(!file) resolve(null); const reader = new FileReader(); reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(file); }); }
@@ -194,38 +183,20 @@
         function addScheduleTag() { const day=document.getElementById('schDay').value, hour=document.getElementById('schHour').value, min=document.getElementById('schMin').value, tag=`${day} ${hour}:${min}`; if(!tempSchedule.includes(tag)){tempSchedule.push(tag); renderTempTags();} }
         function renderTempTags() { document.getElementById('scheduleTags').innerHTML = tempSchedule.map(t => `<span class="tag cursor-pointer hover:bg-red-100 hover:text-red-500" onclick="removeTag('${t}')">${t} <i class="fa-solid fa-xmark ml-1"></i></span>`).join(''); }
         function removeTag(t) { tempSchedule = tempSchedule.filter(x => x !== t); renderTempTags(); }
-
-        // Data Management
-        function backupData() { const d = { students, records, version: "8.1", date: new Date().toISOString() }; const b = new Blob([JSON.stringify(d)], { type: "application/json" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `pilates_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); alert("已下載備份檔"); }
-        function restoreData(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); if (d.students && d.records && confirm("還原將覆蓋目前資料，確定？")) { localStorage.setItem('p81_st', JSON.stringify(d.students)); localStorage.setItem('p81_rc', JSON.stringify(d.records)); alert("還原成功"); location.reload(); } } catch (err) { alert("檔案錯誤"); } }; r.readAsText(f); }
+        function backupData() { const d = { students, records, version: "8.2", date: new Date().toISOString() }; const b = new Blob([JSON.stringify(d)], { type: "application/json" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `pilates_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); alert("已下載備份檔"); }
+        function restoreData(i) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = (e) => { try { const d = JSON.parse(e.target.result); if (d.students && d.records && confirm("還原將覆蓋目前資料，確定？")) { localStorage.setItem('p82_st', JSON.stringify(d.students)); localStorage.setItem('p82_rc', JSON.stringify(d.records)); alert("還原成功"); location.reload(); } } catch (err) { alert("檔案錯誤"); } }; r.readAsText(f); }
         function clearAllSystem() { if(confirm("清除所有資料無法復原，確定？")) { localStorage.clear(); location.reload(); } }
 
-        // Create Student
         async function createStudent() {
             const name=document.getElementById('cName').value, credits=document.getElementById('cCredits').value, body=document.getElementById('cBody').value, fileInput=document.getElementById('cContractFile');
             if(!name || !credits) return alert("請輸入完整資料");
             const sigStudent = await compressImage(pads['padNewContractStudent'].c.toDataURL(), 500, 0.5);
             const sigTeacher = await compressImage(pads['padNewContractTeacher'].c.toDataURL(), 500, 0.5);
-            let contractImg = null;
-            if(fileInput.files && fileInput.files[0]) { contractImg = await compressImage(await fileToDataURL(fileInput.files[0]), 1024, 0.7); }
+            let contractImg = null; if(fileInput.files && fileInput.files[0]) { contractImg = await compressImage(await fileToDataURL(fileInput.files[0]), 1024, 0.7); }
             students.push({ id: Date.now(), name, credits: parseInt(credits), body: body||"無", contractSigStudent: sigStudent, contractSigTeacher: sigTeacher, contractImg: contractImg, schedule: [...tempSchedule], contractDate: getTimeString() });
             save(); document.getElementById('cName').value=''; document.getElementById('cCredits').value=''; fileInput.value = ''; tempSchedule = []; renderTempTags(); clearPad('padNewContractStudent'); clearPad('padNewContractTeacher'); switchTab('page-list');
         }
 
-        // Renew
-        function openRenewModal() { const m = document.getElementById('renewModal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('renewContent').classList.remove('scale-95'); }, 10); setTimeout(() => { initPad('padRenewStudent', true); initPad('padRenewTeacher', true); }, 100); }
-        function closeRenewModal() { const m = document.getElementById('renewModal'); m.classList.add('opacity-0'); document.getElementById('renewContent').classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 200); }
-        async function submitRenew() {
-            const amt = parseInt(document.getElementById('renewAmount').value); if(!amt) return alert("請輸入堂數");
-            const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5);
-            const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5);
-            const time = getTimeString();
-            const s = students.find(x=>x.id===curSid); s.credits += amt;
-            records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea });
-            save(); document.getElementById('dCredits').innerText = s.credits; document.getElementById('renewAmount').value = ''; clearPad('padRenewStudent'); clearPad('padRenewTeacher'); closeRenewModal(); renderTimeline();
-        }
-
-        // Logic
         function renderList() {
             const tbody = document.getElementById('studentListBody'); tbody.innerHTML = '';
             students.forEach(s => {
@@ -248,155 +219,155 @@
                 grid.appendChild(col);
             });
         }
-        function openDetail(sid) {
-            try {
-                curSid = sid; const s = students.find(x=>x.id===sid);
-                document.getElementById('dName').innerText = s.name; document.getElementById('dCredits').innerText = s.credits; document.getElementById('dBody').innerText = s.body;
-                document.getElementById('dSchedule').innerHTML = s.schedule && s.schedule.length ? s.schedule.map(t => `<span class="tag">${t}</span>`).join('') : '<span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">未設定時間</span>';
-                resetEditor(); renderTimeline(); switchTab('page-detail'); setTimeout(()=>initPad('padCheckin', true), 100);
-            } catch(e) { console.error(e); }
-        }
-        function viewContract() {
-            const s = students.find(x=>x.id===curSid); const c = document.getElementById('contractContent'); c.innerHTML = '';
-            if(s.contractImg) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">合約照片:</p><img src="${s.contractImg}" class="w-full rounded border"></div>`;
-            if(s.contractSigStudent) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">學生簽名:</p><img src="${s.contractSigStudent}" class="w-full rounded border bg-gray-50 h-24 object-contain"></div>`;
-            if(s.contractSigTeacher) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">老師簽名:</p><img src="${s.contractSigTeacher}" class="w-full rounded border bg-gray-50 h-24 object-contain"></div>`;
-            if(s.contractDate) c.innerHTML += `<div class="text-right text-xs text-gray-400 mt-2">簽署日期: ${s.contractDate}</div>`;
-            document.getElementById('contractModal').classList.remove('hidden');
+        function openDetail(sid) { try { curSid = sid; const s = students.find(x=>x.id===sid); document.getElementById('dName').innerText = s.name; document.getElementById('dCredits').innerText = s.credits; document.getElementById('dBody').innerText = s.body; document.getElementById('dSchedule').innerHTML = s.schedule && s.schedule.length ? s.schedule.map(t => `<span class="tag">${t}</span>`).join('') : '<span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">未設定時間</span>'; resetEditor(); renderTimeline(); switchTab('page-detail'); setTimeout(()=>initPad('padCheckin', true), 100); } catch(e) { console.error(e); } }
+        function viewContract() { const s = students.find(x=>x.id===curSid); const c = document.getElementById('contractContent'); c.innerHTML = ''; if(s.contractImg) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">合約照片:</p><img src="${s.contractImg}" class="w-full rounded border"></div>`; if(s.contractSigStudent) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">學生簽名:</p><img src="${s.contractSigStudent}" class="w-full rounded border bg-gray-50 h-24 object-contain"></div>`; if(s.contractSigTeacher) c.innerHTML += `<div><p class="text-xs text-gray-400 mb-1">老師簽名:</p><img src="${s.contractSigTeacher}" class="w-full rounded border bg-gray-50 h-24 object-contain"></div>`; if(s.contractDate) c.innerHTML += `<div class="text-right text-xs text-gray-400 mt-2">簽署日期: ${s.contractDate}</div>`; document.getElementById('contractModal').classList.remove('hidden'); }
+        function openRenewModal() { const m = document.getElementById('renewModal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('renewContent').classList.remove('scale-95'); }, 10); setTimeout(() => { initPad('padRenewStudent', true); initPad('padRenewTeacher', true); }, 100); }
+        function closeRenewModal() { const m = document.getElementById('renewModal'); m.classList.add('opacity-0'); document.getElementById('renewContent').classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 200); }
+        async function submitRenew() {
+            const amt = parseInt(document.getElementById('renewAmount').value); if(!amt) return alert("請輸入堂數");
+            const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5);
+            const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5);
+            const time = getTimeString();
+            const s = students.find(x=>x.id===curSid); s.credits += amt;
+            records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea });
+            save(); document.getElementById('dCredits').innerText = s.credits; document.getElementById('renewAmount').value = ''; clearPad('padRenewStudent'); clearPad('padRenewTeacher'); closeRenewModal(); renderTimeline();
         }
 
-        // Multi-image & Editor Logic
+        // Editor Logic (Decoupled)
         function resetEditor() {
-            editRecId=null; isSigLocked=false;
-            document.getElementById('editStatus').innerText="新課程";
-            document.getElementById('editNote').value='';
-            currentDraftImages = []; renderImgList();
-            document.getElementById('fileInput').value='';
-            clearPad('padCheckin'); 
-            updateCheckinBtn(false);
-            toggleSigLock(false);
+            editRecId=null;
+            document.getElementById('imgList').innerHTML=''; currentDraftImages=[];
+            document.getElementById('fileInput').value=''; document.getElementById('editNote').value='';
+            clearPad('padCheckin'); lockSignature(false);
+            document.getElementById('statusMsg').innerText = "";
         }
 
-        function handleAddImage(input) {
-            if(input.files && input.files[0]) {
-                const r = new FileReader();
-                r.onload = async (e) => {
-                    // Compress immediately upon selection
-                    const compressed = await compressImage(e.target.result, 800, 0.6);
-                    currentDraftImages.push(compressed);
-                    renderImgList();
-                };
-                r.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function renderImgList() {
-            const container = document.getElementById('imgList');
-            container.innerHTML = currentDraftImages.map((img, idx) => `
-                <img src="${img}" class="img-thumb flex-none" onclick="openPaintModal(${idx})">
-            `).join('');
-        }
-
-        function openPaintModal(idx) {
-            paintImgIndex = idx;
-            const src = currentDraftImages[idx];
-            if(!src) return;
-            document.getElementById('paintModal').classList.remove('hidden');
-            paintBaseImg = new Image();
-            paintBaseImg.onload = () => initPad('canvasPaint');
-            paintBaseImg.src = src;
-        }
-
-        function drawImageFit(img, c, ctx, cw, ch) {
-            const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2;
-            ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h);
-        }
+        function handleAddImage(input) { if(input.files && input.files[0]) { const r = new FileReader(); r.onload = async (e) => { const compressed = await compressImage(e.target.result, 800, 0.6); currentDraftImages.push(compressed); renderImgList(); }; r.readAsDataURL(input.files[0]); } }
+        function renderImgList() { document.getElementById('imgList').innerHTML = currentDraftImages.map((img, idx) => `<img src="${img}" class="img-thumb flex-none" onclick="openPaintModal(${idx})">`).join(''); }
+        function openPaintModal(idx) { paintImgIndex = idx; const src = currentDraftImages[idx]; if(!src) return; document.getElementById('paintModal').classList.remove('hidden'); paintBaseImg = new Image(); paintBaseImg.onload = () => initPad('canvasPaint'); paintBaseImg.src = src; }
+        function drawImageFit(img, c, ctx, cw, ch) { const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2; ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h); }
         function setPen(c) { pads.color=c; }
-        
-        async function savePaint() {
-            const d = await compressImage(pads['canvasPaint'].c.toDataURL(), 800, 0.6);
-            currentDraftImages[paintImgIndex] = d;
-            renderImgList();
-            closePaintModal();
-        }
+        async function savePaint() { const d = await compressImage(pads['canvasPaint'].c.toDataURL(), 800, 0.6); currentDraftImages[paintImgIndex] = d; renderImgList(); closePaintModal(); }
         function closePaintModal() { document.getElementById('paintModal').classList.add('hidden'); }
 
-        // Signature Lock Logic
-        function toggleSigLock(locked, sigSrc=null) {
-            const overlay = document.getElementById('sigLockOverlay');
-            const btnResign = document.getElementById('resignBtn');
-            const btnClear = document.getElementById('clearSigBtn');
-            const img = document.getElementById('lockedSigImg');
-            
-            isSigLocked = locked;
-            if(locked && sigSrc) {
-                overlay.classList.remove('hidden');
-                btnResign.classList.remove('hidden');
-                btnClear.classList.add('hidden');
-                img.src = sigSrc;
-                updateCheckinBtn(true); // Locked means we have a sig
-            } else {
-                overlay.classList.add('hidden');
-                btnResign.classList.add('hidden');
-                btnClear.classList.remove('hidden');
-                if(!editRecId) clearPad('padCheckin'); // Only clear if new
-            }
-        }
-
-        function resetSignature() {
-            if(confirm("確定要重簽嗎？")) {
-                toggleSigLock(false);
-                clearPad('padCheckin');
-                updateCheckinBtn(false);
-            }
-        }
-
-        function updateCheckinBtn(a) {
-            const b=document.getElementById('btnConfirm');
-            if(a) { b.disabled=false; b.classList.remove('bg-gray-200','text-gray-400','cursor-not-allowed'); b.classList.add('bg-green-600','text-white','shadow-lg'); b.innerText=editRecId?"更新課程":"確認扣課 (-1)"; }
-            else { b.disabled=true; b.classList.add('bg-gray-200','text-gray-400','cursor-not-allowed'); b.classList.remove('bg-green-600','text-white','shadow-lg'); }
-        }
-
-        async function savePlan() { await saveRecord('planned'); }
-        async function confirmClass() { if(confirm("確認扣課？")) await saveRecord('done'); }
-
-        async function saveRecord(status) {
+        // Core Functions: 1. Save Content Only
+        async function saveContentOnly() {
             const note = document.getElementById('editNote').value;
-            // Get Sig: If locked, use existing from record. If not, get from pad.
-            let finalSig = null;
-            if (isSigLocked && editRecId) {
-                const r = records.find(x => x.id === editRecId);
-                finalSig = r.sig;
-            } else {
-                finalSig = await compressImage(pads['padCheckin'].c.toDataURL(), 400, 0.5);
-            }
             const time = getTimeString();
             const s = students.find(x=>x.id===curSid);
 
-            if(editRecId) {
+            if (editRecId) {
                 const idx = records.findIndex(r=>r.id===editRecId);
-                const oldStatus = records[idx].status;
-                // Only deduct if changing from planned to done
-                if(status==='done' && oldStatus==='planned') s.credits--;
-                
-                records[idx] = { ...records[idx], date: time, note, imgs: [...currentDraftImages], sig: finalSig, status };
+                // Update text/imgs only, keep status and sig
+                records[idx] = { ...records[idx], note, imgs: [...currentDraftImages] }; 
             } else {
-                if(status==='done') s.credits--;
-                records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'class', status, note, imgs: [...currentDraftImages], sig: finalSig });
+                // New record, status is planned
+                const newRecId = Date.now();
+                records.unshift({ id: newRecId, sid: curSid, date: time, type: 'class', status: 'planned', note, imgs: [...currentDraftImages], sig: null });
+                editRecId = newRecId; // Switch to editing mode immediately
             }
-            save(); document.getElementById('dCredits').innerText = s.credits; renderTimeline(); resetEditor(); alert(status==='done'?"簽到成功":"更新成功");
+            save(); renderTimeline(); alert("內容已儲存 (尚未簽到)");
         }
 
-        function renderTimeline() {
+        // Core Functions: 2. Confirm Attendance
+        async function confirmAttendance() {
+            const s = students.find(x=>x.id===curSid);
+            
+            // Check if user actually signed (only if not locked)
+            const isLocked = !document.getElementById('signedOverlay').classList.contains('hidden');
+            if (!isLocked) {
+                // simple check logic
+                // In real app, check pixel data. Here we rely on button enablement
+            }
+
+            // Get signature
+            let finalSig = null;
+            if (editRecId) {
+                const r = records.find(x=>x.id===editRecId);
+                if (r.sig) finalSig = r.sig; // Use existing
+            }
+            if (!finalSig) {
+                finalSig = await compressImage(pads['padCheckin'].c.toDataURL(), 400, 0.5);
+            }
+
+            const time = getTimeString();
+
+            if (editRecId) {
+                const idx = records.findIndex(r=>r.id===editRecId);
+                const r = records[idx];
+                
+                // Deduct credit ONLY if it wasn't done before
+                if (r.status !== 'done') {
+                    if (s.credits <= 0) return alert("堂數不足！");
+                    s.credits--;
+                }
+                
+                records[idx] = { ...r, status: 'done', sig: finalSig, date: time }; // Update time to check-in time
+            } else {
+                // Direct check-in without saving content first
+                if (s.credits <= 0) return alert("堂數不足！");
+                s.credits--;
+                const newId = Date.now();
+                records.unshift({ id: newId, sid: curSid, date: time, type: 'class', status: 'done', note: document.getElementById('editNote').value, imgs: [...currentDraftImages], sig: finalSig });
+                editRecId = newId;
+            }
+
+            save(); document.getElementById('dCredits').innerText = s.credits; 
+            renderTimeline(); lockSignature(true, finalSig);
+            alert("簽到成功！已扣除堂數");
+        }
+
+        function updateCheckinBtn(active) {
+            const b = document.getElementById('btnConfirm');
+            if(active) { b.disabled=false; b.classList.remove('bg-gray-200','text-gray-400','cursor-not-allowed'); b.classList.add('bg-green-600','text-white','shadow-lg'); }
+            else { b.disabled=true; b.classList.add('bg-gray-200','text-gray-400','cursor-not-allowed'); b.classList.remove('bg-green-600','text-white','shadow-lg'); }
+        }
+
+        function lockSignature(locked, sigSrc=null) {
+            const overlay = document.getElementById('signedOverlay');
+            const img = document.getElementById('existingSigImg');
+            const btnUnlock = document.getElementById('btnUnlockSig');
+            const btnClear = document.getElementById('btnClearSig');
+            const btnConfirm = document.getElementById('btnConfirm');
+
+            if (locked && sigSrc) {
+                overlay.classList.remove('hidden');
+                img.src = sigSrc;
+                btnUnlock.classList.remove('hidden');
+                btnClear.classList.add('hidden');
+                // Disable confirm button visually since it's done, or leave enabled to update time? 
+                // Let's disable it to indicate "Done".
+                btnConfirm.innerText = "已完成簽到";
+                btnConfirm.disabled = true;
+                btnConfirm.classList.add('bg-green-800', 'cursor-not-allowed'); // Darker green
+                document.getElementById('statusMsg').innerText = "如需重新扣課或更新簽名，請點擊「撤銷重簽」";
+            } else {
+                overlay.classList.add('hidden');
+                btnUnlock.classList.add('hidden');
+                btnClear.classList.remove('hidden');
+                btnConfirm.innerText = "確認出席 (扣課)";
+                updateCheckinBtn(false); // Reset button state
+                document.getElementById('statusMsg').innerText = "";
+            }
+        }
+
+        function unlockSignature() {
+            if(confirm("確定要撤銷簽名嗎？(注意：這不會自動退還堂數，請手動調整)")) {
+                lockSignature(false);
+                clearPad('padCheckin');
+            }
+        }
+
+        function renderTimeline(){
             const t=document.getElementById('timeline'), my=records.filter(r=>r.sid===curSid); t.innerHTML=my.length?'':'<p class="text-center text-gray-300 py-6">尚無紀錄</p>';
             my.forEach(r=>{
                 const d=document.createElement('div');
-                if(r.type==='renew') {
+                if(r.type==='renew'){
                     d.className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl mb-4";
                     d.innerHTML=`<div class="flex justify-between font-bold text-indigo-800"><span><i class="fa-solid fa-receipt"></i> 購買紀錄</span><span>+${r.amount}</span></div><div class="text-right text-xs text-indigo-400 mt-1">${r.date}</div>`;
-                } else {
+                }else{
                     const done=r.status==='done';
-                    // Backwards compatibility for single img
+                    // Images display
                     const images = r.imgs || (r.img ? [r.img] : []);
                     const imgHtml = images.map(src => `<img src="${src}" class="w-16 h-16 rounded-lg object-cover bg-gray-100 border">`).join('');
                     
@@ -411,18 +382,17 @@
         function loadEdit(rid) {
             const r = records.find(x=>x.id===rid); if(r.type==='renew') return;
             editRecId = rid;
-            document.getElementById('editStatus').innerText = r.status==='done'?"編輯紀錄":"編輯預排";
-            document.getElementById('editNote').value = r.note||'';
             
-            // Handle images
+            // Load Content
+            document.getElementById('editNote').value = r.note||'';
             currentDraftImages = r.imgs || (r.img ? [r.img] : []);
             renderImgList();
 
-            // Handle Signature Lock
-            if(r.sig) {
-                toggleSigLock(true, r.sig);
+            // Load Signature State
+            if(r.status === 'done' && r.sig) {
+                lockSignature(true, r.sig);
             } else {
-                toggleSigLock(false);
+                lockSignature(false);
                 clearPad('padCheckin');
             }
             
@@ -430,8 +400,8 @@
         }
 
         function clearPad(id) { const p = pads[id]; if(!p) return; p.ctx.clearRect(0,0,p.c.width,p.c.height); if(id!=='canvasPaint'){ p.ctx.fillStyle='#ffffff'; p.ctx.fillRect(0,0,p.c.width,p.c.height); } if(id==='padCheckin') updateCheckinBtn(false); }
-        function save() { localStorage.setItem('p81_st',JSON.stringify(students)); localStorage.setItem('p81_rc',JSON.stringify(records)); }
-        
+        function save() { localStorage.setItem('p82_st',JSON.stringify(students)); localStorage.setItem('p82_rc',JSON.stringify(records)); }
+        function clearAllSystem() { if(confirm("警告：清除後資料無法復原")){localStorage.clear();location.reload()}}
         switchTab('page-list');
     </script>
 </body>
