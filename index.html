@@ -10,7 +10,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
-        canvas { touch-action: none; display: block; width: 100%; height: 100%; cursor: crosshair; }
+        /* V10.6 Fix: Removed width/height 100% to prevent conflict with JS sizing in dual canvas setup */
+        canvas { touch-action: none; display: block; cursor: crosshair; }
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .tag { display: inline-flex; align-items: center; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; margin-right: 4px; margin-bottom: 4px; font-weight: bold; border: 1px solid #dbeafe; }
@@ -28,7 +29,6 @@
         .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
         .toggle-label { width: 48px; height: 28px; background-color: #d1d5db; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s ease-in-out; }
         .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out; }
-        /* V10.5 New styles for guide modal content */
         .guide-content h4 { font-weight: bold; color: #4f46e5; margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
         .guide-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
         .guide-content li { margin-bottom: 0.5rem; }
@@ -92,7 +92,7 @@
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-bell text-yellow-500 mr-2"></i> 備份提醒</h3>
                     <div class="flex items-center justify-between"><label class="text-sm text-gray-600 font-bold">小紅點提醒頻率</label><select id="backupFreq" class="p-2 border rounded-lg bg-gray-50 text-sm font-bold" onchange="saveSettings()"><option value="999">從不提醒</option><option value="7">每週一次</option><option value="14">每兩週一次</option><option value="30">每月一次</option></select></div>
                 </div>
-                <div class="text-center pt-8 border-t border-gray-200"><button onclick="clearAllSystem()" class="text-xs text-red-300 hover:text-red-500 underline mb-4">重置系統</button><p class="text-[10px] text-gray-300">CoachFlow v10.5</p></div>
+                <div class="text-center pt-8 border-t border-gray-200"><button onclick="clearAllSystem()" class="text-xs text-red-300 hover:text-red-500 underline mb-4">重置系統</button><p class="text-[10px] text-gray-300">CoachFlow v10.6</p></div>
             </div>
         </div>
     </main>
@@ -102,33 +102,14 @@
             <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-bold text-xl text-gray-800">📘 CoachFlow 使用教學指南</h3><button onclick="document.getElementById('guideModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark fa-xl"></i></button></div>
             <div class="guide-content text-gray-700 leading-relaxed text-sm">
                 <p>專為自由接案老師設計的輕量級教學助手。適用於：健身教練、瑜珈/皮拉提斯老師、樂器家教、語言導師、治療師等。</p>
-
                 <h4>🚀 核心功能特色</h4>
-                <ul>
-                    <li><strong>完美跨裝置體驗</strong>：推薦使用 iPad 並「加入主畫面」，享受全螢幕流暢操作。</li>
-                    <li><strong>雙向電子合約</strong>：支援學生與老師雙方電子簽名。</li>
-                    <li><strong>視覺化週曆</strong>：自動彙整所有學生的固定上課時間。</li>
-                    <li><strong>卡片式課程管理</strong>：支援預排、多圖紀錄（可畫線標註）、簽到扣課。</li>
-                    <li><strong>圖片直通車</strong>：在課表卡片上直接點擊照片，即可快速進入繪圖模式，支援復原與橡皮擦。</li>
-                    <li><strong>資料管理</strong>：支援學生封存與自主備份還原。</li>
-                </ul>
-
+                <ul><li><strong>完美跨裝置體驗</strong>：推薦使用 iPad 並「加入主畫面」，享受全螢幕流暢操作。</li><li><strong>雙向電子合約</strong>：支援學生與老師雙方電子簽名。</li><li><strong>視覺化週曆</strong>：自動彙整所有學生的固定上課時間。</li><li><strong>卡片式課程管理</strong>：支援預排、多圖紀錄（可畫線標註）、簽到扣課。</li><li><strong>圖片直通車</strong>：在課表卡片上直接點擊照片，即可快速進入繪圖模式，支援復原與橡皮擦。</li><li><strong>資料管理</strong>：支援學生封存與自主備份還原。</li></ul>
                 <h4>📲 安裝教學 (iOS/iPadOS 推薦)</h4>
-                <ol class="list-decimal pl-6 mb-4">
-                    <li>使用 <strong>Safari 瀏覽器</strong> 開啟本系統。</li>
-                    <li>點擊右上角的 <strong>「分享」</strong> 按鈕 <i class="fa-solid fa-arrow-up-from-bracket"></i>。</li>
-                    <li>往下滑動選單，點選 <strong>「加入主畫面」(Add to Home Screen)</strong>。</li>
-                    <li>輸入名稱後按下新增，回到桌面點擊 App 圖示即可使用。</li>
-                </ol>
-
+                <ol class="list-decimal pl-6 mb-4"><li>使用 <strong>Safari 瀏覽器</strong> 開啟本系統。</li><li>點擊右上角的 <strong>「分享」</strong> 按鈕 <i class="fa-solid fa-arrow-up-from-bracket"></i>。</li><li>往下滑動選單，點選 <strong>「加入主畫面」(Add to Home Screen)</strong>。</li><li>輸入名稱後按下新增，回到桌面點擊 App 圖示即可使用。</li></ol>
                 <h4>⚠️ 資料安全與備份 (非常重要)</h4>
                 <p>本系統採用單機網頁技術，所有資料皆儲存在您目前的裝置瀏覽器中。</p>
                 <blockquote><strong>我們不會將您的資料上傳至任何雲端伺服器，這意味著只有您能看到這些資料，保障絕對隱私。</strong></blockquote>
-                <ul>
-                    <li>❌ <strong>請勿清除瀏覽器快取 (Cache)</strong>：這會導致資料遺失。</li>
-                    <li>💾 <strong>定期備份</strong>：請定期至設定頁點擊「下載備份檔案」，並將檔案妥善保存（建議存於 iCloud Drive 或 Google Drive）。</li>
-                    <li>📱 <strong>更換裝置</strong>：若需更換手機或平板，請先在舊機執行備份，再於新機執行「還原資料」。</li>
-                </ul>
+                <ul><li>❌ <strong>請勿清除瀏覽器快取 (Cache)</strong>：這會導致資料遺失。</li><li>💾 <strong>定期備份</strong>：請定期至設定頁點擊「下載備份檔案」，並將檔案妥善保存（建議存於 iCloud Drive 或 Google Drive）。</li><li>📱 <strong>更換裝置</strong>：若需更換手機或平板，請先在舊機執行備份，再於新機執行「還原資料」。</li></ul>
             </div>
             <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="w-full mt-6 bg-indigo-600 text-white py-3 rounded-xl font-bold">我瞭解了</button>
         </div>
@@ -160,16 +141,16 @@
     <div id="contractModal" class="fixed inset-0 z-50 bg-black bg-opacity-90 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')"><div class="bg-white p-4 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">合約與簽名詳情</h3><button onclick="document.getElementById('contractModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark fa-lg"></i></button></div><div id="contractContent" class="space-y-4"></div></div></div>
 
     <script>
-        const CUR_VER = 'tms_v5';
-        const OLD_VER = 'tms_v4';
+        const CUR_VER = 'tms_v6';
+        const OLD_VER = 'tms_v5';
 
         function loadAndUpgradeData() {
             let st = localStorage.getItem(CUR_VER + '_st');
             let rc = localStorage.getItem(CUR_VER + '_rc');
             let settings = JSON.parse(localStorage.getItem(CUR_VER + '_set')) || { lastBackup: null, freq: '7' }; 
             if (st && rc) return { students: JSON.parse(st), records: JSON.parse(rc), settings };
-            let oldSt = localStorage.getItem(OLD_VER + '_st') || localStorage.getItem('tms_v3_st');
-            let oldRc = localStorage.getItem(OLD_VER + '_rc') || localStorage.getItem('tms_v3_rc');
+            let oldSt = localStorage.getItem(OLD_VER + '_st') || localStorage.getItem('tms_v4_st');
+            let oldRc = localStorage.getItem(OLD_VER + '_rc') || localStorage.getItem('tms_v4_rc');
             if (oldSt && oldRc) {
                 console.log("Auto migrating data...");
                 localStorage.setItem(CUR_VER + '_st', oldSt);
@@ -193,7 +174,6 @@
         let directEditRecId = null;
         let paintHistory = [];
         const pads = {};
-        // V10.5 New Global for Background Canvas Context
         let bgCanvasCtx = null;
 
         // --- Core Functions ---
@@ -204,7 +184,7 @@
         function initPad(id, isSig=false) {
             const canvas = document.getElementById(id); if(!canvas) return; const parent = canvas.parentElement; if(parent.offsetWidth === 0) return;
             
-            // V10.5 Dual Canvas Resize Logic
+            // V10.6 Fix: Canvas sizing logic without conflicting CSS
             const resize = () => {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 const w = parent.clientWidth; const h = parent.clientHeight;
@@ -213,10 +193,11 @@
                 const ctx = canvas.getContext('2d'); ctx.scale(ratio, ratio); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
                 
                 if(id === 'canvasPaint') {
-                    // Also resize the background canvas
                     const bgC = document.getElementById('canvasBg');
-                    bgC.width = w * ratio; bgC.height = h * ratio;
-                    bgCanvasCtx = bgC.getContext('2d'); bgCanvasCtx.scale(ratio, ratio);
+                    if(bgC) { // V10.6 Fix: Safety check
+                        bgC.width = w * ratio; bgC.height = h * ratio;
+                        bgCanvasCtx = bgC.getContext('2d'); bgCanvasCtx.scale(ratio, ratio);
+                    }
                 } else {
                     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width/ratio, canvas.height/ratio);
                 }
@@ -291,7 +272,7 @@
         function removeProfileTag(t) { tempProfileSchedule = tempProfileSchedule.filter(x => x !== t); renderProfileTags(); }
 
         function backupData() { 
-            const d = { students, records, settings: appSettings, version: "10.5", date: new Date().toISOString() }; 
+            const d = { students, records, settings: appSettings, version: "10.6", date: new Date().toISOString() }; 
             const b = new Blob([JSON.stringify(d)], { type: "application/json" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `coachflow_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); 
             appSettings.lastBackup = new Date().toISOString(); save(); renderSettingsPage(); checkBackupStatus(); alert("已下載備份檔"); 
         }
@@ -336,15 +317,17 @@
         function handleModalAddImage(input) { if(input.files) { Array.from(input.files).forEach(file => { const r = new FileReader(); r.onload = async (e) => { const compressed = await compressImage(e.target.result, 800, 0.6); tempEditorImages.push(compressed); renderModalImgList(); }; r.readAsDataURL(file); }); } }
         function saveModalContent() { const idx = records.findIndex(r => r.id === editRecId); if (idx > -1) { records[idx].note = document.getElementById('modalEditNote').value; records[idx].imgs = [...tempEditorImages]; save(); renderTimeline(); closeContentModal(); } }
         
-        // --- Paint Logic V10.5 (Dual Canvas for Eraser Fix) ---
+        // --- Paint Logic V10.6 (Fix: Dual Canvas with Robust Sizing) ---
         function setupPaintScene(src) {
             paintHistory = [];
-            initPad('canvasPaint'); // Ensure canvasPaint is sized and events attached
-            // Clear paint canvas
+            initPad('canvasPaint'); 
             pads['canvasPaint'].ctx.clearRect(0, 0, pads['canvasPaint'].c.width, pads['canvasPaint'].c.height);
-            // Draw base image on background canvas
+            
+            const container = document.getElementById('paintContainer');
+            const cw = container.clientWidth; const ch = container.clientHeight;
             const img = new Image();
-            img.onload = () => { drawImageFit(img, document.getElementById('canvasBg'), bgCanvasCtx); };
+            // V10.6 Fix: Use robust drawImageFit from V10.4
+            img.onload = () => { drawImageFit(img, document.getElementById('canvasBg'), bgCanvasCtx, cw, ch); };
             img.src = src;
             setPen('#ef4444');
             document.getElementById('paintModal').classList.remove('hidden');
@@ -354,14 +337,13 @@
         function openDirectPaint(rid, imgIdx) { directEditRecId = rid; paintImgIndex = imgIdx; isDirectEdit = true; const r = records.find(x => x.id === rid); if(r && r.imgs[imgIdx]) setupPaintScene(r.imgs[imgIdx]); }
 
         function savePaint() { 
-            // V10.5: Compose dual canvases into one image for saving
             const bgC = document.getElementById('canvasBg');
             const paintC = document.getElementById('canvasPaint');
             const tempC = document.createElement('canvas');
             tempC.width = bgC.width; tempC.height = bgC.height;
             const tempCtx = tempC.getContext('2d');
-            tempCtx.drawImage(bgC, 0, 0); // Draw BG layer
-            tempCtx.drawImage(paintC, 0, 0); // Draw Stroke layer on top
+            tempCtx.drawImage(bgC, 0, 0); 
+            tempCtx.drawImage(paintC, 0, 0); 
             
             (async () => { 
                 const d = await compressImage(tempC.toDataURL(), 800, 0.6); 
@@ -375,7 +357,8 @@
             })(); 
         }
         function closePaintModal() { document.getElementById('paintModal').classList.add('hidden'); }
-        function drawImageFit(img, c, ctx) { const cw=c.width/window.devicePixelRatio, ch=c.height/window.devicePixelRatio; const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2; ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h); }
+        // V10.6 Fix: Reverted to V10.4's robust drawImageFit
+        function drawImageFit(img, c, ctx, cw, ch) { const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2; ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h); }
         
         function setPen(c) { 
             const ctx = pads['canvasPaint'].ctx; ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = c; ctx.lineWidth = 4;
