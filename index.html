@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
-        canvas { touch-action: none; display: block; width: 100%; height: 100%; cursor: crosshair; background-color: #ffffff; }
+        canvas { touch-action: none; display: block; width: 100%; height: 100%; cursor: crosshair; }
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .tag { display: inline-flex; align-items: center; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; margin-right: 4px; margin-bottom: 4px; font-weight: bold; border: 1px solid #dbeafe; }
@@ -28,6 +28,12 @@
         .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
         .toggle-label { width: 48px; height: 28px; background-color: #d1d5db; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s ease-in-out; }
         .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out; }
+        /* V10.5 New styles for guide modal content */
+        .guide-content h4 { font-weight: bold; color: #4f46e5; margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .guide-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .guide-content li { margin-bottom: 0.5rem; }
+        .guide-content p { margin-bottom: 1rem; }
+        .guide-content blockquote { border-left: 4px solid #fbbf24; background-color: #fffbeb; padding: 1rem; margin: 1rem 0; font-style: italic; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col text-gray-800 w-full">
@@ -71,34 +77,58 @@
         </div>
 
         <div id="page-settings" class="hidden">
-            <div class="max-w-2xl mx-auto space-y-6">
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 rounded-2xl shadow-md text-white flex justify-between items-center cursor-pointer active:scale-95 transition" onclick="document.getElementById('guideModal').classList.remove('hidden')">
-                    <div><h3 class="font-bold text-xl mb-1"><i class="fa-solid fa-book-open mr-2"></i> 使用教學</h3><p class="text-indigo-100 text-sm">安裝、備份與功能操作指南</p></div>
-                    <i class="fa-solid fa-chevron-right text-indigo-200"></i>
-                </div>
-
+            <div class="max-w-2xl mx-auto space-y-6 pt-4">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-cloud-arrow-down text-indigo-500 mr-2"></i> 備份與還原</h3>
                     <p id="lastBackupText" class="text-sm text-gray-500 mb-4">上次備份時間：<span class="text-orange-500">尚無紀錄</span></p>
                     <div class="flex flex-col sm:flex-row gap-4"><button onclick="backupData()" class="flex-1 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-xl font-bold border border-indigo-100 hover:bg-indigo-100 transition flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> 下載備份檔案</button><label class="flex-1 bg-white text-gray-600 px-4 py-3 rounded-xl font-bold border border-gray-300 hover:bg-gray-50 transition flex items-center justify-center gap-2 cursor-pointer"><i class="fa-solid fa-upload"></i> 還原資料 (讀取)<input type="file" id="importFile" accept=".json" class="hidden" onchange="restoreData(this)"></label></div>
+                    <div class="mt-4 pt-4 border-t">
+                        <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full text-center text-indigo-600 font-bold text-sm hover:underline flex items-center justify-center gap-2 py-2">
+                            <i class="fa-solid fa-book-open"></i> 查看完整使用教學指南
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-bell text-yellow-500 mr-2"></i> 備份提醒</h3>
                     <div class="flex items-center justify-between"><label class="text-sm text-gray-600 font-bold">小紅點提醒頻率</label><select id="backupFreq" class="p-2 border rounded-lg bg-gray-50 text-sm font-bold" onchange="saveSettings()"><option value="999">從不提醒</option><option value="7">每週一次</option><option value="14">每兩週一次</option><option value="30">每月一次</option></select></div>
                 </div>
-                <div class="text-center pt-8 border-t border-gray-200"><button onclick="clearAllSystem()" class="text-xs text-red-300 hover:text-red-500 underline mb-4">重置系統</button><p class="text-[10px] text-gray-300">CoachFlow v10.4</p></div>
+                <div class="text-center pt-8 border-t border-gray-200"><button onclick="clearAllSystem()" class="text-xs text-red-300 hover:text-red-500 underline mb-4">重置系統</button><p class="text-[10px] text-gray-300">CoachFlow v10.5</p></div>
             </div>
         </div>
     </main>
 
     <div id="guideModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')">
-        <div class="bg-white w-full max-w-lg p-6 rounded-2xl shadow-2xl max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-bold text-xl text-gray-800">📘 使用教學指南</h3><button onclick="document.getElementById('guideModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark fa-xl"></i></button></div>
-            <div class="space-y-6 text-gray-700 leading-relaxed">
-                <div><h4 class="font-bold text-indigo-600 mb-2">1. 如何安裝 (最佳體驗)</h4><p class="text-sm">本系統為網頁 App，推薦使用 iPad/iPhone 瀏覽器，點擊分享按鈕 <i class="fa-solid fa-arrow-up-from-bracket"></i>，選擇 <strong>「加入主畫面」</strong>，即可享受全螢幕操作。</p></div>
-                <div><h4 class="font-bold text-indigo-600 mb-2">2. 圖片直通車 (新功能)</h4><p class="text-sm">在課程卡片上，<strong>直接點擊照片</strong> 即可進入繪圖模式。畫完按下「完成」，系統會自動儲存並更新，無需經過編輯視窗。</p></div>
-                <div><h4 class="font-bold text-indigo-600 mb-2">3. 關於備份 (非常重要)</h4><p class="text-sm">資料皆儲存在您的「本機瀏覽器」中，不會上傳雲端。請定期至設定頁按 <strong>「下載備份檔案」</strong>，並將檔案存於 iCloud Drive 或 Google Drive，以免遺失。</p></div>
-                <div><h4 class="font-bold text-indigo-600 mb-2">4. 封存與刪除</h4><p class="text-sm">暫停上課的學生可至「編輯資料」將狀態切換為 <strong>「封存」</strong>。若需永久刪除，請至編輯頁最下方點擊紅色刪除鈕。</p></div>
+        <div class="bg-white w-full max-w-2xl p-6 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-4 border-b pb-3"><h3 class="font-bold text-xl text-gray-800">📘 CoachFlow 使用教學指南</h3><button onclick="document.getElementById('guideModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark fa-xl"></i></button></div>
+            <div class="guide-content text-gray-700 leading-relaxed text-sm">
+                <p>專為自由接案老師設計的輕量級教學助手。適用於：健身教練、瑜珈/皮拉提斯老師、樂器家教、語言導師、治療師等。</p>
+
+                <h4>🚀 核心功能特色</h4>
+                <ul>
+                    <li><strong>完美跨裝置體驗</strong>：推薦使用 iPad 並「加入主畫面」，享受全螢幕流暢操作。</li>
+                    <li><strong>雙向電子合約</strong>：支援學生與老師雙方電子簽名。</li>
+                    <li><strong>視覺化週曆</strong>：自動彙整所有學生的固定上課時間。</li>
+                    <li><strong>卡片式課程管理</strong>：支援預排、多圖紀錄（可畫線標註）、簽到扣課。</li>
+                    <li><strong>圖片直通車</strong>：在課表卡片上直接點擊照片，即可快速進入繪圖模式，支援復原與橡皮擦。</li>
+                    <li><strong>資料管理</strong>：支援學生封存與自主備份還原。</li>
+                </ul>
+
+                <h4>📲 安裝教學 (iOS/iPadOS 推薦)</h4>
+                <ol class="list-decimal pl-6 mb-4">
+                    <li>使用 <strong>Safari 瀏覽器</strong> 開啟本系統。</li>
+                    <li>點擊右上角的 <strong>「分享」</strong> 按鈕 <i class="fa-solid fa-arrow-up-from-bracket"></i>。</li>
+                    <li>往下滑動選單，點選 <strong>「加入主畫面」(Add to Home Screen)</strong>。</li>
+                    <li>輸入名稱後按下新增，回到桌面點擊 App 圖示即可使用。</li>
+                </ol>
+
+                <h4>⚠️ 資料安全與備份 (非常重要)</h4>
+                <p>本系統採用單機網頁技術，所有資料皆儲存在您目前的裝置瀏覽器中。</p>
+                <blockquote><strong>我們不會將您的資料上傳至任何雲端伺服器，這意味著只有您能看到這些資料，保障絕對隱私。</strong></blockquote>
+                <ul>
+                    <li>❌ <strong>請勿清除瀏覽器快取 (Cache)</strong>：這會導致資料遺失。</li>
+                    <li>💾 <strong>定期備份</strong>：請定期至設定頁點擊「下載備份檔案」，並將檔案妥善保存（建議存於 iCloud Drive 或 Google Drive）。</li>
+                    <li>📱 <strong>更換裝置</strong>：若需更換手機或平板，請先在舊機執行備份，再於新機執行「還原資料」。</li>
+                </ul>
             </div>
             <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="w-full mt-6 bg-indigo-600 text-white py-3 rounded-xl font-bold">我瞭解了</button>
         </div>
@@ -108,16 +138,12 @@
     
     <div id="paintModal" class="fixed inset-0 z-50 bg-gray-900 hidden flex flex-col">
         <div class="flex justify-between items-center p-4 bg-gray-800 text-white safe-top">
-            <div class="flex gap-2">
-                <button onclick="closePaintModal()" class="px-3 py-2 text-gray-300 font-bold hover:text-white">取消</button>
-                <button onclick="undoPaint()" class="px-3 py-2 bg-gray-700 rounded-lg font-bold hover:bg-gray-600"><i class="fa-solid fa-rotate-left"></i></button>
-            </div>
+            <div class="flex gap-2"><button onclick="closePaintModal()" class="px-3 py-2 text-gray-300 font-bold hover:text-white">取消</button><button onclick="undoPaint()" class="px-3 py-2 bg-gray-700 rounded-lg font-bold hover:bg-gray-600"><i class="fa-solid fa-rotate-left"></i></button></div>
             <h3 class="font-bold">圖片標註</h3>
             <button onclick="savePaint()" class="px-4 py-2 bg-indigo-500 rounded-lg font-bold shadow hover:bg-indigo-600">完成</button>
         </div>
         <div class="flex-1 relative bg-black flex items-center justify-center overflow-hidden" id="paintContainer">
-            <canvas id="canvasPaint" class="paint-canvas"></canvas>
-        </div>
+            <canvas id="canvasBg" class="absolute inset-0 pointer-events-none"></canvas> <canvas id="canvasPaint" class="absolute inset-0 z-10 cursor-crosshair"></canvas> </div>
         <div class="p-6 bg-gray-800 flex justify-center gap-4 safe-bottom overflow-x-auto">
             <button onclick="setPen('#ef4444')" class="w-12 h-12 rounded-full bg-red-500 border-4 border-gray-700 ring-2 ring-white transition hover:scale-110 flex-shrink-0" id="btn-red"></button>
             <button onclick="setPen('#facc15')" class="w-12 h-12 rounded-full bg-yellow-400 border-4 border-gray-700 transition hover:scale-110 flex-shrink-0" id="btn-yellow"></button>
@@ -134,16 +160,16 @@
     <div id="contractModal" class="fixed inset-0 z-50 bg-black bg-opacity-90 hidden flex items-center justify-center p-4" onclick="this.classList.add('hidden')"><div class="bg-white p-4 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()"><div class="flex justify-between items-center mb-4"><h3 class="font-bold">合約與簽名詳情</h3><button onclick="document.getElementById('contractModal').classList.add('hidden')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-xmark fa-lg"></i></button></div><div id="contractContent" class="space-y-4"></div></div></div>
 
     <script>
-        const CUR_VER = 'tms_v4';
-        const OLD_VER = 'tms_v3';
+        const CUR_VER = 'tms_v5';
+        const OLD_VER = 'tms_v4';
 
         function loadAndUpgradeData() {
             let st = localStorage.getItem(CUR_VER + '_st');
             let rc = localStorage.getItem(CUR_VER + '_rc');
             let settings = JSON.parse(localStorage.getItem(CUR_VER + '_set')) || { lastBackup: null, freq: '7' }; 
             if (st && rc) return { students: JSON.parse(st), records: JSON.parse(rc), settings };
-            let oldSt = localStorage.getItem(OLD_VER + '_st') || localStorage.getItem('tms_v2_st');
-            let oldRc = localStorage.getItem(OLD_VER + '_rc') || localStorage.getItem('tms_v2_rc');
+            let oldSt = localStorage.getItem(OLD_VER + '_st') || localStorage.getItem('tms_v3_st');
+            let oldRc = localStorage.getItem(OLD_VER + '_rc') || localStorage.getItem('tms_v3_rc');
             if (oldSt && oldRc) {
                 console.log("Auto migrating data...");
                 localStorage.setItem(CUR_VER + '_st', oldSt);
@@ -163,11 +189,12 @@
         let tempSchedule = [], tempProfileSchedule = [];
         let tempEditorImages = [];
         let paintImgIndex = -1;
-        let paintBaseImg = null;
-        let isDirectEdit = false; // Flag for direct edit mode
+        let isDirectEdit = false;
         let directEditRecId = null;
-        let paintHistory = []; // Undo Stack
+        let paintHistory = [];
         const pads = {};
+        // V10.5 New Global for Background Canvas Context
+        let bgCanvasCtx = null;
 
         // --- Core Functions ---
         function compressImage(src, maxWidth=800, quality=0.6) { return new Promise((resolve) => { if(!src) resolve(null); const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let width = img.width; let height = img.height; if (width > maxWidth) { height = Math.round((height *= maxWidth / width)); width = maxWidth; } canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.fillStyle = "#ffffff"; ctx.fillRect(0,0,width,height); ctx.drawImage(img, 0, 0, width, height); resolve(canvas.toDataURL('image/jpeg', quality)); }; img.src = src; }); }
@@ -176,38 +203,32 @@
 
         function initPad(id, isSig=false) {
             const canvas = document.getElementById(id); if(!canvas) return; const parent = canvas.parentElement; if(parent.offsetWidth === 0) return;
+            
+            // V10.5 Dual Canvas Resize Logic
             const resize = () => {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = parent.clientWidth * ratio; canvas.height = parent.clientHeight * ratio;
-                canvas.style.width = parent.clientWidth + "px"; canvas.style.height = parent.clientHeight + "px";
+                const w = parent.clientWidth; const h = parent.clientHeight;
+                canvas.width = w * ratio; canvas.height = h * ratio;
+                canvas.style.width = w + "px"; canvas.style.height = h + "px";
                 const ctx = canvas.getContext('2d'); ctx.scale(ratio, ratio); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-                if(id !== 'canvasPaint') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width/ratio, canvas.height/ratio); }
-                if(id === 'canvasPaint' && paintBaseImg) drawImageFit(paintBaseImg, canvas, ctx, parent.clientWidth, parent.clientHeight);
+                
+                if(id === 'canvasPaint') {
+                    // Also resize the background canvas
+                    const bgC = document.getElementById('canvasBg');
+                    bgC.width = w * ratio; bgC.height = h * ratio;
+                    bgCanvasCtx = bgC.getContext('2d'); bgCanvasCtx.scale(ratio, ratio);
+                } else {
+                    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width/ratio, canvas.height/ratio);
+                }
             };
+            
             new ResizeObserver(resize).observe(parent); resize();
             const ctx = canvas.getContext('2d'); let isDrawing = false;
             
-            // History Snapshot for Paint
-            const saveHistory = () => {
-                if(id === 'canvasPaint') {
-                    if(paintHistory.length > 10) paintHistory.shift();
-                    paintHistory.push(canvas.toDataURL());
-                }
-            };
-
+            const saveHistory = () => { if(id === 'canvasPaint') { if(paintHistory.length > 10) paintHistory.shift(); paintHistory.push(canvas.toDataURL()); } };
             const getPos = (e) => { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; };
-            const start = (e) => { 
-                if(e.cancelable && e.type.includes('touch')) e.preventDefault(); 
-                if(id === 'canvasPaint') saveHistory(); // Save before drawing
-                isDrawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); 
-            };
-            const move = (e) => { 
-                if(!isDrawing) return; if(e.cancelable && e.type.includes('touch')) e.preventDefault(); 
-                const p=getPos(e); ctx.lineTo(p.x,p.y); 
-                // Color/Eraser Logic handled by global context setting
-                if(id !== 'canvasPaint') { ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2; } 
-                ctx.stroke(); 
-            };
+            const start = (e) => { if(e.cancelable && e.type.includes('touch')) e.preventDefault(); if(id === 'canvasPaint') saveHistory(); isDrawing=true; ctx.beginPath(); const p=getPos(e); ctx.moveTo(p.x,p.y); };
+            const move = (e) => { if(!isDrawing) return; if(e.cancelable && e.type.includes('touch')) e.preventDefault(); const p=getPos(e); ctx.lineTo(p.x,p.y); if(id !== 'canvasPaint') { ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2; } ctx.stroke(); };
             const end = () => isDrawing=false;
             canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchmove', move, {passive:false}); canvas.addEventListener('touchend', end);
             canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); canvas.addEventListener('mouseup', end); canvas.addEventListener('mouseout', end);
@@ -270,7 +291,7 @@
         function removeProfileTag(t) { tempProfileSchedule = tempProfileSchedule.filter(x => x !== t); renderProfileTags(); }
 
         function backupData() { 
-            const d = { students, records, settings: appSettings, version: "10.4", date: new Date().toISOString() }; 
+            const d = { students, records, settings: appSettings, version: "10.5", date: new Date().toISOString() }; 
             const b = new Blob([JSON.stringify(d)], { type: "application/json" }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `coachflow_backup_${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); 
             appSettings.lastBackup = new Date().toISOString(); save(); renderSettingsPage(); checkBackupStatus(); alert("已下載備份檔"); 
         }
@@ -298,7 +319,6 @@
                 } else {
                     const isDone = r.status === 'done'; div.className += isDone ? " status-done" : " status-planned";
                     const metaHtml = `<div class="md:col-span-2 col-span-12 flex md:flex-col justify-between md:justify-start gap-2 border-b md:border-b-0 md:border-r border-gray-100 pb-2 md:pb-0 md:pr-4"><div><div class="font-bold text-gray-700">${r.date.split(' ')[0]}</div><div class="text-xs text-gray-400 mb-2">${r.date.split(' ')[1]}</div>${isDone ? '<span class="text-green-600 text-xs font-bold bg-green-100 px-2 py-1 rounded">已簽到</span>' : '<span class="text-yellow-600 text-xs font-bold bg-yellow-100 px-2 py-1 rounded">預排中</span>'}</div><button onclick="openContentModal(${r.id})" class="text-blue-500 bg-blue-50 px-3 py-2 rounded-xl text-sm font-bold hover:bg-blue-100 flex items-center justify-center gap-1"><i class="fa-solid fa-pen"></i> 編輯</button></div>`;
-                    // Updated Image HTML for Direct Edit
                     const imgsHtml = (r.imgs && r.imgs.length > 0) 
                         ? `<div class="img-scroller mt-2">${r.imgs.map((src, idx)=>`<img src="${src}" class="img-thumb flex-none" onclick="openDirectPaint(${r.id}, ${idx})">`).join('')}</div>` 
                         : `<div class="mt-2 text-xs text-gray-300 italic p-2 border border-dashed rounded text-center cursor-pointer" onclick="openContentModal(${r.id})">點此新增照片</div>`;
@@ -316,80 +336,66 @@
         function handleModalAddImage(input) { if(input.files) { Array.from(input.files).forEach(file => { const r = new FileReader(); r.onload = async (e) => { const compressed = await compressImage(e.target.result, 800, 0.6); tempEditorImages.push(compressed); renderModalImgList(); }; r.readAsDataURL(file); }); } }
         function saveModalContent() { const idx = records.findIndex(r => r.id === editRecId); if (idx > -1) { records[idx].note = document.getElementById('modalEditNote').value; records[idx].imgs = [...tempEditorImages]; save(); renderTimeline(); closeContentModal(); } }
         
-        // --- Paint Logic V10.4 (Unified) ---
-        function openPaintModal(idx) { 
-            paintImgIndex = idx; isDirectEdit = false; paintHistory = [];
-            document.getElementById('paintModal').classList.remove('hidden'); 
-            paintBaseImg = new Image(); paintBaseImg.onload = () => { initPad('canvasPaint'); setPen('#ef4444'); }; // Default to red pen
-            paintBaseImg.src = tempEditorImages[idx]; 
+        // --- Paint Logic V10.5 (Dual Canvas for Eraser Fix) ---
+        function setupPaintScene(src) {
+            paintHistory = [];
+            initPad('canvasPaint'); // Ensure canvasPaint is sized and events attached
+            // Clear paint canvas
+            pads['canvasPaint'].ctx.clearRect(0, 0, pads['canvasPaint'].c.width, pads['canvasPaint'].c.height);
+            // Draw base image on background canvas
+            const img = new Image();
+            img.onload = () => { drawImageFit(img, document.getElementById('canvasBg'), bgCanvasCtx); };
+            img.src = src;
+            setPen('#ef4444');
+            document.getElementById('paintModal').classList.remove('hidden');
         }
 
-        function openDirectPaint(rid, imgIdx) {
-            directEditRecId = rid; paintImgIndex = imgIdx; isDirectEdit = true; paintHistory = [];
-            const r = records.find(x => x.id === rid);
-            if(r && r.imgs[imgIdx]) {
-                document.getElementById('paintModal').classList.remove('hidden');
-                paintBaseImg = new Image(); paintBaseImg.onload = () => { initPad('canvasPaint'); setPen('#ef4444'); };
-                paintBaseImg.src = r.imgs[imgIdx];
-            }
-        }
+        function openPaintModal(idx) { paintImgIndex = idx; isDirectEdit = false; setupPaintScene(tempEditorImages[idx]); }
+        function openDirectPaint(rid, imgIdx) { directEditRecId = rid; paintImgIndex = imgIdx; isDirectEdit = true; const r = records.find(x => x.id === rid); if(r && r.imgs[imgIdx]) setupPaintScene(r.imgs[imgIdx]); }
 
         function savePaint() { 
+            // V10.5: Compose dual canvases into one image for saving
+            const bgC = document.getElementById('canvasBg');
+            const paintC = document.getElementById('canvasPaint');
+            const tempC = document.createElement('canvas');
+            tempC.width = bgC.width; tempC.height = bgC.height;
+            const tempCtx = tempC.getContext('2d');
+            tempCtx.drawImage(bgC, 0, 0); // Draw BG layer
+            tempCtx.drawImage(paintC, 0, 0); // Draw Stroke layer on top
+            
             (async () => { 
-                const d = await compressImage(pads['canvasPaint'].c.toDataURL(), 800, 0.6); 
+                const d = await compressImage(tempC.toDataURL(), 800, 0.6); 
                 if (isDirectEdit) {
-                    // Direct Edit Save
                     const idx = records.findIndex(r => r.id === directEditRecId);
-                    if(idx > -1) {
-                        records[idx].imgs[paintImgIndex] = d;
-                        save(); renderTimeline();
-                    }
+                    if(idx > -1) { records[idx].imgs[paintImgIndex] = d; save(); renderTimeline(); }
                 } else {
-                    // Modal Flow Save
-                    tempEditorImages[paintImgIndex] = d; 
-                    renderModalImgList(); 
+                    tempEditorImages[paintImgIndex] = d; renderModalImgList(); 
                 }
                 closePaintModal(); 
             })(); 
         }
         function closePaintModal() { document.getElementById('paintModal').classList.add('hidden'); }
-        function drawImageFit(img, c, ctx, cw, ch) { const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2; ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h); }
+        function drawImageFit(img, c, ctx) { const cw=c.width/window.devicePixelRatio, ch=c.height/window.devicePixelRatio; const r=Math.min(cw/img.width,ch/img.height),w=img.width*r,h=img.height*r,x=(cw-w)/2,y=(ch-h)/2; ctx.clearRect(0,0,cw,ch); ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h); }
         
-        // Enhanced Paint Tools
         function setPen(c) { 
-            const ctx = pads['canvasPaint'].ctx;
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = c; ctx.lineWidth = 4;
-            // Reset UI
-            document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b => b.classList.remove('ring-2','ring-black'));
+            const ctx = pads['canvasPaint'].ctx; ctx.globalCompositeOperation = 'source-over'; ctx.strokeStyle = c; ctx.lineWidth = 4;
+            document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b => b.classList.remove('ring-2','ring-white','ring-black'));
             if(c==='#ef4444') document.getElementById('btn-red').classList.add('ring-2','ring-white');
             if(c==='#facc15') document.getElementById('btn-yellow').classList.add('ring-2','ring-white');
             if(c==='#3b82f6') document.getElementById('btn-blue').classList.add('ring-2','ring-white');
             if(c==='#22c55e') document.getElementById('btn-green').classList.add('ring-2','ring-white');
         }
         function setEraser() {
-            const ctx = pads['canvasPaint'].ctx;
-            ctx.globalCompositeOperation = 'destination-out'; // Erase transparency
-            ctx.lineWidth = 20;
-            // UI
+            const ctx = pads['canvasPaint'].ctx; ctx.globalCompositeOperation = 'destination-out'; ctx.lineWidth = 20;
             document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b => b.classList.remove('ring-2','ring-white'));
             document.getElementById('btn-eraser').classList.add('ring-2','ring-black');
         }
         function undoPaint() {
             if(paintHistory.length > 0) {
-                const lastState = paintHistory.pop();
-                const img = new Image();
-                img.onload = () => {
-                    const ctx = pads['canvasPaint'].ctx;
-                    ctx.clearRect(0, 0, pads['canvasPaint'].c.width, pads['canvasPaint'].c.height);
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.drawImage(img, 0, 0);
-                };
+                const lastState = paintHistory.pop(); const img = new Image();
+                img.onload = () => { const ctx = pads['canvasPaint'].ctx; ctx.clearRect(0, 0, pads['canvasPaint'].c.width, pads['canvasPaint'].c.height); ctx.globalCompositeOperation = 'source-over'; ctx.drawImage(img, 0, 0); };
                 img.src = lastState;
-            } else {
-                // Clear to base if history empty
-                initPad('canvasPaint');
-            }
+            } else { clearPad('canvasPaint'); }
         }
 
         let signingRecId = null;
