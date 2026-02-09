@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="1on1 Pro">
-    <title>1on1 Pro </title>
+    <title>1on1 Pro 家教管理系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,26 +14,21 @@
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; min-height: 150px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* === 狀態顏色定義 (依照您的要求) === */
+        /* === 狀態顏色 === */
         .record-card { transition: all 0.2s; border-left: 5px solid transparent; }
-        .record-card:active { transform: scale(0.98); }
-        
-        /* 黃色：未上課 */
+        .record-card:active { transform: scale(0.99); }
         .record-card.status-planned { border-left-color: #fbbf24; background: white; }
-        /* 綠色：已完成 */
         .record-card.status-done { border-left-color: #22c55e; background: #f0fdf4; }
-        /* 灰色：請假 (原取消) */
         .record-card.status-leave { border-left-color: #9ca3af; background: #f3f4f6; opacity: 0.8; }
-        /* 粉紅：改期 */
         .record-card.status-rescheduled { border-left-color: #f472b6; background: #fdf2f8; }
+        .record-card.status-canceled { border-left-color: #ef4444; background: #fef2f2; opacity: 0.7; }
 
-        /* 週曆顏色定義 */
-        .cal-card { padding: 6px; margin-bottom: 6px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.8rem; cursor: pointer; transition: transform 0.1s; user-select: none; -webkit-user-select: none; display: flex; flex-direction: column; justify-content: center; min-height: 50px; position: relative; }
-        
-        .cal-planned { background: #fffbeb; border-left: 3px solid #fbbf24; } /* 黃 */
-        .cal-done { background: #f0fdf4; border-left: 3px solid #22c55e; } /* 綠 */
-        .cal-leave { background: #f3f4f6; border-left: 3px solid #9ca3af; color: #6b7280; text-decoration: line-through; } /* 灰 */
-        .cal-rescheduled { background: #fdf2f8; border-left: 3px solid #f472b6; } /* 粉 */
+        /* 週曆顏色 */
+        .cal-card { padding: 6px; margin-bottom: 6px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.8rem; cursor: pointer; transition: transform 0.1s; user-select: none; display: flex; flex-direction: column; justify-content: center; min-height: 50px; position: relative; }
+        .cal-planned { background: #fffbeb; border-left: 3px solid #fbbf24; }
+        .cal-done { background: #f0fdf4; border-left: 3px solid #22c55e; }
+        .cal-leave { background: #f3f4f6; border-left: 3px solid #9ca3af; color: #6b7280; text-decoration: line-through; }
+        .cal-rescheduled { background: #fdf2f8; border-left: 3px solid #f472b6; }
         
         .cal-time { color: #6b7280; font-size: 0.7rem; font-weight: bold; line-height: 1.2; }
         .cal-name { color: #1f2937; font-size: 0.85rem; font-weight: bold; line-height: 1.2; margin-top: 2px; }
@@ -41,15 +36,9 @@
         .card-menu-btn { position: absolute; right: 4px; bottom: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #6b7280; border-radius: 4px; z-index: 10; background: rgba(255,255,255,0.8); border: 1px solid #e5e7eb; }
         
         .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; flex-shrink: 0; background: white; }
-        .img-add-btn { width: 80px; height: 80px; border-radius: 8px; border: 2px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; flex-shrink: 0; background: #f9fafb; }
+        .img-add-btn { width: 80px; height: 80px; border-radius: 8px; border: 2px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; flex-shrink: 0; background: #f9fafb; transition: all 0.2s; }
         .img-scroller { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
 
-        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
-        .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
-        .toggle-label { width: 48px; height: 28px; background-color: #d1d5db; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s ease-in-out; }
-        .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out; }
-        
         .col-header { display: grid; grid-template-columns: 1.2fr 2.5fr 1.2fr 0.6fr 50px; gap: 8px; padding: 12px 16px; background-color: #f3f4f6; color: #6b7280; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
         .student-row { display: flex; align-items: center; border-bottom: 1px solid #f3f4f6; transition: background 0.1s; min-height: 60px; }
         .student-row:hover { background-color: #f9fafb; }
@@ -59,22 +48,30 @@
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; opacity: 0; transition: opacity 0.3s; }
         #toast.show { visibility: visible; opacity: 1; }
         
-        #backupBanner { display: none; background-color: #fee2e2; color: #b91c1c; text-align: center; padding: 8px; font-size: 12px; font-weight: bold; border-bottom: 1px solid #fca5a5; }
+        #backupBanner { display: none; background-color: #fee2e2; color: #b91c1c; text-align: center; padding: 12px; font-size: 13px; font-weight: bold; border-radius: 12px; margin-bottom: 16px; border: 1px solid #fca5a5; }
 
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
+        .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
+        .toggle-label { width: 48px; height: 28px; background-color: #d1d5db; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s ease-in-out; }
+        .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out; }
+        
         .guide-content h4 { font-weight: bold; color: #4f46e5; margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
         .guide-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col text-gray-800 w-full">
 
-    <div id="backupBanner">⚠️ 您已超過 7 天未備份，建議立即前往設定頁「下載備份」！</div>
-
     <nav class="bg-white shadow-sm z-20 flex-none h-16 flex items-center justify-between px-4">
         <div class="font-bold text-xl text-indigo-600 flex items-center gap-2 select-none"><i class="fa-solid fa-user-check"></i> 1on1 Pro</div>
         <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg items-center">
             <button onclick="switchTab('page-list')" id="nav-list" class="px-4 py-2 rounded-md text-sm font-bold shadow bg-white text-indigo-600 transition">課表</button>
             <button onclick="switchTab('page-create')" id="nav-create" class="px-4 py-2 rounded-md text-sm font-bold text-gray-500 hover:bg-white transition">建檔</button>
-            <button onclick="switchTab('page-settings')" id="nav-settings" class="px-4 py-2 rounded-md text-sm font-bold text-gray-500 hover:bg-white transition relative">設定</button>
+            <button onclick="switchTab('page-settings')" id="nav-settings" class="px-4 py-2 rounded-md text-sm font-bold text-gray-500 hover:bg-white transition relative">
+                設定
+                <span id="settingsRedDot" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
         </div>
     </nav>
 
@@ -111,7 +108,7 @@
 
                 <div id="cRegularSetup" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-clock"></i> 長期排課規則</div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-col sm:flex-row gap-2">
                         <div class="flex-1"><label class="text-xs text-gray-500 font-bold">開始日期</label><input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white"></div>
                         <div class="flex-1"><label class="text-xs text-gray-500 font-bold">頻率</label><select id="cRegFreq" class="w-full p-2 border rounded bg-white font-bold"><option value="1">每週</option><option value="2">隔週</option><option value="4">每月</option></select></div>
                     </div>
@@ -131,9 +128,9 @@
                     <button onclick="window.openContractSigner('create')" class="w-full bg-white border-2 border-dashed border-indigo-300 text-indigo-600 py-3 rounded-xl font-bold hover:bg-indigo-50">
                         <i class="fa-solid fa-file-signature"></i> 點此開啟合約簽署 (全螢幕)
                     </button>
-                    <div id="cContractPreview" class="hidden mt-2">
-                        <p class="text-xs text-green-600 font-bold mb-1">✓ 已簽署</p>
-                        <img id="cContractThumb" class="h-20 object-contain mx-auto border bg-white">
+                    <div id="cContractPreview" class="hidden mt-2 cursor-pointer transition hover:opacity-80" onclick="window.viewTempContract()">
+                        <p class="text-xs text-green-600 font-bold mb-1">✓ 已簽署 (點擊放大)</p>
+                        <img id="cContractThumb" class="h-20 object-contain mx-auto border bg-white rounded">
                     </div>
                 </div>
                 
@@ -182,51 +179,56 @@
 
         <div id="page-settings" class="hidden">
             <div class="max-w-2xl mx-auto space-y-6 pt-4">
+                
+                <div id="backupBanner">⚠️ 您已超過 7 天未備份，建議立即下載！</div>
+
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-file-contract text-indigo-500 mr-2"></i> 公版合約設定</h3>
                     <p class="text-sm text-gray-500 mb-4">上傳合約底圖 (JPG/PNG)</p>
                     <input type="file" id="sysContractTemplate" accept="image/png, image/jpeg, image/jpg" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="window.saveContractTemplate(this)">
-                    <img id="sysContractPreview" class="mt-4 w-full h-40 object-contain border rounded bg-gray-50 hidden">
+                    <img id="sysContractPreview" class="mt-4 w-full h-40 object-contain border rounded bg-gray-50 hidden cursor-pointer hover:opacity-90 transition" onclick="window.previewContractSetting()">
                 </div>
+                
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-    <h3 class="font-bold text-lg text-gray-700 mb-4">
-        <i class="fa-solid fa-cloud-arrow-down text-indigo-500 mr-2"></i> 備份與還原
-    </h3>
-    
-    <div class="mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div class="text-sm text-gray-600 font-bold flex items-center">
-            <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i>
-            上次備份：
-            <span id="lastBackupTime" class="text-indigo-600 ml-1">讀取中...</span>
-        </div>
-        
-        <div class="flex items-center gap-2">
-            <label for="backupFreq" class="text-xs font-bold text-gray-500">提醒頻率：</label>
-            <select id="backupFreq" onchange="window.saveSettings()" class="text-xs border border-gray-300 rounded-lg p-2 bg-white font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:bg-gray-50">
-                <option value="3">每 3 天</option>
-                <option value="7">每 7 天</option>
-                <option value="14">每 14 天</option>
-                <option value="30">每 30 天</option>
-                <option value="-1">關閉提醒</option>
-            </select>
-        </div>
-    </div>
+                    <h3 class="font-bold text-lg text-gray-700 mb-4">
+                        <i class="fa-solid fa-cloud-arrow-down text-indigo-500 mr-2"></i> 備份與還原
+                    </h3>
+                    
+                    <div class="mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="text-sm text-gray-600 font-bold flex items-center">
+                            <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i>
+                            上次備份：
+                            <span id="lastBackupTime" class="text-indigo-600 ml-1">讀取中...</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <label for="backupFreq" class="text-xs font-bold text-gray-500">提醒頻率：</label>
+                            <select id="backupFreq" onchange="window.saveSettings()" class="text-xs border border-gray-300 rounded-lg p-2 bg-white font-bold text-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer hover:bg-gray-50">
+                                <option value="3">每 3 天</option>
+                                <option value="7">每 7 天</option>
+                                <option value="14">每 14 天</option>
+                                <option value="30">每 30 天</option>
+                                <option value="-1">關閉提醒</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <div class="flex flex-col sm:flex-row gap-4">
-        <button onclick="window.backupData()" class="flex-1 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-xl font-bold border border-indigo-100 hover:bg-indigo-100 transition flex items-center justify-center gap-2 active:scale-95">
-            <i class="fa-solid fa-download"></i> 下載備份
-        </button>
-        
-        <label class="flex-1 bg-white text-gray-600 px-4 py-3 rounded-xl font-bold border border-gray-300 hover:bg-gray-50 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-            <i class="fa-solid fa-upload"></i> 還原 (讀取)
-            <input type="file" id="importFile" accept=".json" class="hidden" onchange="window.restoreData(this)">
-        </label>
-    </div>
-</div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="window.backupData()" class="flex-1 bg-indigo-50 text-indigo-600 px-4 py-3 rounded-xl font-bold border border-indigo-100 hover:bg-indigo-100 transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-download"></i> 下載備份
+                        </button>
+                        
+                        <label class="flex-1 bg-white text-gray-600 px-4 py-3 rounded-xl font-bold border border-gray-300 hover:bg-gray-50 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                            <i class="fa-solid fa-upload"></i> 還原 (讀取)
+                            <input type="file" id="importFile" accept=".json" class="hidden" onchange="window.restoreData(this)">
+                        </label>
+                    </div>
+                </div>
+
                 <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full bg-white text-indigo-600 font-bold text-sm py-3 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2"><i class="fa-solid fa-book-open"></i> 查看使用教學</button>
                 <div class="text-center pt-8 border-t border-gray-200">
                     <button onclick="window.emergencyReset()" class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 px-3 py-2 rounded-full hover:bg-red-500 hover:text-white transition">⚠️ 完整重置系統 (清空資料)</button>
-                    <p class="text-[10px] text-gray-300 mt-2">1on1 Pro (Fixed DB)</p>
+                    <p class="text-[10px] text-gray-300 mt-2">1on1 Pro V16.2 (Stable/IDB)</p>
                 </div>
             </div>
         </div>
@@ -234,7 +236,7 @@
     
     <div id="toast">已儲存</div>
 
-    <div id="profileModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4"><div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"><h3 class="font-bold text-xl mb-4 border-b pb-2 flex-none">編輯學生</h3><div class="space-y-5 overflow-y-auto no-scrollbar flex-1 pb-4">
+    <div id="profileModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4"><div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"><h3 class="font-bold text-xl mb-4 border-b pb-2 flex-none">學生設定</h3><div class="space-y-5 overflow-y-auto no-scrollbar flex-1 pb-4">
         <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl"><div><label class="text-xs text-gray-500 font-bold">姓名</label><input type="text" id="pName" class="w-full bg-transparent border-b border-gray-300 font-bold"></div><div class="flex flex-col items-end"><span id="pArchivedStatus" class="text-xs font-bold text-green-600 mb-1">活躍</span><div class="relative inline-block w-10 h-6 align-middle select-none"><input type="checkbox" id="pArchivedToggle" class="toggle-checkbox absolute block w-0 h-0 opacity-0" onchange="window.toggleArchivedStatusInModal()"/><label for="pArchivedToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div></div>
         <div><label class="text-xs text-gray-500 font-bold">狀況備註</label><input type="text" id="pBody" class="w-full p-3 border rounded-xl bg-gray-50"></div>
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4"><div class="flex justify-between items-center"><label class="text-sm font-bold text-indigo-800"><i class="fa-solid fa-calendar-check mr-1"></i> 排課規則</label></div><div><label class="text-xs text-gray-500 font-bold mb-1 block">上課頻率</label><select id="ruleFreq" class="w-full p-2 border rounded bg-white font-bold text-gray-700"><option value="1">每週 (Weekly)</option><option value="2">隔週 (Every 2 Weeks)</option><option value="4">每月 (Every 4 Weeks)</option></select></div><div><label class="text-xs text-gray-500 font-bold mb-1 block">新增上課時段</label><div class="flex gap-1 mb-2"><select id="slotDay" class="p-2 border rounded bg-white font-bold"><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option></select>
@@ -252,12 +254,10 @@
             </button>
             <h3 class="font-bold text-lg mb-4 text-center">課程管理</h3>
             <div class="text-center text-sm text-gray-500 mb-2" id="actionCurrentTime"></div>
-            
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
                 <label class="text-xs font-bold text-gray-500 block mb-2">更改時間</label>
                 <input type="datetime-local" id="actionNewTime" class="w-full p-3 border rounded-xl bg-white text-lg">
             </div>
-
             <div class="flex gap-3">
                 <button onclick="window.submitReschedule()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow hover:bg-indigo-700">
                     <i class="fa-regular fa-calendar-check mr-1"></i> 改期
@@ -265,7 +265,7 @@
                 <button onclick="window.submitLeave()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl border border-gray-200 hover:bg-gray-200">
                     <i class="fa-solid fa-mug-hot mr-1"></i> 請假
                 </button>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -275,6 +275,15 @@
     
     <div id="renewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 hidden opacity-0 transition-opacity duration-200 backdrop-blur-sm"><div class="bg-white w-[90%] max-w-lg p-6 rounded-3xl shadow-2xl transform scale-95 transition-transform duration-200" id="renewContent"><h3 class="text-xl font-bold mb-4 text-center">購買 / 續約</h3><div class="space-y-4"><input type="number" id="renewAmount" class="w-full p-4 border rounded-2xl text-2xl font-bold text-center outline-none focus:ring-2 focus:ring-indigo-500" placeholder="輸入堂數"><div class="grid grid-cols-2 gap-3"><div class="bg-gray-50 p-2 rounded-xl border"><div class="flex justify-between mb-1"><label class="text-xs font-bold text-gray-400">學生簽名</label><button onclick="window.clearPad('padRenewStudent')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-24 bg-white"><canvas id="padRenewStudent"></canvas></div></div><div class="bg-gray-50 p-2 rounded-xl border"><div class="flex justify-between mb-1"><label class="text-xs font-bold text-gray-400">老師簽名</label><button onclick="window.clearPad('padRenewTeacher')" class="text-xs text-red-400">清除</button></div><div class="canvas-box h-24 bg-white"><canvas id="padRenewTeacher"></canvas></div></div></div><div class="flex gap-3 mt-2"><button onclick="window.closeRenewModal()" class="flex-1 py-3 text-gray-500 font-bold bg-gray-100 rounded-xl hover:bg-gray-200">取消</button><button onclick="window.submitRenew()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700">確認購買</button></div></div></div></div>
     
+    <div id="imageModal" class="fixed inset-0 z-[60] bg-black bg-opacity-90 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="this.classList.add('hidden')">
+        <div class="relative max-w-full max-h-full" onclick="event.stopPropagation()">
+            <button onclick="document.getElementById('imageModal').classList.add('hidden')" class="absolute -top-12 right-0 text-white text-xl font-bold p-2 hover:text-gray-300">
+                <i class="fa-solid fa-xmark fa-lg"></i>
+            </button>
+            <img id="imageModalContent" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+        </div>
+    </div>
+
     <div id="guideModal" class="fixed inset-0 z-50 bg-gray-900 bg-opacity-80 hidden flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm" onclick="this.classList.add('hidden')">
         <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">
             
@@ -283,7 +292,7 @@
                     <h3 class="font-bold text-2xl tracking-wide flex items-center gap-2">
                         <i class="fa-solid fa-book-open"></i> 1on1 Pro 使用手冊
                     </h3>
-                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統</p>
+                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V16.2)</p>
                 </div>
                 <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full w-10 h-10 transition flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -337,11 +346,12 @@
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ 進階功能</h4>
+                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V16.2 進階功能</h4>
                         <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
-                            <li><strong>電子合約：</strong>在「設定」頁面上傳合約底圖後，可讓學生在平板上直接簽名，系統會合成圖片保存。</li>
-                            <li><strong>課堂紀錄：</strong>點擊課程卡片，可以上傳照片（如白板筆記、教材）或撰寫文字紀錄。</li>
-                            <li><strong>圖片標註：</strong>上傳的照片可以直接在系統內進行畫筆標註（畫重點）。</li>
+                            <li><strong>無限儲存空間：</strong>升級為 IndexedDB，照片存量不再受 5MB 限制。</li>
+                            <li><strong>電子合約預覽：</strong>可直接在系統內放大檢視合約圖片。</li>
+                            <li><strong>智慧衝堂檢查：</strong>自動排除自身時段，準確偵測與其他課程的衝突。</li>
+                            <li><strong>備份提醒：</strong>若當天未備份，「設定」頁籤會出現紅點提示。</li>
                         </ul>
                     </div>
                 </div>
@@ -372,41 +382,75 @@
     </div>
 
     <script>
-        // === 核心資料庫設定 (固定 KEY，確保改版不遺失) ===
-        const DB_KEY = '1ON1_PRO_MASTER_DB'; 
+        // === V16.0 IndexedDB Core Engine ===
+        const DB_NAME = '1on1Pro_V16_IDB';
+        const STORE_NAME = 'store';
+        const MASTER_KEY = 'master_data';
         const pads = {};
         
+        // State
         let students = [], records = [], appSettings = { lastBackup: null, freq: '7', contractTemplate: null };
         let curSid = null, signingRecId = null, directEditRecId = null, paintImgIndex = -1;
         let isDirectEdit = false, paintHistory = [], bgCanvasCtx = null;
         let currentWeekStart = new Date();
         let ruleSlots = [], createSlots = [];
         let currentView = 'calendar';
-        let paintMode = 'photo'; 
+        let paintMode = 'photo';
         let tempContractImg = null;
-        let tempEditorImages = [];
-        let editRecId = null;
-        let isLongPress = false;
         let targetRecId = null;
 
-        // 啟動程式
-        window.onload = function() {
-            loadData();
-            switchTab('page-list');
+        // === IndexedDB Wrapper ===
+        const db = {
+            init: () => new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+                req.onupgradeneeded = e => {
+                    const d = e.target.result;
+                    if(!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME);
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            }),
+            put: async (data) => {
+                const d = await db.init();
+                return new Promise((resolve, reject) => {
+                    const tx = d.transaction(STORE_NAME, 'readwrite');
+                    const req = tx.objectStore(STORE_NAME).put(data, MASTER_KEY);
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
+                });
+            },
+            get: async () => {
+                const d = await db.init();
+                return new Promise((resolve, reject) => {
+                    const tx = d.transaction(STORE_NAME, 'readonly');
+                    const req = tx.objectStore(STORE_NAME).get(MASTER_KEY);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+            }
         };
 
-        // 讀取資料
-        function loadData() {
+        // === Initialization Logic ===
+        async function initApp() {
             try {
-                const db = localStorage.getItem(DB_KEY);
-                if(db) {
-                    const data = JSON.parse(db);
+                let data = await db.get();
+                if(!data) {
+                    const oldDB = localStorage.getItem('1ON1_PRO_MASTER_DB') || localStorage.getItem('ONE_PRO_V15_STABLE');
+                    if(oldDB) {
+                        data = JSON.parse(oldDB);
+                        await db.put(data); 
+                        localStorage.removeItem('1ON1_PRO_MASTER_DB'); 
+                        localStorage.removeItem('ONE_PRO_V15_STABLE');
+                        alert("🎉 系統升級成功：資料已遷移至大容量資料庫 (IndexedDB)！");
+                    }
+                }
+
+                if(data) {
                     students = data.students || [];
                     records = data.records || [];
                     appSettings = data.appSettings || appSettings;
-                    console.log(`Loaded ${students.length} students from ${DB_KEY}`);
                 }
-                
+
                 if(appSettings.contractTemplate) {
                     const img = document.getElementById('sysContractPreview');
                     if(img) {
@@ -416,95 +460,90 @@
                 }
                 checkBackupStatus();
             } catch(e) {
-                console.error("Init Error:", e);
+                console.error("Boot Error:", e);
+                alert("資料庫載入失敗，請嘗試重新整理。");
             }
-            // 設定週次
-            const d = new Date(); 
-            d.setHours(0, 0, 0, 0); // 確保歸零到午夜
-            const day = d.getDay(); 
-            const diff = d.getDate() - day + (day == 0 ? -6 : 1); // 調整為週一開始
+
+            const d = new Date();
+            d.setHours(0,0,0,0);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day == 0 ? -6 : 1);
             currentWeekStart = new Date(d.setDate(diff));
+            
+            renderList();
         }
 
-        // 儲存資料
-        function saveData() {
+        window.onload = initApp;
+
+        window.addEventListener('beforeunload', (e) => {
+            if(!appSettings.lastBackup) return;
+            const today = getFmtDate(new Date());
+            if(appSettings.lastBackup !== today) {
+                e.preventDefault();
+                e.returnValue = ''; 
+            }
+        });
+
+        async function saveData() {
             try {
                 const data = { students, records, appSettings };
-                localStorage.setItem(DB_KEY, JSON.stringify(data));
-                
+                await db.put(data);
                 const toast = document.getElementById('toast');
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 2000);
             } catch(e) {
-                alert("儲存失敗 (空間不足?)");
+                alert("儲存失敗: " + e.message);
             }
         }
 
-        // 備份 (下載)
-function backupData() {
-    // 1. 準備資料
-    const dataToSave = { students, records, appSettings };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToSave));
-    
-    // 2. 下載檔案
-    const downloadAnchorNode = document.createElement('a');
-    const date = new Date().toISOString().slice(0, 10);
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `tms_backup_${date}.json`);
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    
-    // 3. 更新設定與存檔
-    appSettings.lastBackup = date;
-    saveData();
-    
-    // 4. [新增] 立即更新備份狀態 (讓紅色橫幅消失) 與設定頁面文字
-    checkBackupStatus(); 
-    renderSettingsPage(); 
-    
-    alert("備份已下載！\n紅色警告橫幅已解除。");
-}
-
-        // 還原 (讀取) - 關鍵修復：強制寫入並重整
-        function restoreData(input) {
-            if(!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = event => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    if (!data.students || !Array.isArray(data.students)) {
-                        return alert("格式錯誤：缺少學生資料");
-                    }
-                    students = data.students;
-                    records = data.records || [];
-                    appSettings = data.appSettings || appSettings;
-
-                    // 強制儲存到新的 Key
-                    saveData(); 
-
-                    alert("還原成功！頁面將重新整理。");
-                    location.reload(); 
-                } catch (err) {
-                    console.error(err);
-                    alert("檔案損毀無法讀取");
-                }
-            };
-            reader.readAsText(file);
+        function getFmtDate(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
-        // 建立卡片 UI
+        // === Conflict Check Logic (V16.2 Fixed) ===
+        function checkConflict(dateStr, excludeRecId = null) {
+            try {
+                // 確保 ID 是數字
+                const excludeIdNum = Number(excludeRecId);
+
+                // 改用 'rec' 當變數，避免跟外面的 'r' 搞混
+                const conflictRec = records.find(rec => 
+                    (rec.status !== 'canceled') && 
+                    rec.date === dateStr && 
+                    rec.id != excludeIdNum
+                );
+                
+                if(conflictRec) {
+                    const conflictStudent = students.find(s => s.id == conflictRec.sid);
+                    const name = conflictStudent ? conflictStudent.name : "未知學生";
+                    
+                    let statusText = "預定";
+                    if(conflictRec.status === 'done') statusText = "已完成";
+                    if(conflictRec.status === 'leave') statusText = "請假";
+                    if(conflictRec.status === 'rescheduled') statusText = "改期";
+
+                    return `[${dateStr} ${name} (${statusText})]`;
+                }
+                return null;
+            } catch(e) {
+                console.error("檢查衝突時發生錯誤:", e);
+                return null; // 發生錯誤時當作沒衝突，避免卡死
+            }
+        }
+
+        // === UI Functions ===
         function createRecordCard(r) {
-            const div = document.createElement('div'); 
+            const div = document.createElement('div');
             const isRescheduled = r.status === 'rescheduled';
             
-            // 狀態對應 CSS Class
-            let statusClass = "status-planned"; // 預設黃色
-            if (r.status === 'done') statusClass = "status-done"; // 綠色
-            if (r.status === 'leave') statusClass = "status-leave"; // 灰色 (請假)
-            if (r.status === 'rescheduled') statusClass = "status-rescheduled"; // 粉紅
-            if (r.status === 'canceled') statusClass = "status-leave"; // 相容舊資料
+            let statusClass = "status-planned";
+            if (r.status === 'done') statusClass = "status-done";
+            if (r.status === 'leave') statusClass = "status-leave";
+            if (r.status === 'rescheduled') statusClass = "status-rescheduled";
+            if (r.status === 'canceled') statusClass = "status-leave";
 
             div.className = `record-card shadow-sm rounded-2xl mb-4 p-4 border border-gray-100 relative ${statusClass}`;
             
@@ -514,9 +553,10 @@ function backupData() {
             } else {
                 const datePart = r.date.split(' ');
                 const isPlanned = r.status === 'planned' || r.status === 'rescheduled';
-                
+                const canUpload = isPlanned || r.status === 'done';
+
                 const imgsHtml = `<div class="img-scroller mt-3 mb-2 flex items-center gap-2">
-                    ${isPlanned ? `<div class="img-add-btn" onclick="document.getElementById('hiddenFile_${r.id}').click()"><i class="fa-solid fa-plus fa-lg"></i><input type="file" id="hiddenFile_${r.id}" class="hidden" accept="image/*" multiple onchange="window.handleDirectUpload(${r.id}, this)"></div>` : ''}
+                    ${canUpload ? `<div class="img-add-btn" onclick="document.getElementById('hiddenFile_${r.id}').click()"><i class="fa-solid fa-plus fa-lg"></i><input type="file" id="hiddenFile_${r.id}" class="hidden" accept="image/*" multiple onchange="window.handleDirectUpload(${r.id}, this)"></div>` : ''}
                     ${(r.imgs || []).map((src, idx)=>`<img src="${src}" class="img-thumb" onclick="window.openDirectPaint(${r.id}, ${idx})">`).join('')}
                 </div>`;
 
@@ -525,10 +565,7 @@ function backupData() {
                 let actions = '';
                 if(isPlanned) {
                     actions = `
-                    <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                        <div class="flex gap-3">
-                            <button onclick="window.openActionModal(${r.id})" class="text-xs font-bold text-gray-400 hover:text-indigo-600"><i class="fa-regular fa-calendar-check"></i> 管理課程</button>
-                        </div>
+                    <div class="flex justify-end mt-2 pt-2 border-t border-gray-100">
                         <button onclick="window.openSignModal(${r.id})" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-700">簽到</button>
                     </div>`;
                 } else if (r.status === 'done') {
@@ -541,7 +578,13 @@ function backupData() {
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div class="font-bold text-lg text-gray-800">${datePart[0]} <span class="text-sm font-normal text-gray-500">${datePart[1]}</span></div>
-                        ${isRescheduled ? '<span class="text-[10px] bg-pink-100 text-pink-600 px-1 rounded">已改期</span>' : ''}
+                        <div class="flex items-center gap-1">
+                            ${isRescheduled ? '<span class="text-[10px] bg-pink-100 text-pink-600 px-1 rounded">已改期</span>' : ''}
+                            ${isPlanned ? `
+                            <button onclick="window.openActionModal(${r.id})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition active:bg-gray-200">
+                                <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+                            </button>` : ''}
+                        </div>
                     </div>
                     ${noteHtml}
                     ${imgsHtml}
@@ -551,145 +594,83 @@ function backupData() {
             return div;
         }
 
-        // 操作 Modal
-        function openActionModal(rid) {
-            targetRecId = rid;
-            const r = records.find(x => x.id === rid);
-            if (!r) return;
-            document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`;
-            document.getElementById('actionNewTime').value = r.date.replace(' ', 'T');
-            document.getElementById('actionModal').classList.remove('hidden');
+        function openImageModal(src) {
+            if(!src) return;
+            document.getElementById('imageModalContent').src = src;
+            document.getElementById('imageModal').classList.remove('hidden');
         }
+        function viewTempContract() { openImageModal(tempContractImg); }
+        function viewContract() { const s = students.find(x => x.id == curSid); if(s && s.contractImg) openImageModal(s.contractImg); }
+        function previewContractSetting() { openImageModal(appSettings.contractTemplate); }
 
-function submitReschedule() {
-    const val = document.getElementById('actionNewTime').value; 
-    if(!val) return; 
-    
-    // 1. 取得新日期字串
-    const newDate = val.replace('T', ' '); 
-
-    // 2. 檢查是否有撞期 (排除自己)
-    // 注意：這裡直接呼叫現有的 checkConflict
-    const conflictMsg = checkConflict(newDate);
-    
-    // 3. 如果有衝突，跳出確認視窗
-    if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) {
-        return; // 使用者按取消，終止操作
-    }
-
-    // 4. 執行改期
-    const r = records.find(x => x.id === targetRecId); 
-    r.date = newDate; 
-    r.status = 'rescheduled'; 
-    saveData(); 
-    
-    document.getElementById('actionModal').classList.add('hidden'); 
-    if(currentView==='calendar') renderCalendar(); else renderTimeline();
-}
-
-        function submitLeave() {
-            const r = records.find(x => x.id === targetRecId);
-            if(r) {
-                r.status = 'leave'; // 設定為請假
-                saveData();
-                document.getElementById('actionModal').classList.add('hidden');
-                if(currentView==='calendar') renderCalendar(); else renderTimeline();
-            }
-        }
-        
-        // 保留取消功能，但預設邏輯導向請假或刪除
-        function submitCancel() {
-             // 這裡如果不想要紅色取消，可以直接呼叫 submitLeave()
-             // 但為了保留彈性，我們還是設為 canceled (但 CSS 會顯示灰色/刪除線)
-             submitLeave(); 
-        }
-
-        // BINDINGS
-        window.changeWeek = changeWeek;
-        window.openDetail = openDetail;
-        window.toggleCreateTrial = toggleCreateTrial;
-        window.addCreateSlot = addCreateSlot;
-        window.removeCreateSlot = removeCreateSlot;
-        window.addSlot = addSlot;
-        window.removeSlot = removeSlot;
-        window.createStudent = createStudent;
-        window.openContractSigner = openContractSigner;
-        window.saveContractTemplate = saveContractTemplate;
-        window.backupData = backupData;
-        window.restoreData = restoreData;
-        window.emergencyReset = emergencyReset;
-        window.closePaintModal = closePaintModal;
-        window.undoPaint = undoPaint;
-        window.savePaint = savePaint;
-        window.setPen = setPen;
-        window.setEraser = setEraser;
-        window.closeRenewModal = closeRenewModal;
-        window.submitRenew = submitRenew;
-        window.openRenewModal = openRenewModal;
-        window.clearPad = clearPad;
-        window.closeSignModal = closeSignModal;
-        window.confirmSignModal = confirmSignModal;
-        window.openSignModal = openSignModal;
-        window.openActionModal = openActionModal;
-        window.submitReschedule = submitReschedule;
-        window.submitLeave = submitLeave;
-        window.submitCancel = submitCancel;
-        window.openDirectPaint = openDirectPaint;
-        window.openProfileModal = openProfileModal;
-        window.saveProfile = saveProfile;
-        window.deleteStudent = deleteStudent;
-        window.generateSchedule = generateSchedule;
-        window.handleDirectUpload = handleDirectUpload;
-        window.updateNote = updateNote;
-        window.viewContract = viewContract;
-        window.toggleArchivedStatusInModal = toggleArchivedStatusInModal;
-        window.addNewRecord = addNewRecord;
-
-        // 其他輔助函式 (保持不變)
-        function getFmtDate(d) { 
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0'); // 月份是 0-11，所以要 +1
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        } 
-        function addDays(d, days) { const result = new Date(d); result.setDate(result.getDate() + days); return result; }
-        function getTimeString() { return new Date().toLocaleString('zh-TW', { hour12: false }); }
-        
-        function checkConflict(dateStr) {
-            const conflictRec = records.find(r => (r.status === 'planned' || r.status === 'rescheduled') && r.date === dateStr);
-            if(conflictRec) {
-                const conflictStudent = students.find(s => s.id == conflictRec.sid);
-                const name = conflictStudent ? conflictStudent.name : "未知學生";
-                return `[${dateStr} 的 ${name}]`;
-            }
-            return null;
-        }
-
-        function switchTab(id) {
-            ['page-create', 'page-list', 'page-detail', 'page-settings'].forEach(p => document.getElementById(p).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            ['nav-create', 'nav-list', 'nav-settings'].forEach(n => { document.getElementById(n).className = "px-4 py-2 rounded-md text-sm font-bold text-gray-500 hover:bg-white transition relative"; });
+        function backupData() {
+            const dataToSave = { students, records, appSettings };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToSave));
+            const downloadAnchorNode = document.createElement('a');
+            const date = new Date().toISOString().slice(0, 10);
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `tms_backup_${date}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
             
-            let activeId = id.replace('page', 'nav');
-            if(id === 'page-detail') activeId = 'nav-list';
-            document.getElementById(activeId).className = "px-4 py-2 rounded-md text-sm font-bold shadow bg-white text-indigo-600 transition relative";
-            
-            if (id === 'page-create') {
-                curSid = null; createSlots = []; renderCreateSlots(); tempContractImg = null;
-                document.getElementById('cContractPreview').classList.add('hidden');
-            }
-            
-            if(id === 'page-list') { currentView = 'calendar'; renderList(); }
-            if(id === 'page-detail') currentView = 'detail';
-            if(id === 'page-settings') renderSettingsPage();
+            appSettings.lastBackup = date;
+            saveData();
+            checkBackupStatus();
+            renderSettingsPage();
+            alert("備份已下載！\n紅色警告已解除。");
         }
 
-        async function saveContractTemplate(input) {
-            if(input.files && input.files[0]) {
-                appSettings.contractTemplate = await compressImage(await fileToDataURL(input.files[0]), 600, 0.3);
-                document.getElementById('sysContractPreview').src = appSettings.contractTemplate;
-                document.getElementById('sysContractPreview').classList.remove('hidden');
-                saveData();
+        function restoreData(input) {
+            if(!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = async event => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (!data.students || !Array.isArray(data.students)) return alert("格式錯誤");
+                    students = data.students;
+                    records = data.records || [];
+                    appSettings = data.appSettings || appSettings;
+                    await saveData();
+                    alert("還原成功！頁面將重新整理。");
+                    location.reload();
+                } catch (err) { alert("檔案損毀"); }
+            };
+            reader.readAsText(file);
+        }
+
+        function checkBackupStatus() {
+            const banner = document.getElementById('backupBanner');
+            const dot = document.getElementById('settingsRedDot');
+            const freq = parseInt(appSettings.freq || "7");
+
+            if (freq === -1) {
+                if(banner) banner.style.display = 'none';
+                if(dot) dot.classList.add('hidden');
+                return;
+            }
+
+            let isOverdue = false;
+            let msg = '';
+
+            if (!appSettings.lastBackup) {
+                isOverdue = true;
+                msg = `⚠️ 系統偵測到您尚未備份，建議立即下載備份檔案！`;
+            } else {
+                const diff = (new Date() - new Date(appSettings.lastBackup)) / (1000 * 60 * 60 * 24);
+                if (diff > freq) {
+                    isOverdue = true;
+                    msg = `⚠️ 您已超過 ${freq} 天未備份，建議立即前往設定頁「下載備份」！`;
+                }
+            }
+
+            if (isOverdue) {
+                if(banner) { banner.innerHTML = msg; banner.style.display = 'block'; }
+                if(dot) dot.classList.remove('hidden');
+            } else {
+                if(banner) banner.style.display = 'none';
+                if(dot) dot.classList.add('hidden');
             }
         }
 
@@ -711,74 +692,77 @@ function submitReschedule() {
             requestAnimationFrame(() => setupPaintScene(src, "合約簽署")); 
         }
 
+        async function saveContractTemplate(input) {
+            if(input.files && input.files[0]) {
+                appSettings.contractTemplate = await compressImage(await fileToDataURL(input.files[0]), 600, 0.3);
+                document.getElementById('sysContractPreview').src = appSettings.contractTemplate;
+                document.getElementById('sysContractPreview').classList.remove('hidden');
+                saveData();
+            }
+        }
+
         function createStudent() {
-            try {
-                const btn = document.getElementById('btnCreate');
-                const name=document.getElementById('cName').value, body=document.getElementById('cBody').value;
-                const isTrial = document.getElementById('cIsTrial').checked;
-                let credits = parseInt(document.getElementById('cCredits').value);
+            const btn = document.getElementById('btnCreate');
+            const name=document.getElementById('cName').value, body=document.getElementById('cBody').value;
+            const isTrial = document.getElementById('cIsTrial').checked;
+            let credits = parseInt(document.getElementById('cCredits').value);
+            
+            if(!name || !credits) return alert("請輸入完整資料");
+            
+            let rule = { freq:1, slots:[], start: getFmtDate(new Date()) };
+            if(isTrial) {
+                const tDate = document.getElementById('cTrialDate').value;
+                const tTime = document.getElementById('cTrialHour').value + ":" + document.getElementById('cTrialMin').value;
+                if(!tDate) return alert("請選擇體驗日期");
+                rule.start = tDate;
+            } else {
+                if(createSlots.length === 0 || !document.getElementById('cRegStart').value) return alert("請設定上課時段與開始日期");
+                rule = { freq: parseInt(document.getElementById('cRegFreq').value), slots: [...createSlots], start: document.getElementById('cRegStart').value };
+            }
+
+            btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 處理中...`;
+            setTimeout(async () => {
+                const newSid = Date.now();
+                const contractImg = isTrial ? null : tempContractImg;
+                students.push({ id: newSid, name, credits, body: body||"無", contractImg, rule, isArchived: false, isTrial: isTrial });
                 
-                if(!name || !credits) return alert("請輸入完整資料");
-                
-                let rule = { freq:1, slots:[], start: getFmtDate(new Date()) };
                 if(isTrial) {
                     const tDate = document.getElementById('cTrialDate').value;
                     const tTime = document.getElementById('cTrialHour').value + ":" + document.getElementById('cTrialMin').value;
-                    if(!tDate) return alert("請選擇體驗日期");
-                    rule.start = tDate;
+                    records.push({ id: Date.now()+1, sid: newSid, date: tDate + " " + tTime, status: 'planned', note: '體驗課', imgs: [], sig: null });
                 } else {
-                    const freq = parseInt(document.getElementById('cRegFreq').value);
-                    const start = document.getElementById('cRegStart').value;
-                    if(createSlots.length === 0 || !start) return alert("請設定上課時段與開始日期");
-                    rule = { freq, slots: [...createSlots], start };
-                }
-
-                btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 處理中...`; btn.classList.add('bg-gray-400');
-
-                setTimeout(async () => {
-                    const newSid = Date.now();
-                    const contractImg = isTrial ? null : tempContractImg;
-                    students.push({ id: newSid, name, credits, body: body||"無", contractImg, rule, isArchived: false, isTrial: isTrial });
-                    
-                    if(isTrial) {
-                        const tDate = document.getElementById('cTrialDate').value;
-                        const tTime = document.getElementById('cTrialHour').value + ":" + document.getElementById('cTrialMin').value;
-                        records.push({ id: Date.now()+1, sid: newSid, date: tDate + " " + tTime, status: 'planned', note: '體驗課', imgs: [], sig: null });
-                    } else {
-                        // 自動排課邏輯 (略，與之前相同)
-                        let count = 0, currDate = new Date(rule.start + "T00:00:00"); 
-                        const refMonday = new Date(currDate); refMonday.setDate(currDate.getDate() - (currDate.getDay()==0?6:currDate.getDay()-1)); 
-                        let safety = 0;
-                        while(count < credits && safety < 1000) {
-                            safety++;
-                            const diffDays = Math.floor((currDate - refMonday) / (86400000));
-                            const weekIdx = Math.floor(diffDays / 7);
-                            if(weekIdx % rule.freq === 0) { 
-                                const daySlots = rule.slots.filter(slot => slot.day === currDate.getDay());
-                                daySlots.forEach(slot => {
-                                    if(count < credits) { 
-                                        const dateStr = getFmtDate(currDate) + " " + slot.time;
-                                        if(!records.some(r=>r.sid===newSid && r.date === dateStr)) {
-                                            records.push({ id: Date.now() + Math.random(), sid: newSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null });
-                                            count++;
-                                        }
+                    let count = 0, currDate = new Date(rule.start + "T00:00:00"); 
+                    const refMonday = new Date(currDate); refMonday.setDate(currDate.getDate() - (currDate.getDay()==0?6:currDate.getDay()-1)); 
+                    let safety = 0;
+                    while(count < credits && safety < 1000) {
+                        safety++;
+                        const diffDays = Math.floor((currDate - refMonday) / (86400000));
+                        const weekIdx = Math.floor(diffDays / 7);
+                        if(weekIdx % rule.freq === 0) { 
+                            const daySlots = rule.slots.filter(slot => slot.day === currDate.getDay());
+                            daySlots.forEach(slot => {
+                                if(count < credits) { 
+                                    const dateStr = getFmtDate(currDate) + " " + slot.time;
+                                    if(!records.some(r=>r.sid===newSid && r.date === dateStr)) {
+                                        records.push({ id: Date.now() + Math.random(), sid: newSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null });
+                                        count++;
                                     }
-                                });
-                            }
-                            currDate.setDate(currDate.getDate() + 1);
+                                }
+                            });
                         }
+                        currDate.setDate(currDate.getDate() + 1);
                     }
-                    saveData();
-                    document.getElementById('cName').value=''; document.getElementById('cCredits').value=''; document.getElementById('cBody').value=''; 
-                    document.getElementById('cIsTrial').checked = false; toggleCreateTrial(document.getElementById('cIsTrial'));
-                    createSlots = []; renderCreateSlots();
-                    tempContractImg = null;
-                    document.getElementById('cContractPreview').classList.add('hidden');
-                    btn.disabled = false; btn.innerHTML = `<span>完成建檔</span>`; btn.classList.remove('bg-gray-400');
-                    alert("✅ 新增成功！");
-                    switchTab('page-list');
-                }, 100);
-            } catch(e) { alert("錯誤：" + e.message); console.error(e); }
+                }
+                await saveData();
+                document.getElementById('cName').value=''; document.getElementById('cCredits').value=''; document.getElementById('cBody').value=''; 
+                document.getElementById('cIsTrial').checked = false; toggleCreateTrial(document.getElementById('cIsTrial'));
+                createSlots = []; renderCreateSlots();
+                tempContractImg = null;
+                document.getElementById('cContractPreview').classList.add('hidden');
+                btn.disabled = false; btn.innerHTML = `<span>完成建檔</span>`;
+                alert("✅ 新增成功！");
+                switchTab('page-list');
+            }, 50);
         }
 
         function addCreateSlot() {
@@ -795,59 +779,37 @@ function submitReschedule() {
             });
         }
 
-        function openDetail(sid) {
-            curSid = Number(sid); 
-            const s = students.find(x => x.id == sid);
-            if(!s) return alert("資料錯誤：找不到學生 ID " + sid);
-
-            try {
-                document.getElementById('dName').innerText = s.name || '未命名'; 
-                document.getElementById('dCredits').innerText = s.credits || 0; 
-                document.getElementById('dBody').innerText = s.body || ''; 
-                document.getElementById('dTrialTag').classList.toggle('hidden', !s.isTrial);
-                
-                if(!s.rule) s.rule = {freq:1, slots:[], start:''};
-
-                const daysMap = ['日','一','二','三','四','五','六'];
-                if(s.rule && s.rule.slots && s.rule.slots.length > 0) {
-                    const slotsStr = s.rule.slots.map(sl => `週${daysMap[sl.day]} ${sl.time}`).join('、');
-                    const freqStr = s.rule.freq == 1 ? "每週" : (s.rule.freq == 2 ? "隔週" : "每月");
-                    document.getElementById('dRuleDisplay').innerText = `${freqStr} (${slotsStr})`;
-                } else { document.getElementById('dRuleDisplay').innerText = "尚未設定排課規則"; }
-                
-                const cArea = document.getElementById('dContractArea');
-                if (cArea) {
-                     if(s.contractImg) {
-                        cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border cursor-pointer" onclick="viewContract()">`;
-                    } else {
-                        cArea.innerHTML = `<div class="text-red-500 font-bold text-sm mb-2">⚠️ 尚未簽署正式合約</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow">✍️ 立即補簽</button>`;
-                    }
-                }
-                
-                renderTimeline(); 
-                switchTab('page-detail');
-            } catch(e) { console.error(e); alert("錯誤：" + e.message); }
+        function switchTab(id) {
+            ['page-create', 'page-list', 'page-detail', 'page-settings'].forEach(p => document.getElementById(p).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            ['nav-create', 'nav-list', 'nav-settings'].forEach(n => { document.getElementById(n).className = "px-4 py-2 rounded-md text-sm font-bold text-gray-500 hover:bg-white transition relative"; });
+            let activeId = id.replace('page', 'nav');
+            if(id === 'page-detail') activeId = 'nav-list';
+            document.getElementById(activeId).className = "px-4 py-2 rounded-md text-sm font-bold shadow bg-white text-indigo-600 transition relative";
+            if (id === 'page-create') {
+                curSid = null; createSlots = []; renderCreateSlots(); tempContractImg = null;
+                document.getElementById('cContractPreview').classList.add('hidden');
+            }
+            if(id === 'page-list') { currentView = 'calendar'; renderList(); }
+            if(id === 'page-detail') currentView = 'detail';
+            if(id === 'page-settings') renderSettingsPage();
         }
 
         function renderList() {
             renderCalendar();
             const list = document.getElementById('studentListBody'); list.innerHTML = '';
             const daysMap = ['日','一','二','三','四','五','六'];
-            
             students.forEach(s => { 
                 if(!s || s.isArchived) return;
-                
                 const trialTag = s.isTrial ? `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded ml-2 font-bold">🌱 體驗</span>` : '';
                 const nextRec = records.filter(r => r.sid===s.id && (r.status==='planned' || r.status==='rescheduled')).sort((a,b)=>a.date.localeCompare(b.date))[0];
                 const nextStr = nextRec ? `<span class="text-blue-600 font-bold">${nextRec.date}</span>` : '<span class="text-gray-400 text-xs">無預排</span>';
-                
                 let ruleStr = '<span class="text-gray-400 text-xs">未設定</span>';
                 if(s.rule && s.rule.slots && s.rule.slots.length > 0) {
                     const freqText = s.rule.freq == 1 ? "每週" : (s.rule.freq == 2 ? "隔週" : "每月");
                     const slotsText = s.rule.slots.map(sl => `週${daysMap[sl.day]} ${sl.time}`).join(', ');
                     ruleStr = `<span class="text-xs text-gray-600 bg-gray-100 p-1 rounded">${freqText} (${slotsText})</span>`;
                 }
-
                 list.innerHTML += `
                 <div class="student-row">
                     <div class="row-info" onclick="window.openDetail('${s.id}')">
@@ -859,255 +821,66 @@ function submitReschedule() {
                     <div class="text-right text-gray-300 pr-2"><i class="fa-solid fa-chevron-right"></i></div>
                 </div>`; 
             });
-            
             const arcList = document.getElementById('archivedListBody'); arcList.innerHTML = ''; let hasArc = false;
-            students.forEach(s => { 
-                if(s && s.isArchived) { 
-                    hasArc = true; 
-                    arcList.innerHTML += `
-                    <div class="student-row opacity-60">
-                         <div class="row-info cursor-default">
-                            <div class="font-bold">${s.name}</div><div>-</div><div>-</div><div class="text-right">${s.credits}</div>
-                         </div>
-                         <div class="row-action">
-                            <button onclick="event.stopPropagation(); window.openProfileModal('${s.id}')" class="text-gray-500 hover:text-indigo-600 p-2">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                         </div>
-                    </div>`; 
-                } 
-            });
+            students.forEach(s => { if(s && s.isArchived) { hasArc = true; arcList.innerHTML += `<div class="student-row opacity-60"><div class="row-info cursor-default"><div class="font-bold">${s.name}</div><div>-</div><div>-</div><div class="text-right">${s.credits}</div></div><div class="row-action"><button onclick="event.stopPropagation(); window.openProfileModal('${s.id}')" class="text-gray-500 hover:text-indigo-600 p-2"><i class="fa-solid fa-ellipsis-vertical"></i></button></div></div>`; } });
             document.getElementById('noArchiveMsg').style.display = hasArc ? 'none' : 'block';
         }
 
-        function changeWeek(offset) { currentWeekStart.setDate(currentWeekStart.getDate() + (offset * 7)); renderCalendar(); }
-        
         function renderCalendar() {
-            try {
-                const grid = document.getElementById('calendarGrid'); grid.innerHTML = ''; const weekEnd = addDays(currentWeekStart, 6); document.getElementById('currentWeekRange').innerText = `${currentWeekStart.getMonth()+1}/${currentWeekStart.getDate()} ~ ${weekEnd.getMonth()+1}/${weekEnd.getDate()}`; const today = new Date(); today.setHours(0,0,0,0); const isCur = today >= currentWeekStart && today <= weekEnd; document.getElementById('currentWeekLabel').innerText = isCur ? "本週" : (currentWeekStart > today ? "未來" : "過去"); const dayNames = ['一','二','三','四','五','六','日'];
-                for(let i=0; i<7; i++) {
-                    const dayDate = addDays(currentWeekStart, i); const dayStr = getFmtDate(dayDate); const col = document.createElement('div'); col.className = "p-2 min-h-[150px] border-r border-gray-100 last:border-0"; const isToday = dayStr === getFmtDate(new Date()); col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg">${dayDate.getDate()}</span></div>`;
-                    
-                    if(Array.isArray(records)) {
-                        const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr)).sort((a,b)=> a.date.localeCompare(b.date));
-                        dayRecords.forEach(r => {
-                            const s = students.find(x => x.id === r.sid); 
-                            if(!s || s.isArchived) return;
-                            const time = r.date.split(' ')[1].substring(0,5); 
-                            
-                            // 對應顏色的 Class
-                            let styleClass = "cal-planned"; 
-                            if(r.status === 'rescheduled') styleClass = "cal-rescheduled"; 
-                            if(r.status === 'done') styleClass = "cal-done"; 
-                            if(r.status === 'leave') styleClass = "cal-leave"; // 灰色
-                            if(r.status === 'canceled') styleClass = "cal-leave"; // 相容
-                            
-                            const card = document.createElement('div'); 
-                            card.className = `cal-card ${styleClass}`; 
-                            
-                            card.innerHTML = `
-                                <div class="cal-time">${time}</div>
-                                <div class="cal-name truncate">${s.name}</div>
-                                <div class="card-menu-btn" onclick="event.stopPropagation(); window.openActionModal(${r.id})">
-                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                </div>
-                            `;
-                            
-                            card.onclick = (e) => { 
-                                if(e.target.closest('.card-menu-btn')) return;
-                                openDetail(r.sid); 
-                            };
-                            card.oncontextmenu = (e) => { e.preventDefault(); openActionModal(r.id); };
-
-                            col.appendChild(card);
-                        });
-                    }
-                    grid.appendChild(col);
-                }
-            } catch(e) { console.error("Calendar Error:", e); }
-        }
-
-        function compressImage(src,w,q){ return new Promise(r=>{ if(!src)r(null); const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let rw=i.width,rh=i.height; if(rw>w){rh=Math.round(rh*=w/rw);rw=w;} c.width=rw;c.height=rh; const x=c.getContext('2d'); x.fillStyle="#ffffff"; x.fillRect(0,0,rw,rh); x.drawImage(i,0,0,rw,rh); r(c.toDataURL('image/jpeg',q)); }; i.src=src; }); }
-        function initPad(id){const c=document.getElementById(id); if(!c) return; const p=c.parentElement; const rsz=()=>{const r=Math.max(window.devicePixelRatio||1,1),w=p.clientWidth||300,h=p.clientHeight||150; c.width=w*r;c.height=h*r;c.style.width=w+"px";c.style.height=h+"px";const x=c.getContext('2d');x.scale(r,r);x.lineCap='round';x.lineJoin='round'; if(id==='canvasPaint'){const b=document.getElementById('canvasBg');if(b){b.width=w*r;b.height=h*r;bgCanvasCtx=b.getContext('2d');bgCanvasCtx.scale(r,r);}}else{x.fillStyle='#fff';x.fillRect(0,0,c.width/r,c.height/r);} }; new ResizeObserver(rsz).observe(p); rsz(); let d=false;const x=c.getContext('2d'); const gp=(e)=>{const b=c.getBoundingClientRect();return{x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,y:(e.touches?e.touches[0].clientY:e.clientY)-b.top}}; const st=(e)=>{if(e.cancelable)e.preventDefault();if(id==='canvasPaint')saveH();d=true;x.beginPath();const p=gp(e);x.moveTo(p.x,p.y);}; const mv=(e)=>{if(!d)return;if(e.cancelable)e.preventDefault();const p=gp(e);x.lineTo(p.x,p.y);if(id!=='canvasPaint'){x.strokeStyle='#1f2937';x.lineWidth=2;}x.stroke();}; const ed=()=>d=false; c.addEventListener('touchstart',st,{passive:false});c.addEventListener('touchmove',mv,{passive:false});c.addEventListener('touchend',ed);c.addEventListener('mousedown',st);c.addEventListener('mousemove',mv);c.addEventListener('mouseup',ed); pads[id]={c,ctx:x};}
-        function saveH(){if(paintHistory.length>10)paintHistory.shift();paintHistory.push(pads['canvasPaint'].c.toDataURL());}
-        function undoPaint(){const ctx = pads['canvasPaint'].ctx; const w = pads['canvasPaint'].c.width; const h = pads['canvasPaint'].c.height; if(paintHistory.length>0){const i=new Image();i.onload=()=>{ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0,0,w,h); ctx.drawImage(i,0,0); ctx.scale(Math.max(window.devicePixelRatio||1,1),Math.max(window.devicePixelRatio||1,1));};i.src=paintHistory.pop();}else{ctx.clearRect(0,0,w/(Math.max(window.devicePixelRatio||1,1)),h/(Math.max(window.devicePixelRatio||1,1)));}}
-        function setupPaintScene(src, title){paintHistory=[];document.getElementById('paintModal').classList.remove('hidden');document.getElementById('paintTitle').innerText=title||"圖片標註";initPad('canvasPaint');pads['canvasPaint'].ctx.clearRect(0,0,pads['canvasPaint'].c.width,pads['canvasPaint'].c.height);if(src){const i=new Image();i.onload=()=>{drawImageFit(i,document.getElementById('canvasBg'),bgCanvasCtx);};i.src=src;} else { bgCanvasCtx.fillStyle='#fff'; bgCanvasCtx.fillRect(0,0,document.getElementById('canvasBg').width,document.getElementById('canvasBg').height); } setPen('#ef4444');}
-        function savePaint(){ const b=document.getElementById('canvasBg'),p=document.getElementById('canvasPaint'),t=document.createElement('canvas');t.width=b.width;t.height=b.height;const x=t.getContext('2d');x.drawImage(b,0,0);x.drawImage(p,0,0); (async()=>{ const d=await compressImage(t.toDataURL(),800,0.5); if(paintMode === 'photo' && isDirectEdit){ const i=records.findIndex(r=>r.id===directEditRecId);if(i>-1){records[i].imgs[paintImgIndex]=d;saveData();renderTimeline();} } else if(paintMode === 'contract') { if(curSid) { const s=students.find(x=>x.id===curSid); s.contractImg = d; saveData(); openDetail(curSid); document.getElementById('pContractArea').innerHTML = `<img src="${d}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`;} else { tempContractImg = d; document.getElementById('cContractThumb').src = d; document.getElementById('cContractPreview').classList.remove('hidden'); } } closePaintModal(); })(); }
-        function closePaintModal(){document.getElementById('paintModal').classList.add('hidden');}
-        function drawImageFit(img,c,ctx){const r=Math.min(c.width/window.devicePixelRatio/img.width,c.height/window.devicePixelRatio/img.height),w=img.width*r,h=img.height*r,x=(c.width/window.devicePixelRatio-w)/2,y=(c.height/window.devicePixelRatio-h)/2;ctx.clearRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h);}
-        function setPen(c){const x=pads['canvasPaint'].ctx;x.globalCompositeOperation='source-over';x.strokeStyle=c;x.lineWidth=4;document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b=>b.classList.remove('ring-2','ring-white','ring-black'));if(c=='#ef4444')document.getElementById('btn-red').classList.add('ring-2','ring-white');if(c=='#000000')document.getElementById('btn-black').classList.add('ring-2','ring-white');if(c=='#ffffff')document.getElementById('btn-white').classList.add('ring-2','ring-black');}
-        function setEraser(){const x=pads['canvasPaint'].ctx;x.globalCompositeOperation='destination-out';x.lineWidth=20;document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b=>b.classList.remove('ring-2','ring-white'));document.getElementById('btn-eraser').classList.add('ring-2','ring-black');}
-        function handleDirectUpload(rid, input) { if(input.files) { Array.from(input.files).forEach(f=>{ const r = new FileReader(); r.onload = async(e)=>{ const d = await compressImage(e.target.result, 800, 0.5); const rec = records.find(x=>x.id===rid); if(rec) { if(!rec.imgs) rec.imgs=[]; rec.imgs.push(d); saveData(); renderTimeline(); } }; r.readAsDataURL(f); }); } }
-        function updateNote(rid, val) { const r = records.find(x=>x.id===rid); if(r && r.note !== val) { r.note = val; saveData(); } }
-        
-        function openSignModal(rid) { 
-            signingRecId = rid; 
-            document.getElementById('signModal').classList.remove('hidden'); 
-            requestAnimationFrame(() => initPad('padSignModal')); 
-        }
-        
-        function openDirectPaint(rid,i){
-            directEditRecId=rid;paintImgIndex=i;isDirectEdit=true;paintMode='photo';
-            const r=records.find(x=>x.id===rid);
-            if(r&&r.imgs[i]) {
-                document.getElementById('paintModal').classList.remove('hidden');
-                requestAnimationFrame(() => setupPaintScene(r.imgs[i], "照片編輯"));
-            }
-        }
-        
-        function toggleArchivedStatusInModal() { const toggle = document.getElementById('pArchivedToggle'); const status = document.getElementById('pArchivedStatus'); status.innerText = toggle.checked ? "封存" : "活躍"; status.className = toggle.checked ? "text-xs font-bold text-gray-400 mb-1" : "text-xs font-bold text-green-600 mb-1"; }
-        function deleteStudent(){if(confirm("⚠️ 永久刪除此學生？")){const i=students.findIndex(x=>x.id===curSid);if(i>-1){students.splice(i,1);records=records.filter(r=>r.sid!==curSid);saveData();document.getElementById('profileModal').classList.add('hidden');switchTab('page-list');}}}
-        function fileToDataURL(f){return new Promise(r=>{if(!f)r(null);const d=new FileReader();d.onload=(e)=>r(e.target.result);d.readAsDataURL(f);});}
-        function emergencyReset(){if(confirm("⚠️ 重置將清除所有資料，確定？")){localStorage.clear();location.reload();}}
-        function submitRenew() { const amt = parseInt(document.getElementById('renewAmount').value); if(!amt) return alert("請輸入堂數"); (async()=>{const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5); const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5); const time = getTimeString(); const s = students.find(x=>x.id===curSid); s.credits += amt; if(s.isTrial) { s.isTrial = false; alert("🎉 恭喜！學生已從體驗轉為正式學生！"); } records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea }); saveData(); document.getElementById('dCredits').innerText = s.credits; document.getElementById('dTrialTag').classList.add('hidden'); document.getElementById('renewAmount').value = ''; clearPad('padRenewStudent'); clearPad('padRenewTeacher'); closeRenewModal(); renderTimeline();})(); }
-        function closeRenewModal() { document.getElementById('renewModal').classList.add('opacity-0'); document.getElementById('renewContent').classList.add('scale-95'); setTimeout(() => document.getElementById('renewModal').classList.add('hidden'), 200); }
-        function openRenewModal() { const m = document.getElementById('renewModal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('renewContent').classList.remove('scale-95'); }, 10); setTimeout(() => { initPad('padRenewStudent'); initPad('padRenewTeacher'); }, 100); }
-        function clearPad(id) { const p = pads[id]; if(!p) return; p.ctx.clearRect(0,0,p.c.width,p.c.height); p.ctx.fillStyle='#ffffff'; p.ctx.fillRect(0,0,p.c.width,p.c.height); }
-        function closeSignModal() { document.getElementById('signModal').classList.add('hidden'); clearPad('padSignModal'); }
-        async function confirmSignModal() { const idx = records.findIndex(r => r.id === signingRecId); if (idx > -1) { const s = students.find(x => x.id === curSid); const sig = await compressImage(pads['padSignModal'].c.toDataURL(), 400, 0.5); s.credits--; records[idx].status = 'done'; records[idx].sig = sig; records[idx].signDate = getTimeString(); saveData(); document.getElementById('dCredits').innerText = s.credits; renderTimeline(); closeSignModal(); alert("簽到成功！已扣除 1 堂課"); } }
-        function renderSettingsPage() {
-            // 顯示上次備份時間
-            const timeSpan = document.getElementById('lastBackupTime');
-            if (timeSpan) {
-                timeSpan.innerText = appSettings.lastBackup ? appSettings.lastBackup : "尚無紀錄";
-            }
-
-            // 設定選單為目前的值
-            const freqSelect = document.getElementById('backupFreq');
-            if (freqSelect) {
-                freqSelect.value = appSettings.freq || "7";
-            }
-            
-            // 更新上方警告條
-            checkBackupStatus();
-        }
-function saveSettings() {
-            const freq = document.getElementById('backupFreq').value;
-            appSettings.freq = freq;
-            saveData(); // 儲存到資料庫
-            checkBackupStatus(); // 立即更新警告條狀態
-        }
-
-        // 別忘了綁定到 window (如果是模組化開發需要，單一檔案通常不需要但加上保險)
-        window.saveSettings = saveSettings;
-        function checkBackupStatus() {
-            const banner = document.getElementById('backupBanner');
-            const freq = parseInt(appSettings.freq || "7"); // 讀取設定，預設7天
-
-            // 如果設定為 -1，代表關閉提醒
-            if (freq === -1) {
-                banner.style.display = 'none';
-                return;
-            }
-
-            // 如果從來沒備份過
-            if (!appSettings.lastBackup) {
-                banner.innerHTML = `⚠️ 系統偵測到您尚未備份，建議立即下載備份檔案！`;
-                banner.style.display = 'block';
-                return;
-            }
-
-            // 計算天數差
-            const diff = (new Date() - new Date(appSettings.lastBackup)) / (1000 * 60 * 60 * 24);
-            
-            if (diff > freq) {
-                banner.innerHTML = `⚠️ 您已超過 ${freq} 天未備份，建議立即前往設定頁「下載備份」！`;
-                banner.style.display = 'block';
-            } else {
-                banner.style.display = 'none';
-            }
-        }
-
-        function openProfileModal(id) {
-            if(id) curSid = Number(id);
-            let s = students.find(x => x.id === curSid);
-            if(!s) s = students.find(x => x.id == curSid);
-            if(!s) return alert("資料錯誤：找不到學生");
-            try {
-                document.getElementById('pName').value=s.name;
-                document.getElementById('pBody').value=s.body;
-                if(!s.rule) s.rule = {freq:1, slots:[], start:''};
-                ruleSlots=s.rule.slots ? [...s.rule.slots] : [];
-                document.getElementById('ruleFreq').value=s.rule.freq || 1;
-                document.getElementById('ruleStartDate').value=s.rule.start || getFmtDate(new Date());
-                renderRuleSlots();
-                const t=document.getElementById('pArchivedToggle');
-                t.checked=!s.isArchived;
-                document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍";
-                const cArea = document.getElementById('pContractArea');
-                if (cArea) {
-                     if(s.contractImg) {
-                        cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`;
-                    } else {
-                        cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`;
-                    }
-                }
-                document.getElementById('profileModal').classList.remove('hidden');
-            } catch(e) { console.error(e); alert("設定頁面開啟失敗，請重置系統。"); }
-        }
-        
-        function saveProfile(){const s=students.find(x=>x.id===curSid);s.name=document.getElementById('pName').value;s.body=document.getElementById('pBody').value;s.isArchived=!document.getElementById('pArchivedToggle').checked;s.rule = { freq: parseInt(document.getElementById('ruleFreq').value), slots: [...ruleSlots], start: document.getElementById('ruleStartDate').value }; saveData(); renderList(); openDetail(curSid); document.getElementById('profileModal').classList.add('hidden');}
-        function addSlot() { const d = parseInt(document.getElementById('slotDay').value); const t = document.getElementById('slotHour').value + ":" + document.getElementById('slotMin').value; if(!ruleSlots.some(s => s.day === d && s.time === t)) { ruleSlots.push({day: d, time: t}); renderRuleSlots(); } }
-        function removeSlot(idx) { ruleSlots.splice(idx, 1); renderRuleSlots(); }
-        function renderRuleSlots() { const c = document.getElementById('slotList'); c.innerHTML = ''; const daysMap = ['日','一','二','三','四','五','六']; ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; }); }
-        
-        function generateSchedule() {
-            const s = students.find(x => x.id == curSid);
-            const freq = parseInt(document.getElementById('ruleFreq').value);
-            const startStr = document.getElementById('ruleStartDate').value;
-            if(ruleSlots.length === 0 || !startStr) return alert("請至少新增一個時段並設定開始日期");
-            if(s.credits <= 0) return alert("沒有剩餘堂數，無法排課");
-            const existingFuturePlans = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date < startStr).length;
-            const neededQuota = s.credits - existingFuturePlans;
-            if(neededQuota <= 0) return alert(`額度已滿，無需新增。(剩餘 ${s.credits}，保留 ${existingFuturePlans})`);
-            
-            let conflicts = 0;
-            let checkCount = 0, checkDate = new Date(startStr + "T00:00:00");
-            const checkMonday = new Date(checkDate); checkMonday.setDate(checkDate.getDate() - (checkDate.getDay()==0?6:checkDate.getDay()-1)); 
-            
-            while(checkCount < neededQuota && checkCount < 100) { 
-                const diffDays = Math.floor((checkDate - checkMonday) / (86400000)); const weekIdx = Math.floor(diffDays / 7);
-                if(weekIdx % freq === 0) { 
-                    const daySlots = ruleSlots.filter(slot => slot.day === checkDate.getDay());
-                    daySlots.forEach(slot => { 
-                        if(checkCount < neededQuota) {
-                            if(checkConflict(getFmtDate(checkDate) + " " + slot.time)) conflicts++;
-                            checkCount++;
-                        }
+            const grid = document.getElementById('calendarGrid'); grid.innerHTML = ''; const weekEnd = addDays(currentWeekStart, 6); 
+            document.getElementById('currentWeekRange').innerText = `${currentWeekStart.getMonth()+1}/${currentWeekStart.getDate()} ~ ${weekEnd.getMonth()+1}/${weekEnd.getDate()}`; 
+            const today = new Date(); today.setHours(0,0,0,0); const isCur = today >= currentWeekStart && today <= weekEnd; 
+            document.getElementById('currentWeekLabel').innerText = isCur ? "本週" : (currentWeekStart > today ? "未來" : "過去"); 
+            const dayNames = ['一','二','三','四','五','六','日'];
+            for(let i=0; i<7; i++) {
+                const dayDate = addDays(currentWeekStart, i); const dayStr = getFmtDate(dayDate); 
+                const col = document.createElement('div'); col.className = "p-2 min-h-[150px] border-r border-gray-100 last:border-0"; 
+                const isToday = dayStr === getFmtDate(new Date()); 
+                col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg">${dayDate.getDate()}</span></div>`;
+                
+                if(Array.isArray(records)) {
+                    const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr)).sort((a,b)=> a.date.localeCompare(b.date));
+                    dayRecords.forEach(r => {
+                        const s = students.find(x => x.id === r.sid); 
+                        if(!s || s.isArchived) return;
+                        const time = r.date.split(' ')[1].substring(0,5); 
+                        let styleClass = "cal-planned"; 
+                        if(r.status === 'rescheduled') styleClass = "cal-rescheduled"; 
+                        if(r.status === 'done') styleClass = "cal-done"; 
+                        if(r.status === 'leave') styleClass = "cal-leave";
+                        if(r.status === 'canceled') styleClass = "cal-leave";
+                        
+                        const card = document.createElement('div'); card.className = `cal-card ${styleClass}`; 
+                        card.innerHTML = `<div class="cal-time">${time}</div><div class="cal-name truncate">${s.name}</div><div class="card-menu-btn" onclick="event.stopPropagation(); window.openActionModal(${r.id})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
+                        card.onclick = (e) => { if(e.target.closest('.card-menu-btn')) return; openDetail(r.sid); };
+                        card.oncontextmenu = (e) => { e.preventDefault(); openActionModal(r.id); };
+                        col.appendChild(card);
                     });
                 }
-                checkDate.setDate(checkDate.getDate() + 1);
+                grid.appendChild(col);
             }
+        }
 
-            if(conflicts > 0 && !confirm(`⚠️ 警告：系統預測將有 ${conflicts} 堂課程與現有時段重疊！\n\n確定要強制排入嗎？`)) return;
-            if(conflicts === 0 && !confirm(`確認排程？將從 ${startStr} 開始產生 ${neededQuota} 堂新課。`)) return;
-
-            records = records.filter(r => !(r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date >= startStr));
-            let count = 0, currDate = new Date(startStr + "T00:00:00"), safety = 0;
-            s.rule = { freq, slots: [...ruleSlots], start: startStr };
-            const refMonday = new Date(currDate); refMonday.setDate(currDate.getDate() - (currDate.getDay()==0?6:currDate.getDay()-1)); 
-            while(count < neededQuota && safety < 1000) {
-                safety++;
-                const diffDays = Math.floor((currDate - refMonday) / (86400000));
-                const weekIdx = Math.floor(diffDays / 7);
-                if(weekIdx % freq === 0) { 
-                    const daySlots = ruleSlots.filter(slot => slot.day === currDate.getDay());
-                    daySlots.forEach(slot => {
-                        if(count < neededQuota) { 
-                            const dateStr = getFmtDate(currDate) + " " + slot.time;
-                            if(!records.some(r=>r.sid==curSid && r.date === dateStr)) {
-                                records.push({ id: Date.now() + Math.random(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null });
-                                count++;
-                            }
-                        }
-                    });
-                }
-                currDate.setDate(currDate.getDate() + 1);
+        function openDetail(sid) {
+            curSid = Number(sid); const s = students.find(x => x.id == sid);
+            if(!s) return alert("資料錯誤");
+            document.getElementById('dName').innerText = s.name || '未命名'; 
+            document.getElementById('dCredits').innerText = s.credits || 0; 
+            document.getElementById('dBody').innerText = s.body || ''; 
+            document.getElementById('dTrialTag').classList.toggle('hidden', !s.isTrial);
+            if(!s.rule) s.rule = {freq:1, slots:[], start:''};
+            const daysMap = ['日','一','二','三','四','五','六'];
+            if(s.rule && s.rule.slots && s.rule.slots.length > 0) {
+                const slotsStr = s.rule.slots.map(sl => `週${daysMap[sl.day]} ${sl.time}`).join('、');
+                const freqStr = s.rule.freq == 1 ? "每週" : (s.rule.freq == 2 ? "隔週" : "每月");
+                document.getElementById('dRuleDisplay').innerText = `${freqStr} (${slotsStr})`;
+            } else { document.getElementById('dRuleDisplay').innerText = "尚未設定排課規則"; }
+            const cArea = document.getElementById('dContractArea');
+            if (cArea) {
+                 if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border cursor-pointer" onclick="openImageModal('${s.contractImg}')">`; } 
+                 else { cArea.innerHTML = `<div class="text-red-500 font-bold text-sm mb-2">⚠️ 尚未簽署正式合約</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow">✍️ 立即補簽</button>`; }
             }
-            saveData(); 
-            alert(`✅ 已成功預排 ${count} 堂課程！`); 
-            document.getElementById('profileModal').classList.add('hidden');
-            openDetail(curSid);
+            renderTimeline(); switchTab('page-detail');
         }
 
         function renderTimeline() {
@@ -1116,7 +889,6 @@ function saveSettings() {
             const history = allRecs.filter(r => r.status !== 'planned' && r.status !== 'rescheduled').sort((a,b)=> b.date.localeCompare(a.date));
             const future = allRecs.filter(r => r.status === 'planned' || r.status === 'rescheduled').sort((a,b)=> a.date.localeCompare(b.date));
             t.innerHTML = '';
-            
             if(future.length > 0) {
                 t.innerHTML += `<div class="text-xs font-bold text-indigo-600 mb-2 uppercase">預定課程</div>`;
                 t.appendChild(createRecordCard(future[0]));
@@ -1135,26 +907,153 @@ function saveSettings() {
                 history.forEach(r => t.appendChild(createRecordCard(r)));
             }
         }
+
+        function openActionModal(rid) { targetRecId = rid; const r = records.find(x => x.id === rid); if (!r) return; document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`; document.getElementById('actionNewTime').value = r.date.replace(' ', 'T'); document.getElementById('actionModal').classList.remove('hidden'); }
         
-        function addNewRecord() {
-            const dateStr = prompt("請輸入日期與時間 (YYYY-MM-DD HH:MM)", getFmtDate(new Date()) + " 10:00");
-            if(dateStr) {
+        // 修正後的改期功能：加入錯誤攔截，解決「按了沒反應」
+        // 修正版：確保程式「先認識 r」，再執行檢查
+        function submitReschedule() {
+            try {
+                // 1. 取得表單值
+                const val = document.getElementById('actionNewTime').value; 
+                if(!val) return; 
+                const newDate = val.replace('T', ' '); 
+
+                // 2. 【關鍵改名】使用 targetRecord 取代 r，避免變數未定義錯誤
+                // 使用 loose equality (==) 確保字串/數字 ID 都能找到
+                const targetRecord = records.find(x => x.id == targetRecId);
+
+                // 如果找不到資料，直接擋掉
+                if (!targetRecord) {
+                    return alert("錯誤：找不到原始課程資料 (ID: " + targetRecId + ")，請重新整理網頁。");
+                }
+
+                // 3. 檢查衝堂 (傳入 targetRecord.id)
+                // 這裡絕對安全，因為上面已經確認 targetRecord 存在了
+                const conflictMsg = checkConflict(newDate, targetRecord.id); 
+                
+                // 4. 如果有衝突，執行確認
+                if (conflictMsg) {
+                    if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) {
+                        return; // 使用者按取消
+                    }
+                }
+
+                // 5. 執行儲存
+                targetRecord.date = newDate; 
+                targetRecord.status = 'rescheduled'; 
+                saveData(); 
+                
+                document.getElementById('actionModal').classList.add('hidden'); 
+                
+                // 重新整理畫面
+                if(currentView==='calendar') renderCalendar(); else renderTimeline();
+
+            } catch (error) {
+                console.error(error);
+                alert("程式執行錯誤 (Reschedule)：" + error.message);
+            }
+        }
+
+        function submitLeave() { const r = records.find(x => x.id === targetRecId); if(r) { r.status = 'leave'; saveData(); document.getElementById('actionModal').classList.add('hidden'); if(currentView==='calendar') renderCalendar(); else renderTimeline(); } }
+        
+        function renderSettingsPage() {
+            const timeSpan = document.getElementById('lastBackupTime'); if (timeSpan) timeSpan.innerText = appSettings.lastBackup ? appSettings.lastBackup : "尚無紀錄";
+            const freqSelect = document.getElementById('backupFreq'); if (freqSelect) freqSelect.value = appSettings.freq || "7";
+            checkBackupStatus();
+        }
+        function saveSettings() { const freq = document.getElementById('backupFreq').value; appSettings.freq = freq; saveData(); checkBackupStatus(); }
+        
+        function emergencyReset(){if(confirm("⚠️ 重置將清除所有資料，確定？")){ const req = indexedDB.deleteDatabase(DB_NAME); req.onsuccess = ()=>location.reload(); }}
+        
+        // V16.2 Fix: Add conflict check for addNewRecord
+        function addNewRecord() { 
+            const dateStr = prompt("請輸入日期與時間 (YYYY-MM-DD HH:MM)", getFmtDate(new Date()) + " 10:00"); 
+            if(dateStr) { 
+                const conflictMsg = checkConflict(dateStr);
+                if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return;
+                const s = students.find(x => x.id == curSid); 
+                records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null }); 
+                saveData(); 
+                renderTimeline(); 
+            } 
+        }
+        
+        function addDays(d, days) { const result = new Date(d); result.setDate(result.getDate() + days); return result; }
+        function getTimeString() { return new Date().toLocaleString('zh-TW', { hour12: false }); }
+        function fileToDataURL(f){return new Promise(r=>{if(!f)r(null);const d=new FileReader();d.onload=(e)=>r(e.target.result);d.readAsDataURL(f);});}
+        function compressImage(src,w,q){ return new Promise(r=>{ if(!src)r(null); const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let rw=i.width,rh=i.height; if(rw>w){rh=Math.round(rh*=w/rw);rw=w;} c.width=rw;c.height=rh; const x=c.getContext('2d'); x.fillStyle="#ffffff"; x.fillRect(0,0,rw,rh); x.drawImage(i,0,0,rw,rh); r(c.toDataURL('image/jpeg',q)); }; i.src=src; }); }
+        
+        function initPad(id){const c=document.getElementById(id); if(!c) return; const p=c.parentElement; const rsz=()=>{const r=Math.max(window.devicePixelRatio||1,1),w=p.clientWidth||300,h=p.clientHeight||150; c.width=w*r;c.height=h*r;c.style.width=w+"px";c.style.height=h+"px";const x=c.getContext('2d');x.scale(r,r);x.lineCap='round';x.lineJoin='round'; if(id==='canvasPaint'){const b=document.getElementById('canvasBg');if(b){b.width=w*r;b.height=h*r;bgCanvasCtx=b.getContext('2d');bgCanvasCtx.scale(r,r);}}else{x.fillStyle='#fff';x.fillRect(0,0,c.width/r,c.height/r);} }; new ResizeObserver(rsz).observe(p); rsz(); let d=false;const x=c.getContext('2d'); const gp=(e)=>{const b=c.getBoundingClientRect();return{x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,y:(e.touches?e.touches[0].clientY:e.clientY)-b.top}}; const st=(e)=>{if(e.cancelable)e.preventDefault();if(id==='canvasPaint')saveH();d=true;x.beginPath();const p=gp(e);x.moveTo(p.x,p.y);}; const mv=(e)=>{if(!d)return;if(e.cancelable)e.preventDefault();const p=gp(e);x.lineTo(p.x,p.y);if(id!=='canvasPaint'){x.strokeStyle='#1f2937';x.lineWidth=2;}x.stroke();}; const ed=()=>d=false; c.addEventListener('touchstart',st,{passive:false});c.addEventListener('touchmove',mv,{passive:false});c.addEventListener('touchend',ed);c.addEventListener('mousedown',st);c.addEventListener('mousemove',mv);c.addEventListener('mouseup',ed); pads[id]={c,ctx:x};}
+        function saveH(){if(paintHistory.length>10)paintHistory.shift();paintHistory.push(pads['canvasPaint'].c.toDataURL());}
+        function undoPaint(){const ctx = pads['canvasPaint'].ctx; const w = pads['canvasPaint'].c.width; const h = pads['canvasPaint'].c.height; if(paintHistory.length>0){const i=new Image();i.onload=()=>{ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0,0,w,h); ctx.drawImage(i,0,0); ctx.scale(Math.max(window.devicePixelRatio||1,1),Math.max(window.devicePixelRatio||1,1));};i.src=paintHistory.pop();}else{ctx.clearRect(0,0,w/(Math.max(window.devicePixelRatio||1,1)),h/(Math.max(window.devicePixelRatio||1,1)));}}
+        function setupPaintScene(src, title){paintHistory=[];document.getElementById('paintModal').classList.remove('hidden');document.getElementById('paintTitle').innerText=title||"圖片標註";initPad('canvasPaint');pads['canvasPaint'].ctx.clearRect(0,0,pads['canvasPaint'].c.width,pads['canvasPaint'].c.height);if(src){const i=new Image();i.onload=()=>{drawImageFit(i,document.getElementById('canvasBg'),bgCanvasCtx);};i.src=src;} else { bgCanvasCtx.fillStyle='#fff'; bgCanvasCtx.fillRect(0,0,document.getElementById('canvasBg').width,document.getElementById('canvasBg').height); } setPen('#ef4444');}
+        function savePaint(){ const b=document.getElementById('canvasBg'),p=document.getElementById('canvasPaint'),t=document.createElement('canvas');t.width=b.width;t.height=b.height;const x=t.getContext('2d');x.drawImage(b,0,0);x.drawImage(p,0,0); (async()=>{ const d=await compressImage(t.toDataURL(),800,0.5); if(paintMode === 'photo' && isDirectEdit){ const i=records.findIndex(r=>r.id===directEditRecId);if(i>-1){records[i].imgs[paintImgIndex]=d;saveData();renderTimeline();} } else if(paintMode === 'contract') { if(curSid) { const s=students.find(x=>x.id===curSid); s.contractImg = d; saveData(); openDetail(curSid); document.getElementById('pContractArea').innerHTML = `<img src="${d}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`;} else { tempContractImg = d; document.getElementById('cContractThumb').src = d; document.getElementById('cContractPreview').classList.remove('hidden'); } } closePaintModal(); })(); }
+        function closePaintModal(){document.getElementById('paintModal').classList.add('hidden');}
+        function drawImageFit(img,c,ctx){const r=Math.min(c.width/window.devicePixelRatio/img.width,c.height/window.devicePixelRatio/img.height),w=img.width*r,h=img.height*r,x=(c.width/window.devicePixelRatio-w)/2,y=(c.height/window.devicePixelRatio-h)/2;ctx.clearRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,img.width,img.height,x,y,w,h);}
+        function setPen(c){const x=pads['canvasPaint'].ctx;x.globalCompositeOperation='source-over';x.strokeStyle=c;x.lineWidth=4;document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b=>b.classList.remove('ring-2','ring-white','ring-black'));if(c=='#ef4444')document.getElementById('btn-red').classList.add('ring-2','ring-white');if(c=='#000000')document.getElementById('btn-black').classList.add('ring-2','ring-white');if(c=='#ffffff')document.getElementById('btn-white').classList.add('ring-2','ring-black');}
+        function setEraser(){const x=pads['canvasPaint'].ctx;x.globalCompositeOperation='destination-out';x.lineWidth=20;document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b=>b.classList.remove('ring-2','ring-white'));document.getElementById('btn-eraser').classList.add('ring-2','ring-black');}
+        function handleDirectUpload(rid, input) { if(input.files) { Array.from(input.files).forEach(f=>{ const r = new FileReader(); r.onload = async(e)=>{ const d = await compressImage(e.target.result, 800, 0.5); const rec = records.find(x=>x.id===rid); if(rec) { if(!rec.imgs) rec.imgs=[]; rec.imgs.push(d); saveData(); renderTimeline(); } }; r.readAsDataURL(f); }); } }
+        function updateNote(rid, val) { const r = records.find(x=>x.id===rid); if(r && r.note !== val) { r.note = val; saveData(); } }
+        function openSignModal(rid) { signingRecId = rid; document.getElementById('signModal').classList.remove('hidden'); requestAnimationFrame(() => initPad('padSignModal')); }
+        function openDirectPaint(rid,i){ directEditRecId=rid;paintImgIndex=i;isDirectEdit=true;paintMode='photo'; const r=records.find(x=>x.id===rid); if(r&&r.imgs[i]) { document.getElementById('paintModal').classList.remove('hidden'); requestAnimationFrame(() => setupPaintScene(r.imgs[i], "照片編輯")); } }
+        function toggleArchivedStatusInModal() { const toggle = document.getElementById('pArchivedToggle'); const status = document.getElementById('pArchivedStatus'); status.innerText = toggle.checked ? "封存" : "活躍"; status.className = toggle.checked ? "text-xs font-bold text-gray-400 mb-1" : "text-xs font-bold text-green-600 mb-1"; }
+        function deleteStudent(){if(confirm("⚠️ 永久刪除此學生？")){const i=students.findIndex(x=>x.id===curSid);if(i>-1){students.splice(i,1);records=records.filter(r=>r.sid!==curSid);saveData();document.getElementById('profileModal').classList.add('hidden');switchTab('page-list');}}}
+        function submitRenew() { const amt = parseInt(document.getElementById('renewAmount').value); if(!amt) return alert("請輸入堂數"); (async()=>{const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5); const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5); const time = getTimeString(); const s = students.find(x=>x.id===curSid); s.credits += amt; if(s.isTrial) { s.isTrial = false; alert("🎉 恭喜！學生已從體驗轉為正式學生！"); } records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea }); saveData(); document.getElementById('dCredits').innerText = s.credits; document.getElementById('dTrialTag').classList.add('hidden'); document.getElementById('renewAmount').value = ''; clearPad('padRenewStudent'); clearPad('padRenewTeacher'); closeRenewModal(); renderTimeline();})(); }
+        function closeRenewModal() { document.getElementById('renewModal').classList.add('opacity-0'); document.getElementById('renewContent').classList.add('scale-95'); setTimeout(() => document.getElementById('renewModal').classList.add('hidden'), 200); }
+        function openRenewModal() { const m = document.getElementById('renewModal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('renewContent').classList.remove('scale-95'); }, 10); setTimeout(() => { initPad('padRenewStudent'); initPad('padRenewTeacher'); }, 100); }
+        function clearPad(id) { const p = pads[id]; if(!p) return; p.ctx.clearRect(0,0,p.c.width,p.c.height); p.ctx.fillStyle='#ffffff'; p.ctx.fillRect(0,0,p.c.width,p.c.height); }
+        function closeSignModal() { document.getElementById('signModal').classList.add('hidden'); clearPad('padSignModal'); }
+        async function confirmSignModal() { const idx = records.findIndex(r => r.id === signingRecId); if (idx > -1) { const s = students.find(x => x.id === curSid); const sig = await compressImage(pads['padSignModal'].c.toDataURL(), 400, 0.5); s.credits--; records[idx].status = 'done'; records[idx].sig = sig; records[idx].signDate = getTimeString(); saveData(); document.getElementById('dCredits').innerText = s.credits; renderTimeline(); closeSignModal(); alert("簽到成功！已扣除 1 堂課"); } }
+        function changeWeek(offset) { currentWeekStart.setDate(currentWeekStart.getDate() + (offset * 7)); renderCalendar(); }
+        function addSlot() { const d = parseInt(document.getElementById('slotDay').value); const t = document.getElementById('slotHour').value + ":" + document.getElementById('slotMin').value; if(!ruleSlots.some(s => s.day === d && s.time === t)) { ruleSlots.push({day: d, time: t}); renderRuleSlots(); } }
+        function removeSlot(idx) { ruleSlots.splice(idx, 1); renderRuleSlots(); }
+        function renderRuleSlots() { const c = document.getElementById('slotList'); c.innerHTML = ''; const daysMap = ['日','一','二','三','四','五','六']; ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; }); }
+        function openProfileModal(id) { if(id) curSid = Number(id); let s = students.find(x => x.id === curSid); if(!s) s = students.find(x => x.id == curSid); if(!s) return alert("資料錯誤"); try { document.getElementById('pName').value=s.name; document.getElementById('pBody').value=s.body; if(!s.rule) s.rule = {freq:1, slots:[], start:''}; ruleSlots=s.rule.slots ? [...s.rule.slots] : []; document.getElementById('ruleFreq').value=s.rule.freq || 1; document.getElementById('ruleStartDate').value=s.rule.start || getFmtDate(new Date()); renderRuleSlots(); const t=document.getElementById('pArchivedToggle'); t.checked=!s.isArchived; document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍"; const cArea = document.getElementById('pContractArea'); if (cArea) { if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`; } else { cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`; } } document.getElementById('profileModal').classList.remove('hidden'); } catch(e) { console.error(e); } }
+        function generateSchedule() { const s = students.find(x => x.id == curSid); const freq = parseInt(document.getElementById('ruleFreq').value); const startStr = document.getElementById('ruleStartDate').value; if(ruleSlots.length === 0 || !startStr) return alert("請設定"); if(s.credits <= 0) return alert("額度不足"); const existing = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date < startStr).length; const quota = s.credits - existing; if(quota <= 0) return alert("額度已滿"); let conflicts=0; let checkCount=0; let checkDate=new Date(startStr + "T00:00:00"); const checkMonday=new Date(checkDate); checkMonday.setDate(checkDate.getDate()-(checkDate.getDay()==0?6:checkDate.getDay()-1)); while(checkCount<quota && checkCount<100){ const diffDays=Math.floor((checkDate-checkMonday)/86400000); const wIdx=Math.floor(diffDays/7); if(wIdx%freq===0){ const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); slots.forEach(sl=>{ if(checkCount<quota){ if(checkConflict(getFmtDate(checkDate)+" "+sl.time)) conflicts++; checkCount++; } }); } checkDate.setDate(checkDate.getDate()+1); } if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入？`)) return; records=records.filter(r=>!(r.sid==curSid && (r.status==='planned'||r.status==='rescheduled') && r.date>=startStr)); let count=0; let curr=new Date(startStr+"T00:00:00"); const ref=new Date(curr); ref.setDate(curr.getDate()-(curr.getDay()==0?6:curr.getDay()-1)); s.rule={freq,slots:[...ruleSlots],start:startStr}; while(count<quota){ const dDays=Math.floor((curr-ref)/86400000); const wI=Math.floor(dDays/7); if(wI%freq===0){ const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); sls.forEach(sl=>{ if(count<quota){ const dStr=getFmtDate(curr)+" "+sl.time; if(!records.some(r=>r.sid==curSid && r.date===dStr)){ records.push({id:Date.now()+Math.random(), sid:curSid, date:dStr, status:'planned', note:'', imgs:[], sig:null}); count++; } } }); } curr.setDate(curr.getDate()+1); } saveData(); alert(`已排 ${count} 堂`); document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid); }
+        // 修正後的儲存設定功能
+        function saveProfile() {
+            try {
+                // 1. 使用寬鬆比對 (==) 確保能找到學生 ID
                 const s = students.find(x => x.id == curSid);
-                records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null });
-                saveData();
-                renderTimeline();
+                
+                if (!s) {
+                    return alert("錯誤：找不到該學生資料，請重新整理後再試。");
+                }
+
+                // 2. 更新基本資料
+                s.name = document.getElementById('pName').value;
+                s.body = document.getElementById('pBody').value;
+                
+                // 3. 更新封存狀態 
+                // (UI邏輯：Toggle打勾 = 活躍 / 沒勾 = 封存)
+                // 所以 isArchived = Toggle 沒打勾
+                s.isArchived = !document.getElementById('pArchivedToggle').checked;
+
+                // 4. 更新排課規則
+                s.rule = { 
+                    freq: parseInt(document.getElementById('ruleFreq').value), 
+                    slots: [...(ruleSlots || [])], 
+                    start: document.getElementById('ruleStartDate').value 
+                };
+
+                // 5. 存檔並刷新
+                saveData(); 
+                renderList(); 
+                
+                // 如果背景剛好是這位學生的詳細頁，也順便更新一下
+                if (curSid) openDetail(curSid); 
+                
+                // 關閉視窗
+                document.getElementById('profileModal').classList.add('hidden');
+
+            } catch (e) {
+                console.error(e);
+                alert("儲存失敗：" + e.message);
             }
         }
-        
-        function viewContract() {
-            const s = students.find(x => x.id == curSid);
-            if(s && s.contractImg) {
-                const w = window.open("");
-                w.document.write(`<img src="${s.contractImg}" style="width:100%">`);
-            }
-        }
-        
-        function handleModalAddImage(input) { handleDirectUpload(directEditRecId, input); } 
+        // BINDINGS
+        window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
     </script>
 </body>
 </html>
