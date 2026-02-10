@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="1on1 Pro">
-    <title>1on1 Pro 家教管理系統</title>
+    <title>1on1 Pro 家教管理系統 (V16.4 Fixed)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -14,7 +14,7 @@
         .canvas-box { border: 2px dashed #cbd5e1; border-radius: 12px; overflow: hidden; position: relative; background: white; width: 100%; min-height: 150px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* === 狀態顏色 === */
+        /* 狀態顏色 */
         .record-card { transition: all 0.2s; border-left: 5px solid transparent; }
         .record-card:active { transform: scale(0.99); }
         .record-card.status-planned { border-left-color: #fbbf24; background: white; }
@@ -23,7 +23,7 @@
         .record-card.status-rescheduled { border-left-color: #f472b6; background: #fdf2f8; }
         .record-card.status-canceled { border-left-color: #ef4444; background: #fef2f2; opacity: 0.7; }
 
-        /* 週曆顏色 */
+        /* 週曆卡片 */
         .cal-card { padding: 6px; margin-bottom: 6px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); font-size: 0.8rem; cursor: pointer; transition: transform 0.1s; user-select: none; display: flex; flex-direction: column; justify-content: center; min-height: 50px; position: relative; }
         .cal-planned { background: #fffbeb; border-left: 3px solid #fbbf24; }
         .cal-done { background: #f0fdf4; border-left: 3px solid #22c55e; }
@@ -33,8 +33,10 @@
         .cal-time { color: #6b7280; font-size: 0.7rem; font-weight: bold; line-height: 1.2; }
         .cal-name { color: #1f2937; font-size: 0.85rem; font-weight: bold; line-height: 1.2; margin-top: 2px; }
         
-        .card-menu-btn { position: absolute; right: 4px; bottom: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #6b7280; border-radius: 4px; z-index: 10; background: rgba(255,255,255,0.8); border: 1px solid #e5e7eb; }
-        
+        /* 卡片右上角選單按鈕 */
+        .card-menu-btn { position: absolute; right: 0px; bottom: 0px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: #9ca3af; border-radius: 6px; z-index: 20; }
+        .card-menu-btn:hover { color: #4f46e5; background-color: rgba(255,255,255,0.9); }
+
         .img-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid #e2e8f0; cursor: pointer; flex-shrink: 0; background: white; }
         .img-add-btn { width: 80px; height: 80px; border-radius: 8px; border: 2px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; color: #9ca3af; cursor: pointer; flex-shrink: 0; background: #f9fafb; transition: all 0.2s; }
         .img-scroller { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
@@ -56,9 +58,6 @@
         .toggle-checkbox:checked + .toggle-label:before { transform: translateX(100%); }
         .toggle-label { width: 48px; height: 28px; background-color: #d1d5db; border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s ease-in-out; }
         .toggle-label:before { content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; border-radius: 50%; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.3s ease-in-out; }
-        
-        .guide-content h4 { font-weight: bold; color: #4f46e5; margin-top: 1.5rem; margin-bottom: 0.5rem; font-size: 1.1rem; }
-        .guide-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col text-gray-800 w-full">
@@ -108,9 +107,9 @@
 
                 <div id="cRegularSetup" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-clock"></i> 長期排課規則</div>
-                    <div class="flex flex-col sm:flex-row gap-2">
-                        <div class="flex-1"><label class="text-xs text-gray-500 font-bold">開始日期</label><input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white"></div>
-                        <div class="flex-1"><label class="text-xs text-gray-500 font-bold">頻率</label><select id="cRegFreq" class="w-full p-2 border rounded bg-white font-bold"><option value="1">每週</option><option value="2">隔週</option><option value="4">每月</option></select></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div><label class="text-xs text-gray-500 font-bold">開始日期</label><input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white"></div>
+                        <div><label class="text-xs text-gray-500 font-bold">頻率</label><select id="cRegFreq" class="w-full p-2 border rounded bg-white font-bold"><option value="1">每週</option><option value="2">隔週</option><option value="4">每月</option></select></div>
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-bold mb-1 block">時段 (可多選)</label>
@@ -195,10 +194,9 @@
                     </h3>
                     
                     <div class="mb-4 bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
-                        <div class="text-sm text-gray-600 font-bold flex items-center">
-                            <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i>
-                            上次備份：
-                            <span id="lastBackupTime" class="text-indigo-600 ml-1">讀取中...</span>
+                        <div class="text-sm text-gray-600 font-bold flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                            <span><i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i> 上次備份：<span id="lastBackupTime" class="text-indigo-600 ml-1">讀取中...</span></span>
+                            <span class="text-xs text-gray-400 sm:ml-4 sm:pl-4 sm:border-l border-gray-300">📦 資料庫大小：<span id="dbSizeDisplay" class="text-gray-600 font-mono">計算中...</span></span>
                         </div>
                         
                         <div class="flex items-center gap-2">
@@ -225,10 +223,9 @@
                     </div>
                 </div>
 
-                <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full bg-white text-indigo-600 font-bold text-sm py-3 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2"><i class="fa-solid fa-book-open"></i> 查看使用教學</button>
                 <div class="text-center pt-8 border-t border-gray-200">
                     <button onclick="window.emergencyReset()" class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 px-3 py-2 rounded-full hover:bg-red-500 hover:text-white transition">⚠️ 完整重置系統 (清空資料)</button>
-                    <p class="text-[10px] text-gray-300 mt-2">1on1 Pro V16.2 (Stable/IDB)</p>
+                    <p class="text-[10px] text-gray-300 mt-2">1on1 Pro V16.4 (Stable/Fixed)</p>
                 </div>
             </div>
         </div>
@@ -292,7 +289,7 @@
                     <h3 class="font-bold text-2xl tracking-wide flex items-center gap-2">
                         <i class="fa-solid fa-book-open"></i> 1on1 Pro 使用手冊
                     </h3>
-                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V16.2)</p>
+                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V16.4)</p>
                 </div>
                 <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full w-10 h-10 transition flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -346,7 +343,7 @@
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V16.2 進階功能</h4>
+                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V16.4 進階功能</h4>
                         <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
                             <li><strong>無限儲存空間：</strong>升級為 IndexedDB，照片存量不再受 5MB 限制。</li>
                             <li><strong>電子合約預覽：</strong>可直接在系統內放大檢視合約圖片。</li>
@@ -382,7 +379,7 @@
     </div>
 
     <script>
-        // === V16.0 IndexedDB Core Engine ===
+        // === V16.4 IndexedDB Core Engine (Fixed) ===
         const DB_NAME = '1on1Pro_V16_IDB';
         const STORE_NAME = 'store';
         const MASTER_KEY = 'master_data';
@@ -503,13 +500,10 @@
             return `${year}-${month}-${day}`;
         }
 
-        // === Conflict Check Logic (V16.2 Fixed) ===
+        // === Conflict Check Logic ===
         function checkConflict(dateStr, excludeRecId = null) {
             try {
-                // 確保 ID 是數字
                 const excludeIdNum = Number(excludeRecId);
-
-                // 改用 'rec' 當變數，避免跟外面的 'r' 搞混
                 const conflictRec = records.find(rec => 
                     (rec.status !== 'canceled') && 
                     rec.date === dateStr && 
@@ -530,7 +524,7 @@
                 return null;
             } catch(e) {
                 console.error("檢查衝突時發生錯誤:", e);
-                return null; // 發生錯誤時當作沒衝突，避免卡死
+                return null; 
             }
         }
 
@@ -910,80 +904,108 @@
 
         function openActionModal(rid) { targetRecId = rid; const r = records.find(x => x.id === rid); if (!r) return; document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`; document.getElementById('actionNewTime').value = r.date.replace(' ', 'T'); document.getElementById('actionModal').classList.remove('hidden'); }
         
-        // 修正後的改期功能：加入錯誤攔截，解決「按了沒反應」
-        // 修正版：確保程式「先認識 r」，再執行檢查
         function submitReschedule() {
             try {
-                // 1. 取得表單值
-                const val = document.getElementById('actionNewTime').value; 
-                if(!val) return; 
+                const val = document.getElementById('actionNewTime').value; if(!val) return; 
                 const newDate = val.replace('T', ' '); 
-
-                // 2. 【關鍵改名】使用 targetRecord 取代 r，避免變數未定義錯誤
-                // 使用 loose equality (==) 確保字串/數字 ID 都能找到
                 const targetRecord = records.find(x => x.id == targetRecId);
-
-                // 如果找不到資料，直接擋掉
-                if (!targetRecord) {
-                    return alert("錯誤：找不到原始課程資料 (ID: " + targetRecId + ")，請重新整理網頁。");
-                }
-
-                // 3. 檢查衝堂 (傳入 targetRecord.id)
-                // 這裡絕對安全，因為上面已經確認 targetRecord 存在了
+                if (!targetRecord) return alert("錯誤：找不到原始課程資料 (ID: " + targetRecId + ")");
                 const conflictMsg = checkConflict(newDate, targetRecord.id); 
-                
-                // 4. 如果有衝突，執行確認
-                if (conflictMsg) {
-                    if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) {
-                        return; // 使用者按取消
-                    }
-                }
-
-                // 5. 執行儲存
-                targetRecord.date = newDate; 
-                targetRecord.status = 'rescheduled'; 
-                saveData(); 
-                
+                if (conflictMsg) { if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) { return; } }
+                targetRecord.date = newDate; targetRecord.status = 'rescheduled'; saveData(); 
                 document.getElementById('actionModal').classList.add('hidden'); 
-                
-                // 重新整理畫面
                 if(currentView==='calendar') renderCalendar(); else renderTimeline();
-
-            } catch (error) {
-                console.error(error);
-                alert("程式執行錯誤 (Reschedule)：" + error.message);
-            }
+            } catch (error) { console.error(error); alert("程式執行錯誤 (Reschedule)：" + error.message); }
         }
 
-        function submitLeave() { const r = records.find(x => x.id === targetRecId); if(r) { r.status = 'leave'; saveData(); document.getElementById('actionModal').classList.add('hidden'); if(currentView==='calendar') renderCalendar(); else renderTimeline(); } }
-        
+        // === 修正：智慧請假邏輯 (自動順延) ===
+        function submitLeave() {
+            const targetRecord = records.find(x => x.id === targetRecId);
+            if (!targetRecord) return;
+            const s = students.find(x => x.id === targetRecord.sid);
+
+            // 1. 標記目前課程為請假
+            targetRecord.status = 'leave';
+
+            // 2. 檢查排課規則並自動順延
+            let msg = "已標記為請假 (不扣堂)。";
+
+            if (s && s.rule && s.rule.freq && s.rule.slots && s.rule.slots.length > 0) {
+                // 如果有規則，詢問是否補課
+                if(confirm("已標記請假。\n\n💡 系統偵測到有排課規則，是否要自動在期末順延(補)一堂課？")) {
+                    // 找出所有未來的預排課程
+                    const futureRecs = records.filter(r => r.sid === s.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
+
+                    let baseDateObj;
+                    if (futureRecs.length > 0) {
+                        baseDateObj = new Date(futureRecs[futureRecs.length-1].date.split(' ')[0]);
+                    } else {
+                        baseDateObj = new Date(targetRecord.date.split(' ')[0]);
+                    }
+
+                    // 計算新日期：最後日期 + (頻率 * 7天)
+                    const daysToAdd = parseInt(s.rule.freq) * 7;
+                    baseDateObj.setDate(baseDateObj.getDate() + daysToAdd);
+
+                    const timePart = targetRecord.date.split(' ')[1];
+                    const newDateStr = getFmtDate(baseDateObj) + " " + timePart;
+
+                    records.push({
+                        id: Date.now(),
+                        sid: s.id,
+                        date: newDateStr,
+                        status: 'planned',
+                        note: '自動順延補課',
+                        imgs: [],
+                        sig: null
+                    });
+                    msg += `\n\n🔄 已自動順延一堂課至：${newDateStr}`;
+                }
+            }
+
+            saveData();
+            alert(msg);
+            document.getElementById('actionModal').classList.add('hidden');
+            if (currentView === 'calendar') renderCalendar(); else renderTimeline();
+        }
+
+        // === 修正：設定頁面顯示容量 ===
         function renderSettingsPage() {
             const timeSpan = document.getElementById('lastBackupTime'); if (timeSpan) timeSpan.innerText = appSettings.lastBackup ? appSettings.lastBackup : "尚無紀錄";
             const freqSelect = document.getElementById('backupFreq'); if (freqSelect) freqSelect.value = appSettings.freq || "7";
+            
+            try {
+                const jsonStr = JSON.stringify({students, records, appSettings});
+                const bytes = new Blob([jsonStr]).size;
+                const mbs = (bytes / 1024 / 1024).toFixed(2);
+                document.getElementById('dbSizeDisplay').innerText = mbs + " MB";
+            } catch(e) {
+                document.getElementById('dbSizeDisplay').innerText = "未知";
+            }
+            
             checkBackupStatus();
         }
+
         function saveSettings() { const freq = document.getElementById('backupFreq').value; appSettings.freq = freq; saveData(); checkBackupStatus(); }
-        
         function emergencyReset(){if(confirm("⚠️ 重置將清除所有資料，確定？")){ const req = indexedDB.deleteDatabase(DB_NAME); req.onsuccess = ()=>location.reload(); }}
+        function addNewRecord() { const dateStr = prompt("請輸入日期與時間 (YYYY-MM-DD HH:MM)", getFmtDate(new Date()) + " 10:00"); if(dateStr) { const conflictMsg = checkConflict(dateStr); if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return; const s = students.find(x => x.id == curSid); records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null }); saveData(); renderTimeline(); } }
         
-        // V16.2 Fix: Add conflict check for addNewRecord
-        function addNewRecord() { 
-            const dateStr = prompt("請輸入日期與時間 (YYYY-MM-DD HH:MM)", getFmtDate(new Date()) + " 10:00"); 
-            if(dateStr) { 
-                const conflictMsg = checkConflict(dateStr);
-                if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return;
-                const s = students.find(x => x.id == curSid); 
-                records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null }); 
-                saveData(); 
-                renderTimeline(); 
-            } 
+        function saveProfile() {
+            try {
+                const s = students.find(x => x.id == curSid);
+                if (!s) return alert("錯誤：找不到該學生資料");
+                s.name = document.getElementById('pName').value;
+                s.body = document.getElementById('pBody').value;
+                s.isArchived = !document.getElementById('pArchivedToggle').checked;
+                s.rule = { freq: parseInt(document.getElementById('ruleFreq').value), slots: [...(ruleSlots || [])], start: document.getElementById('ruleStartDate').value };
+                saveData(); renderList(); if (curSid) openDetail(curSid); document.getElementById('profileModal').classList.add('hidden');
+            } catch (e) { console.error(e); alert("儲存失敗：" + e.message); }
         }
         
         function addDays(d, days) { const result = new Date(d); result.setDate(result.getDate() + days); return result; }
         function getTimeString() { return new Date().toLocaleString('zh-TW', { hour12: false }); }
         function fileToDataURL(f){return new Promise(r=>{if(!f)r(null);const d=new FileReader();d.onload=(e)=>r(e.target.result);d.readAsDataURL(f);});}
         function compressImage(src,w,q){ return new Promise(r=>{ if(!src)r(null); const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let rw=i.width,rh=i.height; if(rw>w){rh=Math.round(rh*=w/rw);rw=w;} c.width=rw;c.height=rh; const x=c.getContext('2d'); x.fillStyle="#ffffff"; x.fillRect(0,0,rw,rh); x.drawImage(i,0,0,rw,rh); r(c.toDataURL('image/jpeg',q)); }; i.src=src; }); }
-        
         function initPad(id){const c=document.getElementById(id); if(!c) return; const p=c.parentElement; const rsz=()=>{const r=Math.max(window.devicePixelRatio||1,1),w=p.clientWidth||300,h=p.clientHeight||150; c.width=w*r;c.height=h*r;c.style.width=w+"px";c.style.height=h+"px";const x=c.getContext('2d');x.scale(r,r);x.lineCap='round';x.lineJoin='round'; if(id==='canvasPaint'){const b=document.getElementById('canvasBg');if(b){b.width=w*r;b.height=h*r;bgCanvasCtx=b.getContext('2d');bgCanvasCtx.scale(r,r);}}else{x.fillStyle='#fff';x.fillRect(0,0,c.width/r,c.height/r);} }; new ResizeObserver(rsz).observe(p); rsz(); let d=false;const x=c.getContext('2d'); const gp=(e)=>{const b=c.getBoundingClientRect();return{x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,y:(e.touches?e.touches[0].clientY:e.clientY)-b.top}}; const st=(e)=>{if(e.cancelable)e.preventDefault();if(id==='canvasPaint')saveH();d=true;x.beginPath();const p=gp(e);x.moveTo(p.x,p.y);}; const mv=(e)=>{if(!d)return;if(e.cancelable)e.preventDefault();const p=gp(e);x.lineTo(p.x,p.y);if(id!=='canvasPaint'){x.strokeStyle='#1f2937';x.lineWidth=2;}x.stroke();}; const ed=()=>d=false; c.addEventListener('touchstart',st,{passive:false});c.addEventListener('touchmove',mv,{passive:false});c.addEventListener('touchend',ed);c.addEventListener('mousedown',st);c.addEventListener('mousemove',mv);c.addEventListener('mouseup',ed); pads[id]={c,ctx:x};}
         function saveH(){if(paintHistory.length>10)paintHistory.shift();paintHistory.push(pads['canvasPaint'].c.toDataURL());}
         function undoPaint(){const ctx = pads['canvasPaint'].ctx; const w = pads['canvasPaint'].c.width; const h = pads['canvasPaint'].c.height; if(paintHistory.length>0){const i=new Image();i.onload=()=>{ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0,0,w,h); ctx.drawImage(i,0,0); ctx.scale(Math.max(window.devicePixelRatio||1,1),Math.max(window.devicePixelRatio||1,1));};i.src=paintHistory.pop();}else{ctx.clearRect(0,0,w/(Math.max(window.devicePixelRatio||1,1)),h/(Math.max(window.devicePixelRatio||1,1)));}}
@@ -1011,49 +1033,10 @@
         function renderRuleSlots() { const c = document.getElementById('slotList'); c.innerHTML = ''; const daysMap = ['日','一','二','三','四','五','六']; ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; }); }
         function openProfileModal(id) { if(id) curSid = Number(id); let s = students.find(x => x.id === curSid); if(!s) s = students.find(x => x.id == curSid); if(!s) return alert("資料錯誤"); try { document.getElementById('pName').value=s.name; document.getElementById('pBody').value=s.body; if(!s.rule) s.rule = {freq:1, slots:[], start:''}; ruleSlots=s.rule.slots ? [...s.rule.slots] : []; document.getElementById('ruleFreq').value=s.rule.freq || 1; document.getElementById('ruleStartDate').value=s.rule.start || getFmtDate(new Date()); renderRuleSlots(); const t=document.getElementById('pArchivedToggle'); t.checked=!s.isArchived; document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍"; const cArea = document.getElementById('pContractArea'); if (cArea) { if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`; } else { cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`; } } document.getElementById('profileModal').classList.remove('hidden'); } catch(e) { console.error(e); } }
         function generateSchedule() { const s = students.find(x => x.id == curSid); const freq = parseInt(document.getElementById('ruleFreq').value); const startStr = document.getElementById('ruleStartDate').value; if(ruleSlots.length === 0 || !startStr) return alert("請設定"); if(s.credits <= 0) return alert("額度不足"); const existing = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date < startStr).length; const quota = s.credits - existing; if(quota <= 0) return alert("額度已滿"); let conflicts=0; let checkCount=0; let checkDate=new Date(startStr + "T00:00:00"); const checkMonday=new Date(checkDate); checkMonday.setDate(checkDate.getDate()-(checkDate.getDay()==0?6:checkDate.getDay()-1)); while(checkCount<quota && checkCount<100){ const diffDays=Math.floor((checkDate-checkMonday)/86400000); const wIdx=Math.floor(diffDays/7); if(wIdx%freq===0){ const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); slots.forEach(sl=>{ if(checkCount<quota){ if(checkConflict(getFmtDate(checkDate)+" "+sl.time)) conflicts++; checkCount++; } }); } checkDate.setDate(checkDate.getDate()+1); } if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入？`)) return; records=records.filter(r=>!(r.sid==curSid && (r.status==='planned'||r.status==='rescheduled') && r.date>=startStr)); let count=0; let curr=new Date(startStr+"T00:00:00"); const ref=new Date(curr); ref.setDate(curr.getDate()-(curr.getDay()==0?6:curr.getDay()-1)); s.rule={freq,slots:[...ruleSlots],start:startStr}; while(count<quota){ const dDays=Math.floor((curr-ref)/86400000); const wI=Math.floor(dDays/7); if(wI%freq===0){ const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); sls.forEach(sl=>{ if(count<quota){ const dStr=getFmtDate(curr)+" "+sl.time; if(!records.some(r=>r.sid==curSid && r.date===dStr)){ records.push({id:Date.now()+Math.random(), sid:curSid, date:dStr, status:'planned', note:'', imgs:[], sig:null}); count++; } } }); } curr.setDate(curr.getDate()+1); } saveData(); alert(`已排 ${count} 堂`); document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid); }
-        // 修正後的儲存設定功能
-        function saveProfile() {
-            try {
-                // 1. 使用寬鬆比對 (==) 確保能找到學生 ID
-                const s = students.find(x => x.id == curSid);
-                
-                if (!s) {
-                    return alert("錯誤：找不到該學生資料，請重新整理後再試。");
-                }
 
-                // 2. 更新基本資料
-                s.name = document.getElementById('pName').value;
-                s.body = document.getElementById('pBody').value;
-                
-                // 3. 更新封存狀態 
-                // (UI邏輯：Toggle打勾 = 活躍 / 沒勾 = 封存)
-                // 所以 isArchived = Toggle 沒打勾
-                s.isArchived = !document.getElementById('pArchivedToggle').checked;
-
-                // 4. 更新排課規則
-                s.rule = { 
-                    freq: parseInt(document.getElementById('ruleFreq').value), 
-                    slots: [...(ruleSlots || [])], 
-                    start: document.getElementById('ruleStartDate').value 
-                };
-
-                // 5. 存檔並刷新
-                saveData(); 
-                renderList(); 
-                
-                // 如果背景剛好是這位學生的詳細頁，也順便更新一下
-                if (curSid) openDetail(curSid); 
-                
-                // 關閉視窗
-                document.getElementById('profileModal').classList.add('hidden');
-
-            } catch (e) {
-                console.error(e);
-                alert("儲存失敗：" + e.message);
-            }
-        }
         // BINDINGS
         window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
+        window.switchTab = switchTab; // 確保 switchTab 有被綁定！
     </script>
 </body>
 </html>
