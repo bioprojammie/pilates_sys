@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="1on1 Pro">
-    <title>1on1 Pro 家教管理系統 (V16.4 Fixed)</title>
+    <title>1on1 Pro 家教管理系統 (V16.5)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -107,9 +107,19 @@
 
                 <div id="cRegularSetup" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-clock"></i> 長期排課規則</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div><label class="text-xs text-gray-500 font-bold">開始日期</label><input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white"></div>
-                        <div><label class="text-xs text-gray-500 font-bold">頻率</label><select id="cRegFreq" class="w-full p-2 border rounded bg-white font-bold"><option value="1">每週</option><option value="2">隔週</option><option value="4">每月</option></select></div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 font-bold mb-1 block">開始日期</label>
+                            <input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white h-10">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 font-bold mb-1 block">頻率</label>
+                            <select id="cRegFreq" class="w-full p-2 border rounded bg-white font-bold h-10">
+                                <option value="1">每週</option>
+                                <option value="2">隔週</option>
+                                <option value="4">每月</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 font-bold mb-1 block">時段 (可多選)</label>
@@ -222,7 +232,10 @@
                         </label>
                     </div>
                 </div>
-
+                
+                <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full bg-white text-indigo-600 font-bold text-sm py-3 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 mt-6">
+                    <i class="fa-solid fa-book-open"></i> 查看使用教學
+                </button>
                 <div class="text-center pt-8 border-t border-gray-200">
                     <button onclick="window.emergencyReset()" class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 px-3 py-2 rounded-full hover:bg-red-500 hover:text-white transition">⚠️ 完整重置系統 (清空資料)</button>
                     <p class="text-[10px] text-gray-300 mt-2">1on1 Pro V16.4 (Stable/Fixed)</p>
@@ -249,17 +262,20 @@
             <button onclick="document.getElementById('actionModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-xmark fa-xl"></i>
             </button>
-            <h3 class="font-bold text-lg mb-4 text-center">課程管理</h3>
+            <h3 class="font-bold text-lg mb-2 text-center">課程管理</h3>
+            
+            <div id="actionStatusHint" class="text-center text-xs font-bold text-red-500 mb-2 h-4"></div>
+            
             <div class="text-center text-sm text-gray-500 mb-2" id="actionCurrentTime"></div>
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mb-4">
                 <label class="text-xs font-bold text-gray-500 block mb-2">更改時間</label>
                 <input type="datetime-local" id="actionNewTime" class="w-full p-3 border rounded-xl bg-white text-lg">
             </div>
             <div class="flex gap-3">
-                <button onclick="window.submitReschedule()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow hover:bg-indigo-700">
+                <button id="btnActionReschedule" onclick="window.submitReschedule()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
                     <i class="fa-regular fa-calendar-check mr-1"></i> 改期
                 </button>
-                <button onclick="window.submitLeave()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl border border-gray-200 hover:bg-gray-200">
+                <button id="btnActionLeave" onclick="window.submitLeave()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl border border-gray-200 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition">
                     <i class="fa-solid fa-mug-hot mr-1"></i> 請假
                 </button>
             </div>
@@ -289,13 +305,13 @@
                     <h3 class="font-bold text-2xl tracking-wide flex items-center gap-2">
                         <i class="fa-solid fa-book-open"></i> 1on1 Pro 使用手冊
                     </h3>
-                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V16.4)</p>
+                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V17.4)</p>
                 </div>
                 <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full w-10 h-10 transition flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-
+    
             <div class="p-6 overflow-y-auto space-y-8 bg-gray-50 text-gray-700 leading-relaxed">
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -306,19 +322,19 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
                             <strong class="block text-indigo-700 mb-1">1. 設定規則</strong>
-                            <p class="text-xs text-gray-600">在學生檔案設定「每週一 19:00」上課，並設定開始日期。</p>
+                            <p class="text-xs text-gray-600">在學生檔案設定上課時間。</p>
                         </div>
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
                             <strong class="block text-indigo-700 mb-1">2. 購買堂數</strong>
-                            <p class="text-xs text-gray-600">當您輸入「購買 10 堂」時，系統會自動往後產生 10 堂預定課程。</p>
+                            <p class="text-xs text-gray-600">輸入堂數，系統自動排課。</p>
                         </div>
                         <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
                             <strong class="block text-indigo-700 mb-1">3. 自動順延</strong>
-                            <p class="text-xs text-gray-600">若課程「取消」，系統會自動將該堂課順延到排程的最後面，確保堂數不滅。</p>
+                            <p class="text-xs text-gray-600">請假可選擇是否自動往後補課。</p>
                         </div>
                     </div>
                 </div>
-
+    
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🎨 課程狀態與顏色</h4>
@@ -335,41 +351,22 @@
                                 <span class="w-3 h-3 rounded-full bg-gray-400"></span>
                                 <div><strong>灰色 (Leave)</strong>：學生請假，<span class="text-green-600 font-bold">不扣堂數</span>，亦不補課。</div>
                             </div>
-                            <div class="flex items-center gap-3 p-2 bg-white rounded border border-pink-200">
-                                <span class="w-3 h-3 rounded-full bg-pink-400"></span>
-                                <div><strong>粉紅 (Rescheduled)</strong>：手動改期過的課程。</div>
-                            </div>
                         </div>
                     </div>
-
+    
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V16.4 進階功能</h4>
+                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V17.4 進階功能</h4>
                         <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
-                            <li><strong>無限儲存空間：</strong>升級為 IndexedDB，照片存量不再受 5MB 限制。</li>
-                            <li><strong>電子合約預覽：</strong>可直接在系統內放大檢視合約圖片。</li>
-                            <li><strong>智慧衝堂檢查：</strong>自動排除自身時段，準確偵測與其他課程的衝突。</li>
-                            <li><strong>備份提醒：</strong>若當天未備份，「設定」頁籤會出現紅點提示。</li>
+                            <li><strong>智慧請假：</strong>請假時可選擇自動順延。</li>
+                            <li><strong>國定假日：</strong>內建假日表，可連網更新。</li>
+                            <li><strong>防呆機制：</strong>自動修復損壞資料，防止當機。</li>
+                            <li><strong>平板優化：</strong>建檔欄位自動適應螢幕寬度。</li>
                         </ul>
                     </div>
                 </div>
-
-                <div class="bg-red-50 border border-red-100 rounded-lg p-5 flex gap-4 items-start shadow-sm">
-                    <div class="text-red-500 text-2xl mt-1"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                    <div>
-                        <h5 class="font-bold text-red-800 text-base mb-1">關於資料備份 (非常重要！)</h5>
-                        <p class="text-red-700 text-sm leading-relaxed mb-2">
-                            本系統是「離線版」，資料完全儲存在您的瀏覽器中。<strong>若您清除瀏覽器紀錄、使用無痕模式，或更換電腦，資料將會消失。</strong>
-                        </p>
-                        <ul class="text-xs text-red-600 list-disc pl-4 space-y-1">
-                            <li>請務必定期到「設定」頁面點擊 <strong>[下載備份]</strong>。</li>
-                            <li>建議將下載的 <code>.json</code> 檔案存到 Google Drive 或雲端硬碟。</li>
-                            <li>若資料遺失，使用 <strong>[還原]</strong> 功能讀取備份檔即可恢復。</li>
-                        </ul>
-                    </div>
-                </div>
-
+    
             </div>
-
+    
             <div class="p-4 bg-gray-100 border-t flex justify-end shrink-0">
                 <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold transition shadow-sm">
                     我瞭解了
@@ -902,71 +899,128 @@
             }
         }
 
-        function openActionModal(rid) { targetRecId = rid; const r = records.find(x => x.id === rid); if (!r) return; document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`; document.getElementById('actionNewTime').value = r.date.replace(' ', 'T'); document.getElementById('actionModal').classList.remove('hidden'); }
-        
-        function submitReschedule() {
-            try {
-                const val = document.getElementById('actionNewTime').value; if(!val) return; 
-                const newDate = val.replace('T', ' '); 
-                const targetRecord = records.find(x => x.id == targetRecId);
-                if (!targetRecord) return alert("錯誤：找不到原始課程資料 (ID: " + targetRecId + ")");
-                const conflictMsg = checkConflict(newDate, targetRecord.id); 
-                if (conflictMsg) { if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) { return; } }
-                targetRecord.date = newDate; targetRecord.status = 'rescheduled'; saveData(); 
-                document.getElementById('actionModal').classList.add('hidden'); 
-                if(currentView==='calendar') renderCalendar(); else renderTimeline();
-            } catch (error) { console.error(error); alert("程式執行錯誤 (Reschedule)：" + error.message); }
+        // === 1. 開啟選單 (加入防呆：若已請假則鎖住按鈕) ===
+        function openActionModal(rid) { 
+            targetRecId = rid; 
+            const r = records.find(x => x.id === rid); 
+            if (!r) return; 
+            
+            document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`; 
+            document.getElementById('actionNewTime').value = r.date.replace(' ', 'T'); 
+            
+            // 判斷是否鎖定 (只要不是 planned 或 rescheduled，就鎖住)
+            const isLocked = (r.status !== 'planned' && r.status !== 'rescheduled');
+            const btnRes = document.getElementById('btnActionReschedule');
+            const btnLea = document.getElementById('btnActionLeave');
+            const hint = document.getElementById('actionStatusHint');
+
+            if(isLocked) {
+                btnRes.disabled = true;
+                btnLea.disabled = true;
+                // 顯示鎖定原因
+                let statusText = "已完成";
+                if(r.status === 'leave') statusText = "已請假";
+                if(r.status === 'canceled') statusText = "已取消";
+                hint.innerText = `(此課程為「${statusText}」狀態，無法更動)`;
+                document.getElementById('actionNewTime').disabled = true;
+            } else {
+                btnRes.disabled = false;
+                btnLea.disabled = false;
+                hint.innerText = "";
+                document.getElementById('actionNewTime').disabled = false;
+            }
+
+            document.getElementById('actionModal').classList.remove('hidden'); 
         }
 
-        // === 修正：智慧請假邏輯 (自動順延) ===
+        // === 2. 提交改期 (加入防呆) ===
+        function submitReschedule() { 
+            try { 
+                const targetRecord = records.find(x => x.id == targetRecId); 
+                if (!targetRecord) return alert("錯誤：找不到原始課程資料"); 
+                
+                // 防呆：如果已經是請假或完成，禁止改期
+                if (targetRecord.status !== 'planned' && targetRecord.status !== 'rescheduled') {
+                    return alert("❌ 此課程狀態無法改期 (已請假或已完成)");
+                }
+
+                const val = document.getElementById('actionNewTime').value; 
+                if(!val) return; 
+                const newDate = val.replace('T', ' '); 
+                
+                const conflictMsg = checkConflict(newDate, targetRecord.id); 
+                if (conflictMsg) { 
+                    if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) return; 
+                } 
+                
+                targetRecord.date = newDate; 
+                targetRecord.status = 'rescheduled'; 
+                saveData(); 
+                document.getElementById('actionModal').classList.add('hidden'); 
+                if(currentView==='calendar') renderCalendar(); else renderTimeline(); 
+            } catch (error) { 
+                console.error(error); alert("程式執行錯誤：" + error.message); 
+            } 
+        }
+
+        // === 3. 提交請假 (修正邏輯：確認 -> 自動判斷 -> 直接執行) ===
         function submitLeave() {
             const targetRecord = records.find(x => x.id === targetRecId);
-            if (!targetRecord) return;
+            if(!targetRecord) return;
+            
+            // 防呆：再次檢查狀態
+            if(targetRecord.status === 'leave') return alert("此課程已經是請假狀態！");
+
+            // 步驟 A: 先確認是否真的要請假
+            if(!confirm("確定要幫這位學生請假嗎？")) return;
+
             const s = students.find(x => x.id === targetRecord.sid);
-
-            // 1. 標記目前課程為請假
+            
+            // 標記為請假
             targetRecord.status = 'leave';
-
-            // 2. 檢查排課規則並自動順延
-            let msg = "已標記為請假 (不扣堂)。";
-
-            if (s && s.rule && s.rule.freq && s.rule.slots && s.rule.slots.length > 0) {
-                // 如果有規則，詢問是否補課
-                if(confirm("已標記請假。\n\n💡 系統偵測到有排課規則，是否要自動在期末順延(補)一堂課？")) {
-                    // 找出所有未來的預排課程
-                    const futureRecs = records.filter(r => r.sid === s.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
-
-                    let baseDateObj;
-                    if (futureRecs.length > 0) {
-                        baseDateObj = new Date(futureRecs[futureRecs.length-1].date.split(' ')[0]);
-                    } else {
-                        baseDateObj = new Date(targetRecord.date.split(' ')[0]);
-                    }
-
-                    // 計算新日期：最後日期 + (頻率 * 7天)
-                    const daysToAdd = parseInt(s.rule.freq) * 7;
-                    baseDateObj.setDate(baseDateObj.getDate() + daysToAdd);
-
-                    const timePart = targetRecord.date.split(' ')[1];
-                    const newDateStr = getFmtDate(baseDateObj) + " " + timePart;
-
-                    records.push({
-                        id: Date.now(),
-                        sid: s.id,
-                        date: newDateStr,
-                        status: 'planned',
-                        note: '自動順延補課',
-                        imgs: [],
-                        sig: null
-                    });
-                    msg += `\n\n🔄 已自動順延一堂課至：${newDateStr}`;
+            let msg = "✅ 已標記為請假 (不扣堂)。";
+            
+            // 步驟 B: 判斷是否有規則，有則「直接自動順延」，不跳視窗詢問
+            if(s && s.rule && s.rule.freq && s.rule.slots && s.rule.slots.length > 0) {
+                // 找出該學生所有「未來有效課程」的最後一天
+                const futureRecs = records.filter(r => r.sid === s.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
+                
+                let baseDateObj;
+                if (futureRecs.length > 0) {
+                    baseDateObj = new Date(futureRecs[futureRecs.length-1].date.split(' ')[0]);
+                } else {
+                    // 如果沒有未來課程，就從今天(請假這天)開始往後算
+                    baseDateObj = new Date(targetRecord.date.split(' ')[0]);
                 }
+                
+                // 計算日期：最後日期 + (頻率 * 7)
+                const daysToAdd = parseInt(s.rule.freq) * 7;
+                baseDateObj.setDate(baseDateObj.getDate() + daysToAdd);
+                
+                // 產生新日期字串
+                const timePart = targetRecord.date.split(' ')[1];
+                const newDateStr = getFmtDate(baseDateObj) + " " + timePart; // getFmtDate 需要存在於您的 helper 中
+                
+                // 直接寫入新課程
+                records.push({ 
+                    id: Date.now(), 
+                    sid: s.id, 
+                    date: newDateStr, 
+                    status: 'planned', 
+                    note: '自動順延補課', 
+                    imgs: [], 
+                    sig: null 
+                });
+                
+                msg += `\n\n🔄 系統已根據規則，自動順延一堂課至：${newDateStr}`;
+            } else {
+                msg += "\n(因無長期排課規則，故未執行自動順延)";
             }
 
             saveData();
             alert(msg);
             document.getElementById('actionModal').classList.add('hidden');
-            if (currentView === 'calendar') renderCalendar(); else renderTimeline();
+            if(currentView==='calendar') renderCalendar(); else renderTimeline();
         }
 
         // === 修正：設定頁面顯示容量 ===
