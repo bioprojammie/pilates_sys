@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V16.9";
+        const APP_VERSION = "V17.0";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -184,9 +184,9 @@
             
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[30vh] mb-6">
                 <div class="col-header">
-                    <div>學生姓名</div>
-                    <div>排課規則</div>
-                    <div>下堂課</div>
+                    <div onclick="window.toggleSort('name')" class="cursor-pointer hover:text-indigo-600">學生姓名 <i class="fa-solid fa-sort"></i></div>
+                    <div onclick="window.toggleSort('rule')" class="cursor-pointer hover:text-indigo-600">排課規則 <i class="fa-solid fa-sort"></i></div>
+                    <div onclick="window.toggleSort('nextDate')" class="cursor-pointer hover:text-indigo-600">下堂課 <i class="fa-solid fa-sort"></i></div>
                     <div class="text-right">剩餘</div>
                     <div></div>
                 </div>
@@ -526,6 +526,7 @@
         let paintMode = 'photo';
         let tempContractImg = null;
         let targetRecId = null;
+        let currentSort = { key: 'name', asc: true }; // 預設按姓名升冪排序
 
         // 內建假日資料 (2025-2026 完整版)
         const builtInHolidays = {
@@ -969,8 +970,30 @@
         function renderList() {
             renderCalendar();
             const list = document.getElementById('studentListBody'); list.innerHTML = '';
+            const sortedStudents = [...students].filter(s => s && !s.isArchived).sort((a, b) => {
+                let valA, valB;
+
+                if (currentSort.key === 'name') {
+                    valA = a.name;
+                    valB = b.name;
+                } else if (currentSort.key === 'rule') {
+                    // 按頻率數字排序
+                    valA = a.rule?.freq || 99;
+                    valB = b.rule?.freq || 99;
+                } else if (currentSort.key === 'nextDate') {
+                    // 找出該學生最近的一堂課日期
+                    const nextA = records.filter(r => r.sid === a.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((x, y) => x.date.localeCompare(y.date))[0];
+                    const nextB = records.filter(r => r.sid === b.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((x, y) => x.date.localeCompare(y.date))[0];
+                    valA = nextA ? nextA.date : '9999-12-31';
+                    valB = nextB ? nextB.date : '9999-12-31';
+                }
+
+                if (valA < valB) return currentSort.asc ? -1 : 1;
+                if (valA > valB) return currentSort.asc ? 1 : -1;
+                return 0;
+            });                                     
             const daysMap = ['日','一','二','三','四','五','六'];
-            students.forEach(s => { 
+            sortedStudents.forEach(s => { 
                 if(!s || s.isArchived) return;
                 const trialTag = s.isTrial ? `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded ml-2 font-bold">🌱 體驗</span>` : '';
                 const nextRec = records.filter(r => r.sid===s.id && (r.status==='planned' || r.status==='rescheduled')).sort((a,b)=>a.date.localeCompare(b.date))[0];
@@ -1009,7 +1032,7 @@
                 const isToday = dayStr === getFmtDate(new Date()); 
                 let holidayHtml = '';
                 if(appSettings.holidays && appSettings.holidays[dayStr]) {
-                    holidayHtml = `<div class="mt-1 text-[10px] text-red-500 font-bold bg-red-50 px-1 rounded border border-red-100 leading-tight">${appSettings.holidays[dayStr]}</div>`;
+                    holidayHtml = `<div class="mb-1 text-[10px] text-red-500 font-bold bg-red-50 px-1 rounded border border-red-100 leading-tight">${appSettings.holidays[dayStr]}</div>`;
                 }
                 
                 col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg ${holidayHtml?'text-red-500':''}">${dayDate.getDate()}</span></div>${holidayHtml}`;;
@@ -1318,11 +1341,21 @@
             };
             reader.readAsText(input.files[0]);
         }
+        function toggleSort(key) {
+            if (currentSort.key === key) {
+                currentSort.asc = !currentSort.asc; // 如果按同一個，就切換正反序
+            } else {
+                currentSort.key = key;
+                currentSort.asc = true;
+            }
+            renderList(); // 重新渲染
+        }
         // BINDINGS
         window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
         window.switchTab = switchTab; // 確保 switchTab 有被綁定！
         window.updateOnlineHolidays = updateOnlineHolidays;
         window.importHolidays = importHolidays;
+        window.toggleSort = toggleSort;
     </script>
 </body>
 </html>
