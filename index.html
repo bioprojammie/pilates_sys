@@ -108,9 +108,9 @@
                 <div id="cRegularSetup" class="bg-blue-50 p-4 rounded-xl border border-blue-100 space-y-3">
                     <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-clock"></i> 長期排課規則</div>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <label class="text-xs text-gray-500 font-bold mb-1 block">開始日期</label>
-                            <input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white h-10">
+                            <input type="date" id="cRegStart" class="w-full p-2 border rounded bg-white h-10 box-border">
                         </div>
                         <div class="flex-1">
                             <label class="text-xs text-gray-500 font-bold mb-1 block">頻率</label>
@@ -190,6 +190,9 @@
             <div class="max-w-2xl mx-auto space-y-6 pt-4">
                 
                 <div id="backupBanner">⚠️ 您已超過 7 天未備份，建議立即下載！</div>
+                <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full bg-white text-indigo-600 font-bold text-sm py-3 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 mt-6">
+                    <i class="fa-solid fa-book-open"></i> 查看使用教學
+                </button>
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-file-contract text-indigo-500 mr-2"></i> 公版合約設定</h3>
@@ -232,14 +235,30 @@
                         </label>
                     </div>
                 </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-calendar-days text-indigo-500 mr-2"></i> 國定假日設定</h3>
+                    <p class="text-sm text-gray-600 mb-2">已內建 2025-2026 台灣國定假日。如需更新未來年份，請點擊下方按鈕。</p>
+                    <div class="flex gap-2">
+                        <button onclick="window.updateOnlineHolidays()" class="flex-1 bg-green-50 text-green-700 px-3 py-2 rounded-lg font-bold border border-green-200 hover:bg-green-100 transition text-xs sm:text-sm">
+                            ☁️ 連網更新明年假日
+                        </button>
+                        <label class="flex-1 bg-gray-50 text-gray-600 px-3 py-2 rounded-lg font-bold border border-gray-200 hover:bg-gray-100 transition cursor-pointer text-center text-xs sm:text-sm flex flex-col justify-center">
+                            <span>📂 手動匯入 JSON</span>
+                            <input type="file" accept=".json" class="hidden" onchange="window.importHolidays(this)">
+                        </label>
+                    </div>
+                </div>
                 
-                <button onclick="document.getElementById('guideModal').classList.remove('hidden')" class="w-full bg-white text-indigo-600 font-bold text-sm py-3 rounded-xl border border-gray-200 shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 mt-6">
-                    <i class="fa-solid fa-book-open"></i> 查看使用教學
-                </button>
                 <div class="text-center pt-8 border-t border-gray-200">
                     <button onclick="window.emergencyReset()" class="text-xs text-red-400 font-bold bg-red-50 border border-red-100 px-3 py-2 rounded-full hover:bg-red-500 hover:text-white transition">⚠️ 完整重置系統 (清空資料)</button>
-                    <p class="text-[10px] text-gray-300 mt-2">1on1 Pro V16.5 </p>
-                </div>
+                    
+                    <div onclick="window.location.reload(true)" class="cursor-pointer active:scale-95 transition mt-4 p-2">
+                        <p class="text-[10px] text-gray-400 font-bold" id="ver-footer"></p>
+                        <p class="text-[9px] text-gray-300 mt-1">
+                            <i class="fa-solid fa-rotate-right"></i> 點擊此處更新版本
+                        </p>
+                    </div>
+                    </div>
             </div>
         </div>
     </main>
@@ -305,7 +324,7 @@
                     <h3 class="font-bold text-2xl tracking-wide flex items-center gap-2">
                         <i class="fa-solid fa-book-open"></i> 1on1 Pro 使用手冊
                     </h3>
-                    <p class="text-indigo-100 text-sm mt-1">簡單、強大的家教管理系統 (V16.5)</p>
+                    <p class="text-indigo-100 text-sm mt-1" id="ver-guide-subtitle"></p>
                 </div>
                 <button onclick="document.getElementById('guideModal').classList.add('hidden')" class="bg-white/10 hover:bg-white/20 p-2 rounded-full w-10 h-10 transition flex items-center justify-center">
                     <i class="fa-solid fa-xmark text-xl"></i>
@@ -359,7 +378,7 @@
                     </div>
 
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2">🛠️ V16.5 進階功能</h4>
+                        <h4 class="font-bold text-gray-800 mb-3 border-l-4 border-indigo-500 pl-2" id="ver-guide-header"></h4>
                         <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
                             <li><strong>功能回歸：</strong>簽名、底圖上傳、預覽功能皆已修復。</li>
                             <li><strong>智慧請假：</strong>請假時可自動在期末補一堂課。</li>
@@ -394,14 +413,18 @@
     </div>
 
     <script>
-        // === V16.4 IndexedDB Core Engine (Fixed) ===
+
+        const APP_VERSION = "V16.6"; // 改這裡就好！
+
+        // ===  IndexedDB Core Engine  ===
         const DB_NAME = '1on1Pro_V16_IDB';
         const STORE_NAME = 'store';
         const MASTER_KEY = 'master_data';
         const pads = {};
         
         // State
-        let students = [], records = [], appSettings = { lastBackup: null, freq: '7', contractTemplate: null };
+        let students = [], records = []; 
+        let appSettings = { lastBackup: null, freq: '7', contractTemplate: null, holidays: {} };
         let curSid = null, signingRecId = null, directEditRecId = null, paintImgIndex = -1;
         let isDirectEdit = false, paintHistory = [], bgCanvasCtx = null;
         let currentWeekStart = new Date();
@@ -410,6 +433,26 @@
         let paintMode = 'photo';
         let tempContractImg = null;
         let targetRecId = null;
+
+        // 內建假日資料 (2025-2026 完整版)
+        const builtInHolidays = {
+            "2026-01-01": "元旦",
+            "2026-02-14": "小年夜(彈性)", // 2/14 補班日放假
+            "2026-02-15": "小年夜",       // 連假開始
+            "2026-02-16": "除夕",
+            "2026-02-17": "春節",
+            "2026-02-18": "春節",
+            "2026-02-19": "春節",
+            "2026-02-20": "春節",
+            "2026-02-21": "春節",         // 週六
+            "2026-02-22": "春節",         // 週日
+            "2026-02-28": "和平紀念日",
+            "2026-04-03": "兒童節", "2026-04-04": "清明節", "2026-04-05": "連假", "2026-04-06": "補假",
+            "2026-06-19": "端午節", "2026-06-20": "連假", "2026-06-21": "連假",
+            "2026-09-25": "中秋節", "2026-09-26": "連假", "2026-09-27": "連假",
+            "2026-10-10": "國慶日", "2026-10-11": "連假"
+        };
+        
 
         // === IndexedDB Wrapper ===
         const db = {
@@ -444,16 +487,27 @@
 
         // === Initialization Logic ===
         async function initApp() {
+            document.title = `1on1 Pro 家教管理系統 (${APP_VERSION})`; // 更新網頁標題
+            const verDisplay = {
+                'ver-footer': `1on1 Pro ${APP_VERSION}`,
+                'ver-guide-subtitle': `1on1 Pro 管理系統 (${APP_VERSION})`,
+                'ver-guide-header': `🛠️ ${APP_VERSION} 進階功能`
+            };
+            for (const [id, text] of Object.entries(verDisplay)) {
+                const el = document.getElementById(id);
+                if(el) el.innerText = text;
+            }
+
             try {
                 let data = await db.get();
                 if(!data) {
                     const oldDB = localStorage.getItem('1ON1_PRO_MASTER_DB') || localStorage.getItem('ONE_PRO_V15_STABLE');
-                    if(oldDB) {
-                        data = JSON.parse(oldDB);
+                    if(oldDB) { 
+                        data = JSON.parse(oldDB); 
                         await db.put(data); 
                         localStorage.removeItem('1ON1_PRO_MASTER_DB'); 
-                        localStorage.removeItem('ONE_PRO_V15_STABLE');
-                        alert("🎉 系統升級成功：資料已遷移至大容量資料庫 (IndexedDB)！");
+                        localStorage.removeItem('ONE_PRO_V15_STABLE'); 
+                        alert("🎉 系統升級成功：資料已遷移至大容量資料庫 (IndexedDB)！"); 
                     }
                 }
 
@@ -461,6 +515,17 @@
                     students = data.students || [];
                     records = data.records || [];
                     appSettings = data.appSettings || appSettings;
+                    
+                    // 自動修復：過濾掉壞掉的課程紀錄
+                    records = records.filter(r => r && r.date && typeof r.date === 'string');
+                }
+
+                // 🟢 關鍵修正：這裡就是將「內建假日」載入系統的地方
+                // 如果系統還沒有假日設定，或是要補齊缺少的假日
+                if(!appSettings.holidays) appSettings.holidays = {};
+                for(const [k, v] of Object.entries(builtInHolidays)) {
+                    // 只有當那天原本沒資料時，才補上去 (避免覆蓋您手動修改過的)
+                    if(!appSettings.holidays[k]) appSettings.holidays[k] = v;
                 }
 
                 if(appSettings.contractTemplate) {
@@ -473,7 +538,7 @@
                 checkBackupStatus();
             } catch(e) {
                 console.error("Boot Error:", e);
-                alert("資料庫載入失敗，請嘗試重新整理。");
+                alert("資料庫載入失敗");
             }
 
             const d = new Date();
@@ -482,7 +547,11 @@
             const diff = d.getDate() - day + (day == 0 ? -6 : 1);
             currentWeekStart = new Date(d.setDate(diff));
             
-            renderList();
+            try { 
+                renderList(); 
+            } catch(e) { 
+                console.error("Render List Error", e); 
+            }
         }
 
         window.onload = initApp;
@@ -845,7 +914,12 @@
                 const dayDate = addDays(currentWeekStart, i); const dayStr = getFmtDate(dayDate); 
                 const col = document.createElement('div'); col.className = "p-2 min-h-[150px] border-r border-gray-100 last:border-0"; 
                 const isToday = dayStr === getFmtDate(new Date()); 
-                col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg">${dayDate.getDate()}</span></div>`;
+                let holidayHtml = '';
+                if(appSettings.holidays && appSettings.holidays[dayStr]) {
+                    holidayHtml = `<div class="mt-1 text-[10px] text-red-500 font-bold bg-red-50 px-1 rounded border border-red-100 leading-tight">${appSettings.holidays[dayStr]}</div>`;
+                }
+                
+                col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg ${holidayHtml?'text-red-500':''}">${dayDate.getDate()}</span></div>${holidayHtml}`;;
                 
                 if(Array.isArray(records)) {
                     const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr)).sort((a,b)=> a.date.localeCompare(b.date));
@@ -1105,12 +1179,58 @@
         function renderRuleSlots() { const c = document.getElementById('slotList'); c.innerHTML = ''; const daysMap = ['日','一','二','三','四','五','六']; ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; }); }
         function openProfileModal(id) { if(id) curSid = Number(id); let s = students.find(x => x.id === curSid); if(!s) s = students.find(x => x.id == curSid); if(!s) return alert("資料錯誤"); try { document.getElementById('pName').value=s.name; document.getElementById('pBody').value=s.body; if(!s.rule) s.rule = {freq:1, slots:[], start:''}; ruleSlots=s.rule.slots ? [...s.rule.slots] : []; document.getElementById('ruleFreq').value=s.rule.freq || 1; document.getElementById('ruleStartDate').value=s.rule.start || getFmtDate(new Date()); renderRuleSlots(); const t=document.getElementById('pArchivedToggle'); t.checked=!s.isArchived; document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍"; const cArea = document.getElementById('pContractArea'); if (cArea) { if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`; } else { cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`; } } document.getElementById('profileModal').classList.remove('hidden'); } catch(e) { console.error(e); } }
         function generateSchedule() { const s = students.find(x => x.id == curSid); const freq = parseInt(document.getElementById('ruleFreq').value); const startStr = document.getElementById('ruleStartDate').value; if(ruleSlots.length === 0 || !startStr) return alert("請設定"); if(s.credits <= 0) return alert("額度不足"); const existing = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date < startStr).length; const quota = s.credits - existing; if(quota <= 0) return alert("額度已滿"); let conflicts=0; let checkCount=0; let checkDate=new Date(startStr + "T00:00:00"); const checkMonday=new Date(checkDate); checkMonday.setDate(checkDate.getDate()-(checkDate.getDay()==0?6:checkDate.getDay()-1)); while(checkCount<quota && checkCount<100){ const diffDays=Math.floor((checkDate-checkMonday)/86400000); const wIdx=Math.floor(diffDays/7); if(wIdx%freq===0){ const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); slots.forEach(sl=>{ if(checkCount<quota){ if(checkConflict(getFmtDate(checkDate)+" "+sl.time)) conflicts++; checkCount++; } }); } checkDate.setDate(checkDate.getDate()+1); } if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入？`)) return; records=records.filter(r=>!(r.sid==curSid && (r.status==='planned'||r.status==='rescheduled') && r.date>=startStr)); let count=0; let curr=new Date(startStr+"T00:00:00"); const ref=new Date(curr); ref.setDate(curr.getDate()-(curr.getDay()==0?6:curr.getDay()-1)); s.rule={freq,slots:[...ruleSlots],start:startStr}; while(count<quota){ const dDays=Math.floor((curr-ref)/86400000); const wI=Math.floor(dDays/7); if(wI%freq===0){ const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); sls.forEach(sl=>{ if(count<quota){ const dStr=getFmtDate(curr)+" "+sl.time; if(!records.some(r=>r.sid==curSid && r.date===dStr)){ records.push({id:Date.now()+Math.random(), sid:curSid, date:dStr, status:'planned', note:'', imgs:[], sig:null}); count++; } } }); } curr.setDate(curr.getDate()+1); } saveData(); alert(`已排 ${count} 堂`); document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid); }
+        // === New Feature: Online Holidays ===
+        async function updateOnlineHolidays() {
+            if(!confirm("即將連線至 API (api.pin-yi.me) 下載明年假日。\n\n⚠️ 請確定電腦已連網再按確定！")) return;
+            const nextYear = new Date().getFullYear() + 1;
+            const url = `https://api.pin-yi.me/taiwan-calendar/${nextYear}/?isHoliday=true`;
+            try {
+                const res = await fetch(url);
+                if(!res.ok) throw new Error("API 連線失敗");
+                const data = await res.json();
+                let count = 0;
+                if(Array.isArray(data)) {
+                    data.forEach(item => {
+                        // API format: 2025/01/01 -> We need: 2025-01-01
+                        const dateStr = item.date.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"); 
+                        // Some records use date_format
+                        const finalDate = item.date_format ? item.date_format.replace(/\//g, '-') : dateStr;
+                        const name = item.caption || item.description || "假日";
+                        
+                        if(!appSettings.holidays[finalDate]) {
+                            appSettings.holidays[finalDate] = name;
+                            count++;
+                        }
+                    });
+                    saveData();
+                    alert(`✅ 更新成功！新增了 ${count} 筆 ${nextYear} 年假日。`);
+                    location.reload();
+                }
+            } catch(e) {
+                alert("❌ 更新失敗：無法連線或資料庫尚未發布。\n錯誤：" + e.message);
+            }
+        }
 
+        function importHolidays(input) {
+            if(!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const newH = JSON.parse(e.target.result);
+                    Object.assign(appSettings.holidays, newH);
+                    saveData();
+                    alert("匯入成功！");
+                    location.reload();
+                } catch(err) { alert("格式錯誤"); }
+            };
+            reader.readAsText(input.files[0]);
+        }
         // BINDINGS
         window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
         window.switchTab = switchTab; // 確保 switchTab 有被綁定！
+        window.updateOnlineHolidays = updateOnlineHolidays;
+        window.importHolidays = importHolidays;
     </script>
 </body>
 </html>
-
 
