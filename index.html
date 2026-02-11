@@ -109,21 +109,21 @@
                     <div class="font-bold text-blue-800 text-sm"><i class="fa-solid fa-clock"></i> 長期排課規則</div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                        <div class="grid grid-cols-2 gap-4 w-full">
     
-                            <div class="min-w-0 w-full">
-                                <label class="text-xs text-gray-500 font-bold mb-1 block">開始日期</label>
-                                <input type="date" id="cRegStart" class="appearance-none w-full p-2 border border-gray-300 rounded bg-white h-10 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                            <div class="w-full min-w-0"> <label class="text-xs text-gray-500 font-bold mb-1 block">開始日期</label>
+                                <input type="date" id="cRegStart" class="appearance-none w-full py-2 px-3 border border-gray-300 rounded bg-white h-10 text-gray-700 leading-tight focus:outline-none focus:border-indigo-500 box-border">
                             </div>
                         
-                            <div class="min-w-0 w-full">
+                            <div class="w-full min-w-0">
                                 <label class="text-xs text-gray-500 font-bold mb-1 block">頻率</label>
-                                <select id="cRegFreq" class="appearance-none w-full p-2 border border-gray-300 rounded bg-white font-bold h-10 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <select id="cRegFreq" class="appearance-none w-full py-2 px-3 border border-gray-300 rounded bg-white font-bold h-10 text-gray-700 leading-tight focus:outline-none focus:border-indigo-500 box-border">
                                     <option value="1">每週</option>
                                     <option value="2">隔週</option>
                                     <option value="4">每月</option>
                                 </select>
                             </div>
+                        
                         </div>
                     </div>
                     <div>
@@ -419,7 +419,7 @@
 
     <script>
 
-        const APP_VERSION = "V16.7"; // 改這裡就好！
+        const APP_VERSION = "V16.6"; // 改這裡就好！
 
         // ===  IndexedDB Core Engine  ===
         const DB_NAME = '1on1Pro_V16_IDB';
