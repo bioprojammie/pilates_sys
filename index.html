@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V17.0";
+        const APP_VERSION = "V17.2";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -260,7 +260,7 @@
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-calendar-days text-indigo-500 mr-2"></i> 國定假日設定</h3>
-                    <p class="text-sm text-gray-600 mb-2">已內建 2025-2026 台灣國定假日。如需更新未來年份，請點擊下方按鈕。</p>
+                    <p class="text-sm text-gray-600 mb-2">已內建 2026 台灣國定假日。如需更新未來年份，請點擊下方按鈕。</p>
                     <div class="flex gap-2">
                         <button onclick="window.updateOnlineHolidays()" class="flex-1 bg-green-50 text-green-700 px-3 py-2 rounded-lg font-bold border border-green-200 hover:bg-green-100 transition text-xs sm:text-sm">
                             ☁️ 連網更新明年假日
@@ -313,7 +313,7 @@
                 <label class="text-xs font-bold text-gray-500 block mb-2">更改時間</label>
                 <input type="datetime-local" id="actionNewTime" class="w-full p-3 border rounded-xl bg-white text-lg">
             </div>
-            <div class="flex gap-3">
+            <div id="actionModalFooter" class="flex gap-3">
                 <button id="btnActionReschedule" onclick="window.submitReschedule()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
                     <i class="fa-regular fa-calendar-check mr-1"></i> 改期
                 </button>
@@ -363,20 +363,20 @@
                         <i class="fa-solid fa-lightbulb mr-2 text-yellow-500"></i> 核心觀念：自動排課
                     </h4>
                     <p class="text-sm text-gray-700 mb-3 leading-relaxed">
-                        本系統採用<b>「堂數管理制」</b>。您只需輸入購買堂數，系統便會依照規則<b>自動產生所有上課日期</b>，省去手動排課的麻煩。
+                        本系統採用<b>「堂數管理制」</b> 您只需輸入購買堂數，系統便會依照規則<b>自動產生所有上課日期</b>，省去手動排課的麻煩
                     </p>
                     <ul class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                         <li class="bg-white p-3 rounded-lg border border-indigo-100 flex flex-col">
                             <span class="text-indigo-600 font-bold mb-1"><i class="fa-solid fa-ruler-combined"></i> 設定規則</span>
-                            <span class="text-xs text-gray-500">在學生檔案設定「每週/隔週」及上課時段。</span>
+                            <span class="text-xs text-gray-500">在學生檔案設定「每週/隔週」及上課時段</span>
                         </li>
                         <li class="bg-white p-3 rounded-lg border border-indigo-100 flex flex-col">
                             <span class="text-indigo-600 font-bold mb-1"><i class="fa-solid fa-coins"></i> 購買堂數</span>
-                            <span class="text-xs text-gray-500">輸入購買堂數，系統自動往後推算課程。</span>
+                            <span class="text-xs text-gray-500">輸入購買堂數，系統自動往後推算課程</span>
                         </li>
                         <li class="bg-white p-3 rounded-lg border border-indigo-100 flex flex-col">
                             <span class="text-indigo-600 font-bold mb-1"><i class="fa-solid fa-forward"></i> 自動順延</span>
-                            <span class="text-xs text-gray-500">學生請假時，可選擇自動將課程往後順延。</span>
+                            <span class="text-xs text-gray-500">學生請假時，可選擇自動將課程往後順延</span>
                         </li>
                     </ul>
                 </div>
@@ -389,9 +389,9 @@
                                 <i class="fa-solid fa-user-graduate bg-indigo-100 p-2 rounded-lg"></i> 學生管理
                             </div>
                             <ul class="text-xs text-gray-600 space-y-2 pl-1">
-                                <li>• <b>完整建檔</b>：支援一般生與體驗課模式。</li>
-                                <li>• <b>規則排課</b>：支援每週、隔週、每月頻率。</li>
-                                <li>• <b>合約管理</b>：上傳底圖，直接在平板簽署。</li>
+                                <li>• <b>完整建檔</b>：支援一般生與體驗課模式</li>
+                                <li>• <b>規則排課</b>：支援每週、隔週、每月頻率</li>
+                                <li>• <b>合約管理</b>：上傳底圖，直接在平板簽署</li>
                             </ul>
                         </div>
                         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
@@ -399,9 +399,9 @@
                                 <i class="fa-solid fa-calendar-days bg-green-100 p-2 rounded-lg"></i> 課表紀錄
                             </div>
                             <ul class="text-xs text-gray-600 space-y-2 pl-1">
-                                <li>• <b>週曆檢視</b>：一目瞭然，支援國定假日。</li>
-                                <li>• <b>課後紀錄</b>：可寫筆記、上傳照片並<b>畫記</b>。</li>
-                                <li>• <b>電子簽到</b>：學生簽名後自動扣除堂數。</li>
+                                <li>• <b>週曆檢視</b>：一目瞭然，支援國定假日</li>
+                                <li>• <b>上課紀錄</b>：可筆記、上傳照片並畫記</li>
+                                <li>• <b>電子簽到</b>：學生簽名後自動扣除堂數</li>
                             </ul>
                         </div>
                         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
@@ -409,9 +409,9 @@
                                 <i class="fa-solid fa-gear bg-gray-100 p-2 rounded-lg"></i> 系統設定
                             </div>
                             <ul class="text-xs text-gray-600 space-y-2 pl-1">
-                                <li>• <b>資料備份</b>：一鍵下載/還原 JSON 檔。</li>
-                                <li>• <b>離線使用</b>：無網路也能操作 (更新假日除外)。</li>
-                                <li>• <b>假日匯入</b>：自動更新台灣國定假日。</li>
+                                <li>• <b>資料備份</b>：一鍵下載/還原 JSON 檔</li>
+                                <li>• <b>離線使用</b>：無網路也能操作</li>
+                                <li>• <b>假日匯入</b>：連網可自動更新國訂假日</li>
                             </ul>
                         </div>
                     </div>
@@ -430,7 +430,7 @@
                         </div>
                         <div class="flex items-center gap-2 bg-white p-2 rounded border border-gray-300">
                             <span class="w-3 h-3 rounded-full bg-gray-400 shrink-0"></span>
-                            <span><b>請假</b> (不扣堂)</span>
+                            <span><b>請假</b> (不扣堂/自動順延課程)</span>
                         </div>
                         <div class="flex items-center gap-2 bg-white p-2 rounded border border-pink-200">
                             <span class="w-3 h-3 rounded-full bg-pink-400 shrink-0"></span>
@@ -459,11 +459,11 @@
                     </div>
                 
                     <h4 class="font-bold text-lg mb-3 flex items-center text-indigo-800 relative z-10">
-                        <i class="fa-solid fa-download mr-2 text-indigo-600"></i> 把網頁變成 App
+                        <i class="fa-solid fa-download mr-2 text-indigo-600"></i> 把網頁存到桌面，操作更方便！
                     </h4>
                     
                     <p class="text-sm text-indigo-900/80 mb-4 relative z-10">
-                        強烈建議將本系統加入主畫面，獲得<b>全螢幕體驗</b>與更順暢的操作手感。
+                        推薦您把網頁存到桌面捷徑。這樣不但有全螢幕視窗，操作也會像 App 一樣流暢，快來試試看吧！
                     </p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
@@ -1108,37 +1108,90 @@
         }
 
         // === 1. 開啟選單 (加入防呆：若已請假則鎖住按鈕) ===
-        function openActionModal(rid) { 
-            targetRecId = rid; 
-            const r = records.find(x => x.id === rid); 
-            if (!r) return; 
-            
-            document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`; 
-            document.getElementById('actionNewTime').value = r.date.replace(' ', 'T'); 
-            
-            // 判斷是否鎖定 (只要不是 planned 或 rescheduled，就鎖住)
-            const isLocked = (r.status !== 'planned' && r.status !== 'rescheduled');
-            const btnRes = document.getElementById('btnActionReschedule');
-            const btnLea = document.getElementById('btnActionLeave');
-            const hint = document.getElementById('actionStatusHint');
+        function openActionModal(rid) {
+            targetRecId = rid;
+            const r = records.find(x => x.id === rid);
+            if (!r) return;
 
-            if(isLocked) {
-                btnRes.disabled = true;
-                btnLea.disabled = true;
-                // 顯示鎖定原因
-                let statusText = "已完成";
-                if(r.status === 'leave') statusText = "已請假";
-                if(r.status === 'canceled') statusText = "已取消";
-                hint.innerText = `(此課程為「${statusText}」狀態，無法更動)`;
-                document.getElementById('actionNewTime').disabled = true;
+            // 1. 取得 DOM 元素
+            const hint = document.getElementById('actionStatusHint');
+            const inputTime = document.getElementById('actionNewTime');
+            const footerContainer = document.getElementById('actionModalFooter');
+
+            // 2. 準備動態內容
+            let footerHtml = '';
+            let statusTextHint = '';
+
+            if (r.status === 'leave') {
+                // 【已請假狀態】：改期按鈕停用，顯示取消請假
+                statusTextHint = `(此課程為「已請假」狀態，點擊下方可取消請假)`;
+                footerHtml = `
+                    <button id="btnActionReschedule" onclick="window.submitReschedule()" disabled class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow opacity-50 cursor-not-allowed transition">
+                        <i class="fa-regular fa-calendar-check mr-1"></i> 改期
+                    </button>
+                    <button onclick="window.undoLeave('${r.id}')" class="flex-1 py-3 bg-emerald-500 text-white font-bold rounded-xl shadow hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> 取消請假
+                    </button>
+                `;
             } else {
-                btnRes.disabled = false;
-                btnLea.disabled = false;
-                hint.innerText = "";
-                document.getElementById('actionNewTime').disabled = false;
+                // 【正常或完成狀態】：顯示改期與請假
+                const isDone = r.status === 'done';
+                statusTextHint = isDone ? `(此課程為「已完成」狀態，無法更動)` : "";
+                footerHtml = `
+                    <button id="btnActionReschedule" onclick="window.submitReschedule()" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow hover:bg-indigo-700 transition">
+                        <i class="fa-regular fa-calendar-check mr-1"></i> 改期
+                    </button>
+                    <button id="btnActionLeave" onclick="window.submitLeave()" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl border border-gray-200 hover:bg-gray-200 transition">
+                        <i class="fa-solid fa-mug-hot mr-1"></i> 請假
+                    </button>
+                `;
             }
 
-            document.getElementById('actionModal').classList.remove('hidden'); 
+            // 🌟 執行渲染：一次性塞入 Footer
+            if (footerContainer) {
+                footerContainer.innerHTML = footerHtml;
+            }
+
+            // 3. 設定時間內容
+            document.getElementById('actionCurrentTime').innerText = `目前時間：${r.date}`;
+            inputTime.value = r.date.replace(' ', 'T');
+
+            // 4. 鎖定邏輯 (針對已完成 'done' 或已取消 'canceled' 的處理)
+            const isFullyLocked = (r.status === 'done' || r.status === 'canceled');
+            // 重新取得按鈕物件 (因為剛才 innerHTML 刷新了)
+            const newBtnRes = document.getElementById('btnActionReschedule');
+            const newBtnLea = document.getElementById('btnActionLeave');
+
+            if (r.status === 'leave') {
+                // 【請假狀態】
+                inputTime.disabled = true; // 請假時不能改時間
+                hint.innerText = statusTextHint;
+                hint.className = "text-xs font-bold mb-2 text-emerald-600 text-center";
+                
+                // 確保「回復上課」按鈕是啟用的，而「改期」按鈕是停用的
+                const btnRes = document.getElementById('btnActionReschedule');
+                if (btnRes) btnRes.disabled = true;
+                // 注意：回復上課按鈕沒有 id，所以不會被誤鎖
+            } else if (isFullyLocked) {
+                // 【完成或取消狀態】
+                inputTime.disabled = true;
+                hint.innerText = statusTextHint;
+                hint.className = "text-xs font-bold mb-2 text-red-500 text-center";
+                
+                // 鎖定所有按鈕
+                const btnRes = document.getElementById('btnActionReschedule');
+                const btnLea = document.getElementById('btnActionLeave');
+                if (btnRes) btnRes.disabled = true;
+                if (btnLea) btnLea.disabled = true;
+            } else {
+                // 【正常狀態】
+                inputTime.disabled = false;
+                hint.innerText = "";
+                const btnRes = document.getElementById('btnActionReschedule');
+                if (btnRes) btnRes.disabled = false;
+            }
+
+            document.getElementById('actionModal').classList.remove('hidden');
         }
 
         // === 2. 提交改期 (加入防呆) ===
@@ -1147,9 +1200,9 @@
                 const targetRecord = records.find(x => x.id == targetRecId); 
                 if (!targetRecord) return alert("錯誤：找不到原始課程資料"); 
                 
-                // 防呆：如果已經是請假或完成，禁止改期
-                if (targetRecord.status !== 'planned' && targetRecord.status !== 'rescheduled') {
-                    return alert("❌ 此課程狀態無法改期 (已請假或已完成)");
+                // --- 修改點 A：放寬限制，允許 'leave' 狀態進行改期 ---
+                if (targetRecord.status !== 'planned' && targetRecord.status !== 'rescheduled' && targetRecord.status !== 'leave') {
+                    return alert("❌ 此課程狀態無法改期 (已完成或已取消)");
                 }
 
                 const val = document.getElementById('actionNewTime').value; 
@@ -1160,9 +1213,15 @@
                 if (conflictMsg) { 
                     if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) return; 
                 } 
+
+                // --- 修改點 B：如果原本是請假狀態，現在改期代表要上課，需移除最後一堂補課 ---
+                if (targetRecord.status === 'leave') {
+                    removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
+                }
                 
                 targetRecord.date = newDate; 
                 targetRecord.status = 'rescheduled'; 
+                
                 saveData(); 
                 document.getElementById('actionModal').classList.add('hidden'); 
                 if(currentView==='calendar') renderCalendar(); else renderTimeline(); 
@@ -1216,6 +1275,7 @@
                     date: newDateStr, 
                     status: 'planned', 
                     note: '自動順延補課', 
+                    isAutoExtension: true, // ✅ 新增標記，方便後續精準移除
                     imgs: [], 
                     sig: null 
                 });
@@ -1350,12 +1410,66 @@
             }
             renderList(); // 重新渲染
         }
+        function removeLastPlannedRecord(sid, currentRid) {
+            // 優先找有 'isAutoExtension' 標記的補課，如果沒有，就找最後一堂 planned 課程
+            const studentPlannedRecs = records
+                .filter(r => r.sid === sid && r.status === 'planned' && r.id !== currentRid)
+                .sort((a, b) => b.date.localeCompare(a.date)); // 日期從晚到早排序
+
+            if (studentPlannedRecs.length > 0) {
+                // 優先刪除帶有標記的課程，若無則刪除最後一堂
+                const autoExtRec = studentPlannedRecs.find(r => r.isAutoExtension) || studentPlannedRecs[0];
+                
+                const idx = records.findIndex(r => r.id === autoExtRec.id);
+                if (idx > -1) {
+                    records.splice(idx, 1);
+                    console.log("已自動移除因請假產生的補課:", autoExtRec.date);
+                }
+            }
+        }
+        async function undoLeave(rid) {
+            try {
+                console.log("嘗試回復課程:", rid);
+                const targetRecord = records.find(x => x.id == rid); // 注意這裡用 == 避免型別問題
+                if (!targetRecord) return alert("找不到課程紀錄");
+
+                if (!confirm("確定要取消請假並回復上課嗎？\n(系統將自動移除最後一堂補課)")) return;
+
+                // 1. 執行移除補課邏輯
+                if (typeof window.removeLastPlannedRecord === 'function') {
+                    window.removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
+                }
+
+                // 2. 修改狀態
+                targetRecord.status = 'planned';
+
+                // 3. 儲存
+                if (typeof saveData === 'function') {
+                    saveData();
+                } else {
+                    // 如果你是用直接寫入 DB 的方式
+                    await db.records.put(targetRecord);
+                }
+
+                // 4. 關閉視窗與刷新
+                document.getElementById('actionModal').classList.add('hidden');
+                if (currentView === 'calendar') renderCalendar(); else renderTimeline();
+                
+                console.log("回復成功");
+            } catch (error) {
+                console.error("回復上課發生錯誤:", error);
+                alert("回復失敗，錯誤資訊請見 Console");
+            }
+        }
+
         // BINDINGS
         window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
         window.switchTab = switchTab; // 確保 switchTab 有被綁定！
         window.updateOnlineHolidays = updateOnlineHolidays;
         window.importHolidays = importHolidays;
         window.toggleSort = toggleSort;
+        window.undoLeave = undoLeave;
+        window.getFmtDate = getFmtDate;
     </script>
 </body>
 </html>
