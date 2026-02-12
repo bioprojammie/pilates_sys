@@ -1,4 +1,4 @@
-# 1on1 Pro - 極簡家教管理系統 (Tutor Management System)
+# 1on1 Pro - 家教管理系統 (Tutor Management System)
 
 **1on1 Pro** 是一款專為個人家教、私人教練設計的**輕量級、離線版**課程管理系統。
 不需要架設伺服器，不需要資料庫，所有資料皆儲存在您的瀏覽器中 (IndexedDB)。
