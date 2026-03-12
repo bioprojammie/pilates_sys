@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V17.2";
+        const APP_VERSION = "V18.0";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -33,7 +33,8 @@
         .cal-done { background: #f0fdf4; border-left: 3px solid #22c55e; }
         .cal-leave { background: #f3f4f6; border-left: 3px solid #9ca3af; color: #6b7280; text-decoration: line-through; }
         .cal-rescheduled { background: #fdf2f8; border-left: 3px solid #f472b6; }
-        
+        .record-card.status-manual { border-left-color: #a855f7; background: #fdf2f8; }
+        .cal-manual { background: #fdf2f8; border-left: 3px solid #a855f7; }
         .cal-time { color: #6b7280; font-size: 0.7rem; font-weight: bold; line-height: 1.2; }
         .cal-name { color: #1f2937; font-size: 0.85rem; font-weight: bold; line-height: 1.2; margin-top: 2px; }
         
@@ -109,50 +110,57 @@
                     </div>
                 </div>
 
-                <div id="cRegularSetup" class="bg-blue-50 p-5 rounded-2xl border border-blue-100 space-y-4 w-full">
-                    <div class="font-bold text-blue-800 text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-clock"></i> 長期排課規則
+                <div id="cRegularSetup" class="bg-blue-50 p-5 rounded-2xl border border-blue-100 space-y-4 w-full transition-all">
+                    <div class="flex justify-between items-center">
+                        <div class="font-bold text-blue-800 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-clock"></i> 長期排課規則
+                        </div>
+                        <label class="flex items-center gap-2 text-sm text-blue-700 font-bold cursor-pointer bg-blue-100/50 px-2 py-1 rounded-lg hover:bg-blue-100 transition">
+                            <input type="checkbox" id="cNoRule" class="w-4 h-4 accent-blue-600" onchange="window.toggleNoRule(this)">
+                            暫無固定規則
+                        </label>
                     </div>
                 
-                    <div class="grid grid-cols-12 gap-3 w-full">
-                        <div class="col-span-8 flex flex-col">
-                            <label class="text-xs text-gray-500 font-bold mb-1.5 block ml-1">開始日期</label>
-                            <input type="date" id="cRegStart" class="appearance-none w-full p-2.5 border border-gray-200 rounded-xl bg-white h-11 text-sm outline-none box-border">
-                        </div>
-                        <div class="col-span-4 flex flex-col">
-                            <label class="text-xs text-gray-500 font-bold mb-1.5 block ml-1">頻率</label>
-                            <select id="cRegFreq" class="appearance-none w-full p-2.5 border border-gray-200 rounded-xl bg-white font-bold h-11 text-sm outline-none box-border">
-                                <option value="1">每週</option>
-                                <option value="2">隔週</option>
-                                <option value="4">每月</option>
-                            </select>
-                        </div>
-                    </div>
-                
-                    <div class="w-full mt-4">
-                        <label class="text-xs text-gray-500 font-bold mb-1.5 block ml-1">時段 (可多選)</label>
-                        <div class="flex gap-3 w-full">
-                            <select id="cSlotDay" class="flex-1 p-2.5 border border-gray-200 rounded-xl bg-white font-bold text-sm h-11 outline-none">
-                                <option value="1">週一</option><option value="2">週二</option><option value="3">週三</option>
-                                <option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option>
-                            </select>
-                            <div class="flex gap-1 shrink-0">
-                                <select id="cSlotHour" class="w-16 p-2.5 border border-gray-200 rounded-xl bg-white font-mono text-sm h-11 outline-none">
-                                    <option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option>
-                                    <option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option>
-                                    <option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option>
-                                    <option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option>
-                                </select>
-                                <select id="cSlotMin" class="w-16 p-2.5 border border-gray-200 rounded-xl bg-white font-mono text-sm h-11 outline-none">
-                                    <option value="00">00</option><option value="10">10</option><option value="20">20</option>
-                                    <option value="30">30</option><option value="40">40</option><option value="50">50</option>
-                                </select>
+                    <div id="cRuleInputs" class="space-y-4">
+                        <div class="w-full mt-2 bg-white p-3 rounded-xl border border-gray-200">
+                            <label class="text-xs text-blue-800 font-bold mb-2 block border-b pb-1"><i class="fa-solid fa-plus"></i> 新增排課規則 (頻率/時段/起始日)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 mb-2">
+                                <div class="sm:col-span-3">
+                                    <label class="text-[10px] text-gray-500 font-bold block mb-1">頻率</label>
+                                    <select id="cSlotFreq" class="w-full p-2 border border-gray-200 rounded-lg bg-gray-50 font-bold text-sm outline-none">
+                                        <option value="1">每週</option>
+                                        <option value="2">隔週</option>
+                                        <option value="4">每月(4週)</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-5">
+                                    <label class="text-[10px] text-gray-500 font-bold block mb-1">星期與時間</label>
+                                    <div class="flex gap-1">
+                                        <select id="cSlotDay" class="flex-1 p-2 border border-gray-200 rounded-lg bg-gray-50 font-bold text-sm outline-none">
+                                            <option value="1">一</option><option value="2">二</option><option value="3">三</option>
+                                            <option value="4">四</option><option value="5">五</option><option value="6">六</option><option value="0">日</option>
+                                        </select>
+                                        <select id="cSlotHour" class="p-2 border border-gray-200 rounded-lg bg-gray-50 font-mono text-sm outline-none">
+                                            <option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+                                        </select>
+                                        <span class="font-bold self-center">:</span>
+                                        <select id="cSlotMin" class="p-2 border border-gray-200 rounded-lg bg-gray-50 font-mono text-sm outline-none">
+                                            <option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label class="text-[10px] text-gray-500 font-bold block mb-1">此時段從哪天開始？</label>
+                                    <div class="flex gap-2">
+                                        <input type="date" id="cSlotStart" class="w-full p-2 border border-gray-200 rounded-lg bg-gray-50 text-sm outline-none">
+                                        <button onclick="window.addCreateSlot()" class="bg-blue-600 text-white px-3 rounded-lg font-bold flex items-center justify-center shrink-0 active:scale-95 transition">
+                                            新增
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <button onclick="window.addCreateSlot()" class="bg-blue-600 text-white w-11 h-11 rounded-xl font-bold flex items-center justify-center shrink-0 active:scale-95 transition-transform shadow-sm">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
+                            <div id="cSlotList" class="flex flex-wrap gap-2 mt-2 min-h-[30px]"></div>
                         </div>
-                        <div id="cSlotList" class="flex flex-wrap gap-2 mt-3 min-h-[44px] p-3 bg-white/50 rounded-xl border border-dashed border-blue-200"></div>
                     </div>
                 </div>
 
@@ -200,7 +208,13 @@
             <button onclick="switchTab('page-list')" class="text-gray-500 font-bold flex items-center gap-1 bg-white px-3 py-2 rounded-lg shadow-sm mb-4 w-fit"><i class="fa-solid fa-chevron-left"></i> 返回課表</button>
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div class="flex-1"><div class="flex items-center gap-3 mb-1"><h2 id="dName" class="text-3xl font-bold text-gray-800"></h2><span id="dTrialTag" class="hidden bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold">🌱 體驗</span><button onclick="window.openProfileModal()" class="text-gray-400 hover:text-indigo-600"><i class="fa-solid fa-gear fa-lg"></i></button></div><div id="dRuleDisplay" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mt-1"></div><p id="dBody" class="text-xs text-red-500 font-bold mt-2 bg-red-50 inline-block px-2 py-1 rounded border border-red-100"></p></div>
-                <div class="bg-indigo-600 rounded-xl p-4 text-white shadow-md flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto"><div><p class="text-indigo-200 text-xs font-bold uppercase">剩餘堂數</p><p id="dCredits" class="text-4xl font-mono font-bold leading-none">0</p></div><button onclick="window.openRenewModal()" class="bg-white text-indigo-600 px-3 py-2 rounded-lg font-bold text-sm shadow hover:bg-indigo-50 transition active:scale-95 whitespace-nowrap"><i class="fa-solid fa-plus"></i> 購課/續約</button></div>
+                <div id="dCreditBox" class="bg-indigo-600 rounded-xl p-4 text-white shadow-md flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto">
+                    <div>
+                        <p id="dCreditLabel" class="text-indigo-200 text-xs font-bold uppercase">剩餘堂數</p>
+                        <p id="dCredits" class="text-4xl font-mono font-bold leading-none">0</p>
+                    </div>
+                    <button onclick="window.openRenewModal()" class="bg-white text-indigo-600 px-3 py-2 rounded-lg font-bold text-sm shadow hover:bg-indigo-50 transition active:scale-95 whitespace-nowrap"><i class="fa-solid fa-plus"></i> 購課/續約</button>
+                </div>
             </div>
             <div class="max-w-4xl mx-auto">
                 <button onclick="window.addNewRecord()" class="w-full bg-white border-2 border-dashed border-indigo-200 text-indigo-600 py-4 rounded-2xl font-bold text-lg hover:bg-indigo-50 transition mb-6 shadow-sm"><i class="fa-solid fa-plus-circle"></i> 插入單堂新課程</button>
@@ -291,14 +305,94 @@
     <div id="profileModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4"><div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]"><h3 class="font-bold text-xl mb-4 border-b pb-2 flex-none">學生設定</h3><div class="space-y-5 overflow-y-auto no-scrollbar flex-1 pb-4">
         <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl"><div><label class="text-xs text-gray-500 font-bold">姓名</label><input type="text" id="pName" class="w-full bg-transparent border-b border-gray-300 font-bold"></div><div class="flex flex-col items-end"><span id="pArchivedStatus" class="text-xs font-bold text-green-600 mb-1">活躍</span><div class="relative inline-block w-10 h-6 align-middle select-none"><input type="checkbox" id="pArchivedToggle" class="toggle-checkbox absolute block w-0 h-0 opacity-0" onchange="window.toggleArchivedStatusInModal()"/><label for="pArchivedToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label></div></div></div>
         <div><label class="text-xs text-gray-500 font-bold">狀況備註</label><input type="text" id="pBody" class="w-full p-3 border rounded-xl bg-gray-50"></div>
-        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4"><div class="flex justify-between items-center"><label class="text-sm font-bold text-indigo-800"><i class="fa-solid fa-calendar-check mr-1"></i> 排課規則</label></div><div><label class="text-xs text-gray-500 font-bold mb-1 block">上課頻率</label><select id="ruleFreq" class="w-full p-2 border rounded bg-white font-bold text-gray-700"><option value="1">每週 (Weekly)</option><option value="2">隔週 (Every 2 Weeks)</option><option value="4">每月 (Every 4 Weeks)</option></select></div><div><label class="text-xs text-gray-500 font-bold mb-1 block">新增上課時段</label><div class="flex gap-1 mb-2"><select id="slotDay" class="p-2 border rounded bg-white font-bold"><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option></select>
-        <select id="slotHour" class="p-2 border rounded bg-white font-mono"><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option></select>
-        <select id="slotMin" class="p-2 border rounded bg-white font-mono"><option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select><button onclick="window.addSlot()" class="bg-indigo-500 text-white px-3 rounded font-bold">＋</button></div><div id="slotList" class="flex flex-wrap gap-2 min-h-[30px]"></div></div><div><label class="text-xs text-gray-500 font-bold mb-1 block">開始日期</label><input type="date" id="ruleStartDate" class="w-full p-2 border rounded bg-white text-sm"></div><button onclick="window.generateSchedule()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow hover:bg-indigo-700 active:scale-95 transition"><i class="fa-solid fa-wand-magic-sparkles"></i> 重新安排預定課程</button></div>
+        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 space-y-4">
+            <div class="flex justify-between items-center">
+                <label class="text-sm font-bold text-indigo-800"><i class="fa-solid fa-calendar-check mr-1"></i> 排課規則</label>
+                <label class="flex items-center gap-2 text-sm text-indigo-700 font-bold cursor-pointer bg-indigo-100/50 px-2 py-1 rounded-lg hover:bg-indigo-100 transition">
+                    <input type="checkbox" id="pNoRule" class="w-4 h-4 accent-indigo-600" onchange="window.toggleNoRuleModal(this)">
+                    暫無固定規則
+                </label>
+            </div>
+            
+            <div id="pRuleInputs" class="space-y-4">
+                <div class="bg-white p-3 rounded-xl border border-indigo-100">
+                    <label class="text-xs text-indigo-800 font-bold mb-2 block border-b pb-1"><i class="fa-solid fa-plus"></i> 新增排課規則 (頻率/時段/起始日)</label>
+                    <div class="space-y-2 mb-2">
+                        <div class="flex gap-1">
+                            <select id="slotFreq" class="p-2 border rounded bg-gray-50 font-bold text-sm w-20"><option value="1">每週</option><option value="2">隔週</option><option value="4">每月</option></select>
+                            <select id="slotDay" class="flex-1 p-2 border rounded bg-gray-50 font-bold text-sm"><option value="1">週一</option><option value="2">週二</option><option value="3">週三</option><option value="4">週四</option><option value="5">週五</option><option value="6">週六</option><option value="0">週日</option></select>
+                            <select id="slotHour" class="p-2 border rounded bg-gray-50 font-mono text-sm"><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option></select>
+                            <span class="font-bold self-center">:</span>
+                            <select id="slotMin" class="p-2 border rounded bg-gray-50 font-mono text-sm"><option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="date" id="slotStart" class="w-full p-2 border rounded bg-gray-50 text-sm">
+                            <button onclick="window.addSlot()" class="bg-indigo-500 text-white px-4 rounded-lg font-bold">新增</button>
+                        </div>
+                    </div>
+                    <div id="slotList" class="flex flex-wrap gap-2 min-h-[30px] mt-2"></div>
+                </div>
+            </div>
+
+            <button id="btnGenerateSchedule" onclick="window.generateSchedule()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow hover:bg-indigo-700 active:scale-95 transition mt-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 重新安排預定課程
+            </button>
+        </div>
         <div class="mt-4 pt-4 border-t"><h4 class="font-bold text-gray-500 mb-2 text-sm">合約管理</h4><div id="pContractArea" class="bg-gray-50 p-2 rounded-xl border border-gray-200 text-center"></div></div></div>
         <div class="flex gap-3 mt-4 pt-4 border-t bg-white flex-none"><button onclick="document.getElementById('profileModal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold">關閉</button><button onclick="window.saveProfile()" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold shadow">儲存設定</button></div>
         <div class="text-center mt-2 flex-none"><button onclick="window.deleteStudent()" class="text-xs text-red-400 hover:text-red-600 hover:underline"><i class="fa-solid fa-trash"></i> 永久刪除此學生</button></div>
     </div></div>
-    
+    <div id="scheduleListModal" class="fixed inset-0 z-[55] bg-black bg-opacity-60 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl relative max-h-[80vh] flex flex-col">
+            <button onclick="document.getElementById('scheduleListModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
+                <i class="fa-solid fa-xmark fa-xl"></i>
+            </button>
+            <h3 class="font-bold text-lg mb-4 text-center text-indigo-800"><i class="fa-solid fa-calendar-days mr-1"></i> 未來預排課程</h3>
+            
+            <div id="scheduleListContent" class="bg-gray-50 p-4 rounded-xl border border-gray-200 overflow-y-auto flex-1 font-mono text-sm leading-relaxed text-gray-700 whitespace-pre-wrap select-all">
+                </div>
+            
+            <div class="mt-4 flex gap-3 flex-none">
+                <button onclick="window.copyScheduleList()" class="flex-1 py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 font-bold rounded-xl hover:bg-indigo-100 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-regular fa-copy"></i> 複製文字
+                </button>
+                <button onclick="document.getElementById('scheduleListModal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition active:scale-95">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="insertRecordModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl relative">
+            <button onclick="document.getElementById('insertRecordModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition">
+                <i class="fa-solid fa-xmark fa-xl"></i>
+            </button>
+            <h3 class="font-bold text-lg mb-4 text-center text-gray-800">插入單堂新課程</h3>
+            
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-5 space-y-3">
+                <div>
+                    <label class="text-xs font-bold text-indigo-800 block mb-1">上課日期</label>
+                    <input type="date" id="insertRecordDate" class="w-full p-3 border border-indigo-200 rounded-xl bg-white text-lg outline-none focus:ring-2 focus:ring-indigo-400">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-indigo-800 block mb-1">時間 (時 : 分)</label>
+                    <div class="flex gap-2 items-center">
+                        <select id="insertRecordHour" class="w-full p-3 border border-indigo-200 rounded-xl bg-white text-lg font-mono outline-none focus:ring-2 focus:ring-indigo-400">
+                            <option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+                        </select>
+                        <span class="text-indigo-800 font-bold">:</span>
+                        <select id="insertRecordMin" class="w-full p-3 border border-indigo-200 rounded-xl bg-white text-lg font-mono outline-none focus:ring-2 focus:ring-indigo-400">
+                            <option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="window.submitNewRecord()" class="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 active:scale-95 transition">
+                確認新增
+            </button>
+        </div>
+    </div>
     <div id="actionModal" class="fixed inset-0 z-50 bg-black bg-opacity-60 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm p-6 rounded-2xl shadow-xl relative">
             <button onclick="document.getElementById('actionModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
@@ -581,7 +675,7 @@
 
         // === Initialization Logic ===
         async function initApp() {
-            document.title = `1on1 Pro 家教管理系統 (${APP_VERSION})`; // 更新網頁標題
+            document.title = `1on1 Pro 家教管理系統 (${APP_VERSION})`;
             const verDisplay = {
                 'ver-footer': `1on1 Pro ${APP_VERSION}`,
                 'ver-guide-subtitle': ` (${APP_VERSION})`,
@@ -610,24 +704,46 @@
                     records = data.records || [];
                     appSettings = data.appSettings || appSettings;
                     
-                    // 自動修復：過濾掉壞掉的課程紀錄
                     records = records.filter(r => r && r.date && typeof r.date === 'string');
+
+                    // 🌟 【舊資料相容大升級】(統一在這裡執行，避免拖慢畫面)
+                    let needsSave = false;
+
+                    // 1. 升級舊學生的排課規則 (把外層的 freq, start 塞進 slots 裡面)
+                    students.forEach(s => {
+                        if (s && s.rule && s.rule.slots) {
+                            s.rule.slots.forEach(slot => {
+                                if (!slot.freq) { slot.freq = s.rule.freq || 1; needsSave = true; }
+                                if (!slot.startDate) { slot.startDate = s.rule.start || getFmtDate(new Date()); needsSave = true; }
+                            });
+                        }
+                    });
+
+                    // 2. 升級舊課程紀錄的標記 (把 note 轉為永久屬性，並清空筆記)
+                    records.forEach(r => {
+                        if (r.note === '體驗課' && !r.isTrial) { 
+                            r.isTrial = true; r.note = ''; needsSave = true; 
+                        }
+                        if (r.note === '手動插入' && !r.isManual) { 
+                            r.isManual = true; r.note = ''; needsSave = true; 
+                        }
+                    });
+
+                    // 如果有發現舊資料並做了轉換，就在開機時安靜地存檔一次
+                    if (needsSave) {
+                        await db.put({ students, records, appSettings });
+                        console.log("✅ 系統已自動升級舊資料格式");
+                    }
                 }
 
-                // 🟢 關鍵修正：這裡就是將「內建假日」載入系統的地方
-                // 如果系統還沒有假日設定，或是要補齊缺少的假日
                 if(!appSettings.holidays) appSettings.holidays = {};
                 for(const [k, v] of Object.entries(builtInHolidays)) {
-                    // 只有當那天原本沒資料時，才補上去 (避免覆蓋您手動修改過的)
                     if(!appSettings.holidays[k]) appSettings.holidays[k] = v;
                 }
 
                 if(appSettings.contractTemplate) {
                     const img = document.getElementById('sysContractPreview');
-                    if(img) {
-                        img.src = appSettings.contractTemplate;
-                        img.classList.remove('hidden');
-                    }
+                    if(img) { img.src = appSettings.contractTemplate; img.classList.remove('hidden'); }
                 }
                 checkBackupStatus();
             } catch(e) {
@@ -641,11 +757,7 @@
             const diff = d.getDate() - day + (day == 0 ? -6 : 1);
             currentWeekStart = new Date(d.setDate(diff));
             
-            try { 
-                renderList(); 
-            } catch(e) { 
-                console.error("Render List Error", e); 
-            }
+            try { renderList(); } catch(e) { console.error("Render List Error", e); }
         }
 
         window.onload = initApp;
@@ -711,58 +823,95 @@
             const div = document.createElement('div');
             const isRescheduled = r.status === 'rescheduled';
             
+            // 💡 資料已經在 initApp 升級過了，這裡直接抓取屬性 (加上雙重保險)
+            const isTrialClass = r.isTrial === true || r.note === '體驗課';
+            const isManual = r.isManual === true || r.note === '手動插入';
+            let displayNote = r.note || '';
+            // 避免舊資料萬一沒清乾淨，畫面上依然不顯示系統字眼
+            if (displayNote === '體驗課' || displayNote === '手動插入') displayNote = '';
+
             let statusClass = "status-planned";
             if (r.status === 'done') statusClass = "status-done";
             if (r.status === 'leave') statusClass = "status-leave";
             if (r.status === 'rescheduled') statusClass = "status-rescheduled";
             if (r.status === 'canceled') statusClass = "status-leave";
+            
+            if (isManual && r.status === 'planned') statusClass = "status-manual"; 
 
             div.className = `record-card shadow-sm rounded-2xl mb-4 p-4 border border-gray-100 relative ${statusClass}`;
             
             if(r.type === 'renew') {
                 div.style.borderLeftColor = '#6366f1'; 
                 div.innerHTML = `<div class="flex justify-between font-bold text-indigo-800"><span><i class="fa-solid fa-receipt"></i> 購買紀錄</span><span>+${r.amount}</span></div><div class="text-right text-xs text-indigo-400 mt-1">${r.date}</div>`;
-            } else {
-                const datePart = r.date.split(' ');
-                const isPlanned = r.status === 'planned' || r.status === 'rescheduled';
-                const canUpload = isPlanned || r.status === 'done';
+                return div;
+            } 
 
-                const imgsHtml = `<div class="img-scroller mt-3 mb-2 flex items-center gap-2">
-                    ${canUpload ? `<div class="img-add-btn" onclick="document.getElementById('hiddenFile_${r.id}').click()"><i class="fa-solid fa-plus fa-lg"></i><input type="file" id="hiddenFile_${r.id}" class="hidden" accept="image/*" multiple onchange="window.handleDirectUpload(${r.id}, this)"></div>` : ''}
-                    ${(r.imgs || []).map((src, idx)=>`<img src="${src}" class="img-thumb" onclick="window.openDirectPaint(${r.id}, ${idx})">`).join('')}
-                </div>`;
+            const datePart = r.date.split(' ');
+            const isPlanned = r.status === 'planned' || r.status === 'rescheduled';
+            const canUpload = isPlanned || r.status === 'done';
 
-                const noteHtml = `<textarea placeholder="課程筆記..." class="w-full bg-transparent text-sm text-gray-700 resize-none outline-none border-b border-dashed border-gray-300 focus:border-indigo-400 pb-1 mb-2" onblur="window.updateNote(${r.id}, this.value)">${r.note || ''}</textarea>`;
+            const imgsHtml = `<div class="img-scroller mt-3 mb-2 flex items-center gap-2">
+                ${canUpload ? `<div class="img-add-btn" onclick="document.getElementById('hiddenFile_${r.id}').click()"><i class="fa-solid fa-plus fa-lg"></i><input type="file" id="hiddenFile_${r.id}" class="hidden" accept="image/*" multiple onchange="window.handleDirectUpload(${r.id}, this)"></div>` : ''}
+                ${(r.imgs || []).map((src, idx)=>`<img src="${src}" class="img-thumb" onclick="window.openDirectPaint(${r.id}, ${idx})">`).join('')}
+            </div>`;
 
-                let actions = '';
-                if(isPlanned) {
-                    actions = `
-                    <div class="flex justify-end mt-2 pt-2 border-t border-gray-100">
-                        <button onclick="window.openSignModal(${r.id})" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-700">簽到</button>
-                    </div>`;
-                } else if (r.status === 'done') {
-                    const signTimeDisplay = r.signDate ? `<div class="text-[10px] text-gray-400 mt-1">✍️ 簽署於：${r.signDate.slice(5, 16)}</div>` : '';
-                    actions = `<div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-start"><div><span class="text-xs font-bold text-green-600">✓ 已完成</span>${signTimeDisplay}</div>${r.sig ? `<img src="${r.sig}" class="h-10 object-contain">` : ''}</div>`;
-                } else if (r.status === 'leave') {
-                    actions = `<div class="mt-2 pt-2 border-t border-gray-100"><span class="text-xs font-bold text-gray-400">請假 (不扣堂)</span></div>`;
+            const noteHtml = `<textarea placeholder="課程筆記..." class="w-full bg-transparent text-sm text-gray-700 resize-none outline-none border-b border-dashed border-gray-300 focus:border-indigo-400 pb-1 mb-2 mt-1" onblur="window.updateNote(${r.id}, this.value)">${displayNote}</textarea>`;
+
+            let badges = [];
+            if (isTrialClass) badges.push('<span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold shrink-0">🌱 體驗課</span>');
+            if (isManual) badges.push('<span class="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded font-bold shrink-0">單堂新增</span>');
+            if (isRescheduled) badges.push('<span class="text-[10px] bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded font-bold shrink-0">已改期</span>');
+            if (r.status === 'done') badges.push('<span class="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold shrink-0">✓ 已完成</span>');
+            if (r.status === 'leave') badges.push('<span class="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold shrink-0">☕ 請假</span>');
+            const badgeHtml = badges.join('<span class="w-1 inline-block shrink-0"></span>');
+
+            let rightSideHtml = '';
+            if (r.status === 'done') {
+                let signTimeStr = "";
+                if (r.signDate) {
+                    const match = r.signDate.match(/\d{4}[\/-](\d{1,2})[\/-](\d{1,2})\s(\d{1,2}:\d{2})/);
+                    if (match) signTimeStr = `${match[1]}/${match[2]} ${match[3]}`;
+                    else signTimeStr = r.signDate.slice(5, 16); 
                 }
-
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div class="font-bold text-lg text-gray-800">${datePart[0]} <span class="text-sm font-normal text-gray-500">${datePart[1]}</span></div>
-                        <div class="flex items-center gap-1">
-                            ${isRescheduled ? '<span class="text-[10px] bg-pink-100 text-pink-600 px-1 rounded">已改期</span>' : ''}
-                            ${isPlanned ? `
-                            <button onclick="window.openActionModal(${r.id})" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition active:bg-gray-200">
-                                <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
-                            </button>` : ''}
-                        </div>
-                    </div>
-                    ${noteHtml}
-                    ${imgsHtml}
-                    ${actions}
+                const signTimeDisplay = signTimeStr ? `<span class="text-[10px] text-gray-400 font-normal shrink-0 hidden sm:inline-block">${signTimeStr}</span>` : '';
+                const sigImg = r.sig ? `<img src="${r.sig}" class="h-6 w-12 object-contain bg-white rounded border border-gray-200 shrink-0">` : '';
+                rightSideHtml = `${sigImg}${signTimeDisplay}`;
+            } else if (isPlanned) {
+                rightSideHtml = `
+                    <button onclick="event.stopPropagation(); window.openSignModal(${r.id})" class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-xs font-bold shadow hover:bg-indigo-700 active:scale-95 shrink-0 transition">✍️ 簽到</button>
+                    <button onclick="event.stopPropagation(); window.openActionModal(${r.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition active:bg-gray-200 shrink-0">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                `;
+            } else if (r.status === 'leave') {
+                rightSideHtml = `
+                    <button onclick="event.stopPropagation(); window.openActionModal(${r.id})" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-indigo-600 rounded-full hover:bg-gray-100 transition active:bg-gray-200 shrink-0">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
                 `;
             }
+
+            div.innerHTML = `
+                <details class="group outline-none w-full">
+                    <summary class="flex justify-between items-center list-none cursor-pointer outline-none gap-2">
+                        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+                            <div class="font-bold text-base text-gray-800 shrink-0">${datePart[0]} <span class="text-sm font-normal text-gray-500">${datePart[1]}</span></div>
+                            <div class="flex items-center shrink-0">
+                                ${badgeHtml}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 md:gap-2 justify-end flex-1 overflow-hidden">
+                            ${rightSideHtml}
+                            <i class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform group-open:rotate-180 shrink-0 ml-0.5"></i>
+                        </div>
+                    </summary>
+                    <div class="mt-3 pt-3 border-t border-gray-100 group-open:animate-fade-in">
+                        ${noteHtml}
+                        ${imgsHtml}
+                    </div>
+                </details>
+            `;
+            
             return div;
         }
 
@@ -873,23 +1022,34 @@
             }
         }
 
+        // 新增：切換是否隱藏規則輸入框
+        function toggleNoRule(el) {
+            const isNoRule = el.checked;
+            document.getElementById('cRuleInputs').classList.toggle('hidden', isNoRule);
+        }
+
+        // 修改：建檔邏輯 (支援無規則建檔)
         function createStudent() {
             const btn = document.getElementById('btnCreate');
             const name=document.getElementById('cName').value, body=document.getElementById('cBody').value;
             const isTrial = document.getElementById('cIsTrial').checked;
+            const isNoRule = document.getElementById('cNoRule') ? document.getElementById('cNoRule').checked : false; 
             let credits = parseInt(document.getElementById('cCredits').value);
             
             if(!name || !credits) return alert("請輸入完整資料");
             
-            let rule = { freq:1, slots:[], start: getFmtDate(new Date()) };
+            let rule = { slots:[] }; 
+            
             if(isTrial) {
                 const tDate = document.getElementById('cTrialDate').value;
                 const tTime = document.getElementById('cTrialHour').value + ":" + document.getElementById('cTrialMin').value;
                 if(!tDate) return alert("請選擇體驗日期");
-                rule.start = tDate;
+                rule.slots = [{ freq: 1, day: new Date(tDate).getDay(), time: tTime, startDate: tDate }];
             } else {
-                if(createSlots.length === 0 || !document.getElementById('cRegStart').value) return alert("請設定上課時段與開始日期");
-                rule = { freq: parseInt(document.getElementById('cRegFreq').value), slots: [...createSlots], start: document.getElementById('cRegStart').value };
+                if(!isNoRule) {
+                    if(createSlots.length === 0) return alert("請至少新增一個上課時段，或勾選「暫無固定規則」");
+                    rule = { slots: [...createSlots] };
+                }
             }
 
             btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 處理中...`;
@@ -898,56 +1058,98 @@
                 const contractImg = isTrial ? null : tempContractImg;
                 students.push({ id: newSid, name, credits, body: body||"無", contractImg, rule, isArchived: false, isTrial: isTrial });
                 
+                let addedDates = []; // 💡 收集排課日期
+                const daysMap = ['日','一','二','三','四','五','六'];
+
                 if(isTrial) {
                     const tDate = document.getElementById('cTrialDate').value;
                     const tTime = document.getElementById('cTrialHour').value + ":" + document.getElementById('cTrialMin').value;
                     records.push({ id: Date.now()+1, sid: newSid, date: tDate + " " + tTime, status: 'planned', note: '體驗課', imgs: [], sig: null });
+                    const dayName = daysMap[new Date(tDate).getDay()];
+                    addedDates.push(`${tDate} (${dayName}) ${tTime}`);
                 } else {
-                    let count = 0, currDate = new Date(rule.start + "T00:00:00"); 
-                    const refMonday = new Date(currDate); refMonday.setDate(currDate.getDate() - (currDate.getDay()==0?6:currDate.getDay()-1)); 
-                    let safety = 0;
-                    while(count < credits && safety < 1000) {
-                        safety++;
-                        const diffDays = Math.floor((currDate - refMonday) / (86400000));
-                        const weekIdx = Math.floor(diffDays / 7);
-                        if(weekIdx % rule.freq === 0) { 
+                    if(!isNoRule) {
+                        let earliestStart = "2099-12-31";
+                        rule.slots.forEach(s => { if(s.startDate < earliestStart) earliestStart = s.startDate; });
+                        if (earliestStart === "2099-12-31") earliestStart = getFmtDate(new Date());
+
+                        let count = 0, currDate = new Date(earliestStart + "T00:00:00"); 
+                        let safety = 0;
+                        
+                        while(count < credits && safety < 2000) {
+                            safety++;
                             const daySlots = rule.slots.filter(slot => slot.day === currDate.getDay());
                             daySlots.forEach(slot => {
                                 if(count < credits) { 
-                                    const dateStr = getFmtDate(currDate) + " " + slot.time;
-                                    if(!records.some(r=>r.sid===newSid && r.date === dateStr)) {
-                                        records.push({ id: Date.now() + Math.random(), sid: newSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null });
-                                        count++;
+                                    const dateStr = getFmtDate(currDate);
+                                    if (dateStr >= slot.startDate) {
+                                        const slotStartObj = new Date(slot.startDate + "T00:00:00");
+                                        const slotRefMonday = new Date(slotStartObj); 
+                                        slotRefMonday.setDate(slotStartObj.getDate() - (slotStartObj.getDay()===0?6:slotStartObj.getDay()-1));
+                                        
+                                        const currMonday = new Date(currDate);
+                                        currMonday.setDate(currDate.getDate() - (currDate.getDay()===0?6:currDate.getDay()-1));
+                                        
+                                        const diffWeeks = Math.round((currMonday - slotRefMonday) / (86400000 * 7));
+                                        
+                                        if (diffWeeks % slot.freq === 0) {
+                                            const fullDateStr = dateStr + " " + slot.time;
+                                            if(!records.some(r=>r.sid===newSid && r.date === fullDateStr)) {
+                                                records.push({ id: Date.now() + Math.random(), sid: newSid, date: fullDateStr, status: 'planned', note: '', imgs: [], sig: null });
+                                                const dayName = daysMap[currDate.getDay()];
+                                                addedDates.push(`${dateStr} (${dayName}) ${slot.time}`);
+                                                count++;
+                                            }
+                                        }
                                     }
                                 }
                             });
+                            currDate.setDate(currDate.getDate() + 1);
                         }
-                        currDate.setDate(currDate.getDate() + 1);
                     }
                 }
                 await saveData();
                 document.getElementById('cName').value=''; document.getElementById('cCredits').value=''; document.getElementById('cBody').value=''; 
                 document.getElementById('cIsTrial').checked = false; toggleCreateTrial(document.getElementById('cIsTrial'));
-                createSlots = []; renderCreateSlots();
-                tempContractImg = null;
-                document.getElementById('cContractPreview').classList.add('hidden');
+                if(document.getElementById('cNoRule')) { document.getElementById('cNoRule').checked = false; toggleNoRule(document.getElementById('cNoRule')); }
+                createSlots = []; renderCreateSlots(); tempContractImg = null; document.getElementById('cContractPreview').classList.add('hidden');
                 btn.disabled = false; btn.innerHTML = `<span>完成建檔</span>`;
-                alert("✅ 新增成功！");
+                
+                // 💡 組合建檔成功的專屬提示訊息
+                let msg = `✅ 學生 ${name} 建檔成功！\n`;
+                if (addedDates.length > 0) {
+                    let datesDisplay = addedDates.map(d => `• ${d}`).join('\n');
+                    if (addedDates.length > 10) {
+                        datesDisplay = addedDates.slice(0, 10).map(d => `• ${d}`).join('\n') + `\n...及其他 ${addedDates.length - 10} 堂`;
+                    }
+                    msg += `\n已預排課程 ${addedDates.length} 堂\n排課列表：\n${datesDisplay}`;
+                } else if (isNoRule && !isTrial) {
+                    msg += `\n(已存入堂數，因選擇暫無規則，故尚未進行預排)`;
+                }
+                alert(msg); 
+                
                 switchTab('page-list');
             }, 50);
         }
 
         function addCreateSlot() {
+            const f = parseInt(document.getElementById('cSlotFreq').value);
             const d = parseInt(document.getElementById('cSlotDay').value);
             const t = document.getElementById('cSlotHour').value + ":" + document.getElementById('cSlotMin').value;
-            if(!createSlots.some(s => s.day === d && s.time === t)) { createSlots.push({day: d, time: t}); renderCreateSlots(); }
+            const sd = document.getElementById('cSlotStart').value;
+            if(!sd) return alert("請選擇此時段的「開始日期」");
+            if(!createSlots.some(s => s.day === d && s.time === t && s.startDate === sd && s.freq === f)) { 
+                createSlots.push({freq: f, day: d, time: t, startDate: sd}); 
+                renderCreateSlots(); 
+            }
         }
         function removeCreateSlot(idx) { createSlots.splice(idx, 1); renderCreateSlots(); }
         function renderCreateSlots() {
             const c = document.getElementById('cSlotList'); c.innerHTML = '';
             const daysMap = ['日','一','二','三','四','五','六'];
+            const freqMap = {1: '每週', 2: '隔週', 4: '每月'};
             createSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => {
-                c.innerHTML += `<span class="inline-flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeCreateSlot(${i})" class="ml-2 text-blue-400 hover:text-blue-900">×</button></span>`;
+                c.innerHTML += `<span class="inline-flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">[${freqMap[s.freq]}] 週${daysMap[s.day]} ${s.time} <span class="text-[9px] ml-1 opacity-70">(自 ${s.startDate.slice(5)})</span> <button onclick="window.removeCreateSlot(${i})" class="ml-2 text-blue-400 hover:text-blue-900">×</button></span>`;
             });
         }
 
@@ -998,22 +1200,30 @@
                 const trialTag = s.isTrial ? `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded ml-2 font-bold">🌱 體驗</span>` : '';
                 const nextRec = records.filter(r => r.sid===s.id && (r.status==='planned' || r.status==='rescheduled')).sort((a,b)=>a.date.localeCompare(b.date))[0];
                 const nextStr = nextRec ? `<span class="text-blue-600 font-bold">${nextRec.date}</span>` : '<span class="text-gray-400 text-xs">無預排</span>';
-                let ruleStr = '<span class="text-gray-400 text-xs">未設定</span>';
+                // 💡 使用 inline-flex 排版，讓 Icon 與文字分開兩欄對齊
+                let ruleStr = `<div onclick="event.stopPropagation(); window.openScheduleListModal('${s.id}')" class="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-lg inline-flex items-start gap-1.5 cursor-pointer hover:bg-gray-100 transition active:scale-95"><i class="fa-solid fa-list-ul mt-[2px]"></i><span>無排課規則</span></div>`;
+                
                 if(s.rule && s.rule.slots && s.rule.slots.length > 0) {
-                    const freqText = s.rule.freq == 1 ? "每週" : (s.rule.freq == 2 ? "隔週" : "每月");
-                    const slotsText = s.rule.slots.map(sl => `週${daysMap[sl.day]} ${sl.time}`).join(', ');
-                    ruleStr = `<span class="text-xs text-gray-600 bg-gray-100 p-1 rounded">${freqText} (${slotsText})</span>`;
+                    const freqMap = {1: '每週', 2: '隔週', 4: '每月'};
+                    const slotsText = s.rule.slots.map(sl => `[${freqMap[sl.freq || s.rule.freq || 1]}] 週${daysMap[sl.day]} ${sl.time}`).join('<br>');
+                    
+                    ruleStr = `<div onclick="event.stopPropagation(); window.openScheduleListModal('${s.id}')" class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-1.5 rounded-lg inline-flex items-start gap-1.5 leading-tight cursor-pointer hover:bg-indigo-100 transition shadow-sm active:scale-95 text-left">
+                        <i class="fa-solid fa-list-ul mt-[2px]"></i>
+                        <div>${slotsText}</div>
+                    </div>`;
                 }
+                const creditColor = s.credits <= 0 ? "text-red-500" : "text-indigo-600";
+                
                 list.innerHTML += `
                 <div class="student-row">
                     <div class="row-info" onclick="window.openDetail('${s.id}')">
                         <div class="font-bold text-lg text-gray-800">${s.name} ${trialTag}</div>
                         <div class="text-sm">${ruleStr}</div>
                         <div class="text-sm">${nextStr}</div>
-                        <div class="font-mono text-xl font-bold text-indigo-600 text-right">${s.credits}</div>
+                        <div class="font-mono text-xl font-bold ${creditColor} text-right">${s.credits}</div>
                     </div>
                     <div class="text-right text-gray-300 pr-2"><i class="fa-solid fa-chevron-right"></i></div>
-                </div>`; 
+                </div>`;
             });
             const arcList = document.getElementById('archivedListBody'); arcList.innerHTML = ''; let hasArc = false;
             students.forEach(s => { if(s && s.isArchived) { hasArc = true; arcList.innerHTML += `<div class="student-row opacity-60"><div class="row-info cursor-default"><div class="font-bold">${s.name}</div><div>-</div><div>-</div><div class="text-right">${s.credits}</div></div><div class="row-action"><button onclick="event.stopPropagation(); window.openProfileModal('${s.id}')" class="text-gray-500 hover:text-indigo-600 p-2"><i class="fa-solid fa-ellipsis-vertical"></i></button></div></div>`; } });
@@ -1035,7 +1245,7 @@
                     holidayHtml = `<div class="mb-1 text-[10px] text-red-500 font-bold bg-red-50 px-1 rounded border border-red-100 leading-tight">${appSettings.holidays[dayStr]}</div>`;
                 }
                 
-                col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg ${holidayHtml?'text-red-500':''}">${dayDate.getDate()}</span></div>${holidayHtml}`;;
+                col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg ${holidayHtml?'text-red-500':''}">${dayDate.getDate()}</span></div>${holidayHtml}`;
                 
                 if(Array.isArray(records)) {
                     const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr)).sort((a,b)=> a.date.localeCompare(b.date));
@@ -1043,11 +1253,15 @@
                         const s = students.find(x => x.id === r.sid); 
                         if(!s || s.isArchived) return;
                         const time = r.date.split(' ')[1].substring(0,5); 
+                        
                         let styleClass = "cal-planned"; 
                         if(r.status === 'rescheduled') styleClass = "cal-rescheduled"; 
                         if(r.status === 'done') styleClass = "cal-done"; 
                         if(r.status === 'leave') styleClass = "cal-leave";
                         if(r.status === 'canceled') styleClass = "cal-leave";
+                        
+                        // 💡 首頁的格子，如果是手動插入，套用紫色邊框
+                        if(r.note === '手動插入') styleClass = "cal-manual"; 
                         
                         const card = document.createElement('div'); card.className = `cal-card ${styleClass}`; 
                         card.innerHTML = `<div class="cal-time">${time}</div><div class="cal-name truncate">${s.name}</div><div class="card-menu-btn" onclick="event.stopPropagation(); window.openActionModal(${r.id})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
@@ -1064,16 +1278,41 @@
             curSid = Number(sid); const s = students.find(x => x.id == sid);
             if(!s) return alert("資料錯誤");
             document.getElementById('dName').innerText = s.name || '未命名'; 
-            document.getElementById('dCredits').innerText = s.credits || 0; 
             document.getElementById('dBody').innerText = s.body || ''; 
+            
+            // UI 強化：剩餘堂數為 0 時的強烈警告
+            const box = document.getElementById('dCreditBox');
+            const label = document.getElementById('dCreditLabel');
+            const cred = document.getElementById('dCredits');
+            
+            if (s.credits <= 0) {
+                box.className = "bg-rose-500 rounded-xl p-4 text-white shadow-lg flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto ring-4 ring-rose-200";
+                label.className = "text-rose-100 text-xs font-bold uppercase";
+                cred.innerHTML = s.credits; // 把驚嘆號拿掉，只顯示數字
+                cred.className = "text-4xl font-mono font-bold leading-none text-white";
+            } else {
+                // 恢復原本的藍紫色
+                box.className = "bg-indigo-600 rounded-xl p-4 text-white shadow-md flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto";
+                label.className = "text-indigo-200 text-xs font-bold uppercase";
+                cred.innerHTML = s.credits;
+                cred.className = "text-4xl font-mono font-bold leading-none text-white";
+            } 
             document.getElementById('dTrialTag').classList.toggle('hidden', !s.isTrial);
             if(!s.rule) s.rule = {freq:1, slots:[], start:''};
             const daysMap = ['日','一','二','三','四','五','六'];
+            
+            // 💡 將規則顯示區塊變成可點擊的按鈕樣式
+            const ruleDisplay = document.getElementById('dRuleDisplay');
+            ruleDisplay.className = "text-xs text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-lg inline-flex items-center gap-2 mt-1 cursor-pointer hover:bg-indigo-100 transition font-bold shadow-sm active:scale-95";
+            ruleDisplay.onclick = () => window.openScheduleListModal();
+
             if(s.rule && s.rule.slots && s.rule.slots.length > 0) {
-                const slotsStr = s.rule.slots.map(sl => `週${daysMap[sl.day]} ${sl.time}`).join('、');
-                const freqStr = s.rule.freq == 1 ? "每週" : (s.rule.freq == 2 ? "隔週" : "每月");
-                document.getElementById('dRuleDisplay').innerText = `${freqStr} (${slotsStr})`;
-            } else { document.getElementById('dRuleDisplay').innerText = "尚未設定排課規則"; }
+                const freqMap = {1: '每週', 2: '隔週', 4: '每月'};
+                const slotsStr = s.rule.slots.map(sl => `[${freqMap[sl.freq || s.rule.freq || 1]}] 週${daysMap[sl.day]} ${sl.time}`).join('、');
+                ruleDisplay.innerHTML = `<i class="fa-solid fa-list-ul"></i> <span>${slotsStr}</span>`;
+            } else { 
+                ruleDisplay.innerHTML = `<i class="fa-solid fa-list-ul"></i> <span>查看預排課程列表</span>`; 
+            }
             const cArea = document.getElementById('dContractArea');
             if (cArea) {
                  if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border cursor-pointer" onclick="openImageModal('${s.contractImg}')">`; } 
@@ -1310,7 +1549,70 @@
 
         function saveSettings() { const freq = document.getElementById('backupFreq').value; appSettings.freq = freq; saveData(); checkBackupStatus(); }
         function emergencyReset(){if(confirm("⚠️ 重置將清除所有資料，確定？")){ const req = indexedDB.deleteDatabase(DB_NAME); req.onsuccess = ()=>location.reload(); }}
-        function addNewRecord() { const dateStr = prompt("請輸入日期與時間 (YYYY-MM-DD HH:MM)", getFmtDate(new Date()) + " 10:00"); if(dateStr) { const conflictMsg = checkConflict(dateStr); if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return; const s = students.find(x => x.id == curSid); records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null }); saveData(); renderTimeline(); } }
+        // 開啟插入新課程視窗 (取代原本的 prompt)
+        // 開啟插入新課程視窗 (自動填入當前日期與就近的10分鐘)
+        function addNewRecord() {
+            const now = new Date();
+            
+            // 預設日期為今天
+            document.getElementById('insertRecordDate').value = getFmtDate(now);
+            
+            // 預設小時
+            let hr = String(now.getHours()).padStart(2, '0');
+            const hrSelect = document.getElementById('insertRecordHour');
+            if([...hrSelect.options].some(o => o.value === hr)) {
+                hrSelect.value = hr;
+            } else {
+                hrSelect.value = "19"; // 如果在半夜，預設給 19 點
+            }
+
+            // 預設分鐘 (四捨五入到最近的 10 分鐘)
+            let m = Math.round(now.getMinutes() / 10) * 10;
+            if (m === 60) m = 0; 
+            document.getElementById('insertRecordMin').value = String(m).padStart(2, '0');
+
+            document.getElementById('insertRecordModal').classList.remove('hidden');
+        }
+
+        // 提交插入新課程
+        function submitNewRecord() {
+            const dateVal = document.getElementById('insertRecordDate').value;
+            const hr = document.getElementById('insertRecordHour').value;
+            const min = document.getElementById('insertRecordMin').value;
+            
+            if(!dateVal) return alert("請選擇日期");
+            const dateStr = `${dateVal} ${hr}:${min}`;
+            
+            const conflictMsg = checkConflict(dateStr); 
+            if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return; 
+            
+            const s = students.find(x => x.id == curSid); 
+            if(!s) return;
+
+            const uncompletedRecs = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled'));
+            
+            let autoRemovedMsg = "";
+            if (uncompletedRecs.length >= s.credits) {
+                const plannedRecs = uncompletedRecs.filter(r => r.status === 'planned').sort((a,b) => b.date.localeCompare(a.date));
+                if (plannedRecs.length > 0) {
+                    const latestRec = plannedRecs[0];
+                    const idx = records.findIndex(r => r.id === latestRec.id);
+                    if (idx > -1) {
+                        records.splice(idx, 1); 
+                        autoRemovedMsg = `\n\n💡 為了維持總堂數相符 (剩餘 ${s.credits} 堂)\n系統已自動移除期末的預排課程：\n[ ${latestRec.date} ]`;
+                    }
+                }
+            }
+            
+            // 💡 關鍵修改：不寫入 note，而是加上 isManual: true 永久標記
+            records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null, isManual: true }); 
+            saveData(); 
+            
+            document.getElementById('insertRecordModal').classList.add('hidden');
+            renderTimeline(); 
+            
+            alert("✅ 新課程插入成功！" + autoRemovedMsg);
+        }
         
         function saveProfile() {
             try {
@@ -1319,8 +1621,19 @@
                 s.name = document.getElementById('pName').value;
                 s.body = document.getElementById('pBody').value;
                 s.isArchived = !document.getElementById('pArchivedToggle').checked;
-                s.rule = { freq: parseInt(document.getElementById('ruleFreq').value), slots: [...(ruleSlots || [])], start: document.getElementById('ruleStartDate').value };
-                saveData(); renderList(); if (curSid) openDetail(curSid); document.getElementById('profileModal').classList.add('hidden');
+                
+                // 💡 根據是否勾選無規則來儲存設定 (移除舊的 ruleFreq 依賴)
+                const isNoRule = document.getElementById('pNoRule') ? document.getElementById('pNoRule').checked : false;
+                if (isNoRule) {
+                    s.rule = { slots: [] };
+                } else {
+                    s.rule = { slots: [...(ruleSlots || [])] };
+                }
+                
+                saveData(); 
+                renderList(); 
+                if (curSid) openDetail(curSid); 
+                document.getElementById('profileModal').classList.add('hidden');
             } catch (e) { console.error(e); alert("儲存失敗：" + e.message); }
         }
         
@@ -1339,22 +1652,334 @@
         function setEraser(){const x=pads['canvasPaint'].ctx;x.globalCompositeOperation='destination-out';x.lineWidth=20;document.querySelectorAll('#paintModal button[id^="btn-"]').forEach(b=>b.classList.remove('ring-2','ring-white'));document.getElementById('btn-eraser').classList.add('ring-2','ring-black');}
         function handleDirectUpload(rid, input) { if(input.files) { Array.from(input.files).forEach(f=>{ const r = new FileReader(); r.onload = async(e)=>{ const d = await compressImage(e.target.result, 800, 0.5); const rec = records.find(x=>x.id===rid); if(rec) { if(!rec.imgs) rec.imgs=[]; rec.imgs.push(d); saveData(); renderTimeline(); } }; r.readAsDataURL(f); }); } }
         function updateNote(rid, val) { const r = records.find(x=>x.id===rid); if(r && r.note !== val) { r.note = val; saveData(); } }
-        function openSignModal(rid) { signingRecId = rid; document.getElementById('signModal').classList.remove('hidden'); requestAnimationFrame(() => initPad('padSignModal')); }
+        function openSignModal(rid) { 
+            const r = records.find(x => x.id === rid);
+            if(r) {
+                const s = students.find(x => x.id === r.sid);
+                // 檢查堂數是否 <= 0
+                if(s && s.credits <= 0) {
+                    if(confirm("⚠️ 此學生剩餘堂數已為 0，無法繼續簽到上課。\n\n是否立即前往購課 / 續約？")) {
+                        window.openRenewModal(); // 直接打開購課視窗
+                    }
+                    return; // 阻擋開啟簽名板
+                }
+            }
+            signingRecId = rid; 
+            document.getElementById('signModal').classList.remove('hidden'); 
+            requestAnimationFrame(() => initPad('padSignModal')); 
+        }
         function openDirectPaint(rid,i){ directEditRecId=rid;paintImgIndex=i;isDirectEdit=true;paintMode='photo'; const r=records.find(x=>x.id===rid); if(r&&r.imgs[i]) { document.getElementById('paintModal').classList.remove('hidden'); requestAnimationFrame(() => setupPaintScene(r.imgs[i], "照片編輯")); } }
         function toggleArchivedStatusInModal() { const toggle = document.getElementById('pArchivedToggle'); const status = document.getElementById('pArchivedStatus'); status.innerText = toggle.checked ? "封存" : "活躍"; status.className = toggle.checked ? "text-xs font-bold text-gray-400 mb-1" : "text-xs font-bold text-green-600 mb-1"; }
         function deleteStudent(){if(confirm("⚠️ 永久刪除此學生？")){const i=students.findIndex(x=>x.id===curSid);if(i>-1){students.splice(i,1);records=records.filter(r=>r.sid!==curSid);saveData();document.getElementById('profileModal').classList.add('hidden');switchTab('page-list');}}}
-        function submitRenew() { const amt = parseInt(document.getElementById('renewAmount').value); if(!amt) return alert("請輸入堂數"); (async()=>{const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5); const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5); const time = getTimeString(); const s = students.find(x=>x.id===curSid); s.credits += amt; if(s.isTrial) { s.isTrial = false; alert("🎉 恭喜！學生已從體驗轉為正式學生！"); } records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea }); saveData(); document.getElementById('dCredits').innerText = s.credits; document.getElementById('dTrialTag').classList.add('hidden'); document.getElementById('renewAmount').value = ''; clearPad('padRenewStudent'); clearPad('padRenewTeacher'); closeRenewModal(); renderTimeline();})(); }
+        function submitRenew() { 
+            const amt = parseInt(document.getElementById('renewAmount').value); 
+            if(!amt) return alert("請輸入堂數"); 
+            
+            (async()=>{
+                const sigStu = await compressImage(pads['padRenewStudent'].c.toDataURL(), 500, 0.5); 
+                const sigTea = await compressImage(pads['padRenewTeacher'].c.toDataURL(), 500, 0.5); 
+                const time = getTimeString(); 
+                const s = students.find(x=>x.id===curSid); 
+                
+                s.credits += amt; 
+                if(s.isTrial) { s.isTrial = false; alert("🎉 恭喜！學生已從體驗轉為正式學生！"); } 
+                
+                records.unshift({ id: Date.now(), sid: curSid, date: time, type: 'renew', amount: amt, sigStudent: sigStu, sigTeacher: sigTea }); 
+                
+                let autoScheduleMsg = "";
+
+                if (s.rule && s.rule.slots && s.rule.slots.length > 0) {
+                    let newlyAddedCount = 0;
+                    let addedDates = []; 
+                    const daysMap = ['日','一','二','三','四','五','六']; // 💡 加入星期對照表
+                    
+                    const futureRecs = records.filter(r => r.sid === s.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
+                    
+                    let searchDateObj;
+                    if (futureRecs.length > 0) {
+                        searchDateObj = new Date(futureRecs[futureRecs.length-1].date.split(' ')[0]);
+                        searchDateObj.setDate(searchDateObj.getDate() + 1); 
+                    } else {
+                        searchDateObj = new Date(); 
+                    }
+                    
+                    let curr = new Date(getFmtDate(searchDateObj) + "T00:00:00");
+                    let safety = 0;
+                    
+                    while(newlyAddedCount < amt && safety < 1000) {
+                        safety++;
+                        const sls = s.rule.slots.filter(sl => sl.day === curr.getDay());
+                        sls.forEach(sl => {
+                            if (newlyAddedCount < amt) {
+                                const dStr = getFmtDate(curr);
+                                if (dStr >= sl.startDate) {
+                                    const slotStartObj = new Date(sl.startDate + "T00:00:00");
+                                    const slotRefMonday = new Date(slotStartObj); 
+                                    slotRefMonday.setDate(slotStartObj.getDate() - (slotStartObj.getDay()===0?6:slotStartObj.getDay()-1));
+                                    const currMonday = new Date(curr); 
+                                    currMonday.setDate(curr.getDate() - (curr.getDay()===0?6:curr.getDay()-1));
+                                    
+                                    const diffWeeks = Math.round((currMonday - slotRefMonday) / (86400000 * 7));
+                                    
+                                    if (diffWeeks % sl.freq === 0) {
+                                        const fullStr = dStr + " " + sl.time;
+                                        if (!records.some(r => r.sid == curSid && r.date === fullStr)) {
+                                            records.push({id: Date.now() + Math.random(), sid: curSid, date: fullStr, status: 'planned', note: '', imgs: [], sig: null});
+                                            const dayName = daysMap[curr.getDay()]; // 💡 取得星期幾
+                                            addedDates.push(`${dStr} (${dayName}) ${sl.time}`); // 💡 組合字串
+                                            newlyAddedCount++;
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                    
+                    if (newlyAddedCount > 0) {
+                        let datesDisplay = addedDates.map(d => `• ${d}`).join('\n');
+                        if (addedDates.length > 10) {
+                            datesDisplay = addedDates.slice(0, 10).map(d => `• ${d}`).join('\n') + `\n...及其他 ${addedDates.length - 10} 堂`;
+                        }
+                        autoScheduleMsg = `\n\n🔄 系統已自動往下預排 ${newlyAddedCount} 堂課程：\n${datesDisplay}`;
+                    }
+                }
+
+                saveData(); 
+                
+                document.getElementById('dCredits').innerText = s.credits; 
+                if (s.credits > 0) {
+                    document.getElementById('dCreditBox').className = "bg-indigo-600 rounded-xl p-4 text-white shadow-md flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto";
+                    document.getElementById('dCreditLabel').className = "text-indigo-200 text-xs font-bold uppercase";
+                }
+
+                document.getElementById('dTrialTag').classList.add('hidden'); 
+                document.getElementById('renewAmount').value = ''; 
+                clearPad('padRenewStudent'); 
+                clearPad('padRenewTeacher'); 
+                closeRenewModal(); 
+                renderTimeline(); 
+
+                alert(`✅ 購課成功！已增加 ${amt} 堂。` + autoScheduleMsg);
+            })(); 
+        }
         function closeRenewModal() { document.getElementById('renewModal').classList.add('opacity-0'); document.getElementById('renewContent').classList.add('scale-95'); setTimeout(() => document.getElementById('renewModal').classList.add('hidden'), 200); }
         function openRenewModal() { const m = document.getElementById('renewModal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('renewContent').classList.remove('scale-95'); }, 10); setTimeout(() => { initPad('padRenewStudent'); initPad('padRenewTeacher'); }, 100); }
         function clearPad(id) { const p = pads[id]; if(!p) return; p.ctx.clearRect(0,0,p.c.width,p.c.height); p.ctx.fillStyle='#ffffff'; p.ctx.fillRect(0,0,p.c.width,p.c.height); }
         function closeSignModal() { document.getElementById('signModal').classList.add('hidden'); clearPad('padSignModal'); }
-        async function confirmSignModal() { const idx = records.findIndex(r => r.id === signingRecId); if (idx > -1) { const s = students.find(x => x.id === curSid); const sig = await compressImage(pads['padSignModal'].c.toDataURL(), 400, 0.5); s.credits--; records[idx].status = 'done'; records[idx].sig = sig; records[idx].signDate = getTimeString(); saveData(); document.getElementById('dCredits').innerText = s.credits; renderTimeline(); closeSignModal(); alert("簽到成功！已扣除 1 堂課"); } }
+        async function confirmSignModal() { 
+            const idx = records.findIndex(r => r.id === signingRecId); 
+            if (idx > -1) { 
+                const s = students.find(x => x.id === curSid); 
+                const sig = await compressImage(pads['padSignModal'].c.toDataURL(), 400, 0.5); 
+                
+                s.credits--; // 扣除堂數
+                
+                records[idx].status = 'done'; 
+                records[idx].sig = sig; 
+                records[idx].signDate = getTimeString(); // 取得當下時間
+                
+                saveData(); 
+                
+                // 更新畫面的數字，並檢查是否需要變紅底
+                const cred = document.getElementById('dCredits');
+                cred.innerText = s.credits;
+                if(s.credits <= 0) {
+                    document.getElementById('dCreditBox').className = "bg-rose-500 rounded-xl p-4 text-white shadow-lg flex items-center gap-6 min-w-[200px] justify-between w-full md:w-auto ring-4 ring-rose-200";
+                    document.getElementById('dCreditLabel').className = "text-rose-100 text-xs font-bold uppercase";
+                }
+                
+                renderTimeline(); 
+                closeSignModal(); 
+                
+                // 顯示詳細的成功提示
+                alert(`✅ 簽到成功！\n\n時間：${records[idx].signDate}\n已扣 1 堂，剩餘 ${s.credits} 堂`); 
+            } 
+        }
         function changeWeek(offset) { currentWeekStart.setDate(currentWeekStart.getDate() + (offset * 7)); renderCalendar(); }
-        function addSlot() { const d = parseInt(document.getElementById('slotDay').value); const t = document.getElementById('slotHour').value + ":" + document.getElementById('slotMin').value; if(!ruleSlots.some(s => s.day === d && s.time === t)) { ruleSlots.push({day: d, time: t}); renderRuleSlots(); } }
+        function addSlot() { 
+            const f = parseInt(document.getElementById('slotFreq').value);
+            const d = parseInt(document.getElementById('slotDay').value); 
+            const t = document.getElementById('slotHour').value + ":" + document.getElementById('slotMin').value; 
+            const sd = document.getElementById('slotStart').value;
+            if(!sd) return alert("請選擇此時段的「開始日期」");
+            if(!ruleSlots.some(s => s.day === d && s.time === t && s.startDate === sd && s.freq === f)) { 
+                ruleSlots.push({freq: f, day: d, time: t, startDate: sd}); 
+                renderRuleSlots(); 
+            } 
+        }
         function removeSlot(idx) { ruleSlots.splice(idx, 1); renderRuleSlots(); }
-        function renderRuleSlots() { const c = document.getElementById('slotList'); c.innerHTML = ''; const daysMap = ['日','一','二','三','四','五','六']; ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">週${daysMap[s.day]} ${s.time} <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; }); }
-        function openProfileModal(id) { if(id) curSid = Number(id); let s = students.find(x => x.id === curSid); if(!s) s = students.find(x => x.id == curSid); if(!s) return alert("資料錯誤"); try { document.getElementById('pName').value=s.name; document.getElementById('pBody').value=s.body; if(!s.rule) s.rule = {freq:1, slots:[], start:''}; ruleSlots=s.rule.slots ? [...s.rule.slots] : []; document.getElementById('ruleFreq').value=s.rule.freq || 1; document.getElementById('ruleStartDate').value=s.rule.start || getFmtDate(new Date()); renderRuleSlots(); const t=document.getElementById('pArchivedToggle'); t.checked=!s.isArchived; document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍"; const cArea = document.getElementById('pContractArea'); if (cArea) { if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`; } else { cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`; } } document.getElementById('profileModal').classList.remove('hidden'); } catch(e) { console.error(e); } }
-        function generateSchedule() { const s = students.find(x => x.id == curSid); const freq = parseInt(document.getElementById('ruleFreq').value); const startStr = document.getElementById('ruleStartDate').value; if(ruleSlots.length === 0 || !startStr) return alert("請設定"); if(s.credits <= 0) return alert("額度不足"); const existing = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled') && r.date < startStr).length; const quota = s.credits - existing; if(quota <= 0) return alert("額度已滿"); let conflicts=0; let checkCount=0; let checkDate=new Date(startStr + "T00:00:00"); const checkMonday=new Date(checkDate); checkMonday.setDate(checkDate.getDate()-(checkDate.getDay()==0?6:checkDate.getDay()-1)); while(checkCount<quota && checkCount<100){ const diffDays=Math.floor((checkDate-checkMonday)/86400000); const wIdx=Math.floor(diffDays/7); if(wIdx%freq===0){ const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); slots.forEach(sl=>{ if(checkCount<quota){ if(checkConflict(getFmtDate(checkDate)+" "+sl.time)) conflicts++; checkCount++; } }); } checkDate.setDate(checkDate.getDate()+1); } if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入？`)) return; records=records.filter(r=>!(r.sid==curSid && (r.status==='planned'||r.status==='rescheduled') && r.date>=startStr)); let count=0; let curr=new Date(startStr+"T00:00:00"); const ref=new Date(curr); ref.setDate(curr.getDate()-(curr.getDay()==0?6:curr.getDay()-1)); s.rule={freq,slots:[...ruleSlots],start:startStr}; while(count<quota){ const dDays=Math.floor((curr-ref)/86400000); const wI=Math.floor(dDays/7); if(wI%freq===0){ const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); sls.forEach(sl=>{ if(count<quota){ const dStr=getFmtDate(curr)+" "+sl.time; if(!records.some(r=>r.sid==curSid && r.date===dStr)){ records.push({id:Date.now()+Math.random(), sid:curSid, date:dStr, status:'planned', note:'', imgs:[], sig:null}); count++; } } }); } curr.setDate(curr.getDate()+1); } saveData(); alert(`已排 ${count} 堂`); document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid); }
+        function renderRuleSlots() { 
+            const c = document.getElementById('slotList'); c.innerHTML = ''; 
+            const daysMap = ['日','一','二','三','四','五','六']; 
+            const freqMap = {1: '每週', 2: '隔週', 4: '每月'};
+            ruleSlots.sort((a,b) => (a.day===0?7:a.day) - (b.day===0?7:b.day)).forEach((s, i) => { 
+                c.innerHTML += `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-1 mb-1">[${freqMap[s.freq]}] 週${daysMap[s.day]} ${s.time} <span class="text-[9px] ml-1 opacity-70">(自 ${s.startDate.slice(5)})</span> <button onclick="window.removeSlot(${i})" class="ml-2 text-indigo-400 hover:text-indigo-900">×</button></span>`; 
+            }); 
+        }       
+        function toggleNoRuleModal(el) {
+            const isNoRule = el.checked;
+            document.getElementById('pRuleInputs').classList.toggle('hidden', isNoRule);
+            
+            const genBtn = document.getElementById('btnGenerateSchedule');
+            if (genBtn) {
+                if (isNoRule) {
+                    genBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> 清除所有未上預排`;
+                    genBtn.className = "w-full bg-red-500 text-white py-3 rounded-xl font-bold shadow hover:bg-red-600 active:scale-95 transition mt-2";
+                } else {
+                    genBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> 重新安排預定課程`;
+                    genBtn.className = "w-full bg-indigo-600 text-white py-3 rounded-xl font-bold shadow hover:bg-indigo-700 active:scale-95 transition mt-2";
+                }
+            }
+        }
+        function openProfileModal(id) { 
+            if(id) curSid = Number(id); 
+            let s = students.find(x => x.id === curSid); 
+            if(!s) s = students.find(x => x.id == curSid); 
+            if(!s) return alert("資料錯誤"); 
+            try { 
+                document.getElementById('pName').value=s.name; 
+                document.getElementById('pBody').value=s.body; 
+                if(!s.rule) s.rule = {slots:[]}; 
+                
+                // 💡 確保舊資料相容
+                if (s.rule.freq && s.rule.slots) {
+                    s.rule.slots.forEach(slot => { if(!slot.freq) slot.freq = s.rule.freq; });
+                }
+
+                ruleSlots=s.rule.slots ? [...s.rule.slots] : []; 
+                renderRuleSlots(); 
+                
+                // 💡 初始化「暫無規則」勾選框的狀態
+                const pNoRuleCheckbox = document.getElementById('pNoRule');
+                if (pNoRuleCheckbox) {
+                    pNoRuleCheckbox.checked = (ruleSlots.length === 0);
+                    toggleNoRuleModal(pNoRuleCheckbox);
+                }
+
+                const t=document.getElementById('pArchivedToggle'); 
+                t.checked=!s.isArchived; 
+                document.getElementById('pArchivedStatus').innerText=s.isArchived?"封存":"活躍"; 
+                
+                const cArea = document.getElementById('pContractArea'); 
+                if (cArea) { 
+                    if(s.contractImg) { cArea.innerHTML = `<img src="${s.contractImg}" class="w-full rounded border mb-2"><button onclick="openContractSigner('profile')" class="text-xs text-gray-400 underline">重新簽署</button>`; } 
+                    else { cArea.innerHTML = `<div class="text-red-500 font-bold text-xs mb-2">未簽署</div><button onclick="openContractSigner('profile')" class="bg-indigo-600 text-white px-3 py-2 rounded shadow text-xs">✍️ 補簽合約</button>`; } 
+                } 
+                document.getElementById('profileModal').classList.remove('hidden'); 
+            } catch(e) { console.error(e); } 
+        }
+
+        function generateSchedule() { 
+            const s = students.find(x => x.id == curSid); 
+            const isNoRule = document.getElementById('pNoRule') ? document.getElementById('pNoRule').checked : false;
+
+            if (isNoRule) {
+                if (confirm("⚠️ 因沒有排課規則，將把課程預排清除。\n\n是否確認執行？")) {
+                    // 💡 清除預排時，保留「手動插入」的課，只清除規則產生的
+                    records = records.filter(r => !(r.sid == curSid && r.status === 'planned' && r.note !== '手動插入'));
+                    s.rule = { slots: [] };
+                    saveData(); alert("✅ 已清除所有規則預排課程！\n(手動新增與改期的課程已為您保留)");
+                    document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid);
+                }
+                return;
+            }
+
+            if(ruleSlots.length === 0) return alert("請至少新增一個上課時段與起始日"); 
+            if(s.credits <= 0) return alert("額度不足，無法排課"); 
+            
+            // 💡 關鍵修復：計算「真正需要新排的堂數配額」
+            // 找出該學生目前佔用額度、且不會被刪除的課 (已改期、手動插入)
+            const existingRecs = records.filter(r => r.sid == curSid && (r.status === 'rescheduled' || (r.status === 'planned' && (r.isManual || r.note === '手動插入'))));
+            const targetCount = s.credits - existingRecs.length;
+
+            if (targetCount <= 0) {
+                document.getElementById('profileModal').classList.add('hidden');
+                return alert(`⚠️ 無需再排新課！\n目前剩餘堂數 ${s.credits} 堂，但未來已有 ${existingRecs.length} 堂「已改期」或「手動加課」，額度已滿。`);
+            }
+
+            let earliestStart = "2099-12-31";
+            ruleSlots.forEach(sl => { if(sl.startDate < earliestStart) earliestStart = sl.startDate; });
+            if (earliestStart === "2099-12-31") earliestStart = getFmtDate(new Date());
+
+            let conflicts=0; let checkCount=0; let checkDate=new Date(earliestStart + "T00:00:00"); 
+            let safety1 = 0; 
+            
+            // Phase 1: 衝突檢查 (只檢查 targetCount 的數量)
+            while(checkCount < targetCount && safety1 < 2000){ 
+                safety1++;
+                const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); 
+                slots.forEach(sl=>{ 
+                    if(checkCount < targetCount){ 
+                        const dStr = getFmtDate(checkDate);
+                        if (dStr >= sl.startDate) {
+                            const slotStartObj = new Date(sl.startDate + "T00:00:00");
+                            const slotRefMonday = new Date(slotStartObj); slotRefMonday.setDate(slotStartObj.getDate() - (slotStartObj.getDay()===0?6:slotStartObj.getDay()-1));
+                            const currMonday = new Date(checkDate); currMonday.setDate(checkDate.getDate() - (checkDate.getDay()===0?6:checkDate.getDay()-1));
+                            const diffWeeks = Math.round((currMonday - slotRefMonday) / (86400000 * 7));
+                            if (diffWeeks % sl.freq === 0) {
+                                if(checkConflict(dStr+" "+sl.time)) conflicts++; 
+                                checkCount++; 
+                            }
+                        }
+                    } 
+                }); 
+                checkDate.setDate(checkDate.getDate()+1); 
+            } 
+            
+            if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入嗎？`)) return; 
+            
+            // Phase 2: 正式排課
+            // 💡 清除原本的預排時，特別避開「手動插入」的課程
+            records = records.filter(r => !(r.sid == curSid && r.status === 'planned' && !r.isManual && r.note !== '手動插入'));; 
+            
+            let count=0; let curr=new Date(earliestStart+"T00:00:00"); 
+            s.rule = { slots:[...ruleSlots] }; 
+            let safety2 = 0; 
+            let addedDates = []; 
+            const daysMap = ['日','一','二','三','四','五','六'];
+
+            // 💡 只產生缺少的配額 (targetCount)
+            while(count < targetCount && safety2 < 2000){ 
+                safety2++;
+                const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); 
+                sls.forEach(sl=>{ 
+                    if(count < targetCount){ 
+                        const dStr=getFmtDate(curr);
+                        if (dStr >= sl.startDate) {
+                            const slotStartObj = new Date(sl.startDate + "T00:00:00");
+                            const slotRefMonday = new Date(slotStartObj); slotRefMonday.setDate(slotStartObj.getDate() - (slotStartObj.getDay()===0?6:slotStartObj.getDay()-1));
+                            const currMonday = new Date(curr); currMonday.setDate(curr.getDate() - (curr.getDay()===0?6:curr.getDay()-1));
+                            const diffWeeks = Math.round((currMonday - slotRefMonday) / (86400000 * 7));
+                            
+                            if (diffWeeks % sl.freq === 0) {
+                                const fullStr = dStr+" "+sl.time; 
+                                if(!records.some(r=>r.sid==curSid && r.date===fullStr)){ 
+                                    records.push({id:Date.now()+Math.random(), sid:curSid, date:fullStr, status:'planned', note:'', imgs:[], sig:null}); 
+                                    const dayName = daysMap[curr.getDay()];
+                                    addedDates.push(`${dStr} (${dayName}) ${sl.time}`);
+                                    count++; 
+                                }
+                            }
+                        }
+                    } 
+                }); 
+                curr.setDate(curr.getDate()+1); 
+            } 
+            saveData(); 
+            
+            let datesDisplay = addedDates.map(d => `• ${d}`).join('\n');
+            if (addedDates.length > 10) {
+                datesDisplay = addedDates.slice(0, 10).map(d => `• ${d}`).join('\n') + `\n...及其他 ${addedDates.length - 10} 堂`;
+            }
+            
+            // 提示加上配額說明的細節
+            const offsetMsg = existingRecs.length > 0 ? `\n(已扣除 ${existingRecs.length} 堂已改期/手動加課)` : "";
+            alert(`✅ 已根據規則為您安排缺少的 ${count} 堂課！${offsetMsg}\n\n排課列表：\n${datesDisplay || '無新排課程'}`); 
+            
+            document.getElementById('profileModal').classList.add('hidden'); 
+            openDetail(curSid); 
+        }
         // === New Feature: Online Holidays ===
         async function updateOnlineHolidays() {
             if(!confirm("即將連線至 API (api.pin-yi.me) 下載明年假日。\n\n⚠️ 請確定電腦已連網再按確定！")) return;
@@ -1461,6 +2086,65 @@
                 alert("回復失敗，錯誤資訊請見 Console");
             }
         }
+        // 💡 開啟預排課程列表 Modal
+        function openScheduleListModal(id) {
+            if (id) curSid = Number(id); // 如果從列表點擊，更新當前選取的學生 ID
+            if (!curSid) return;
+            const s = students.find(x => x.id == curSid);
+            if (!s) return;
+
+            // 抓出未來所有的 planned 和 rescheduled 課程，並按日期排序
+            const futureRecs = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
+            
+            const contentDiv = document.getElementById('scheduleListContent');
+            if (futureRecs.length === 0) {
+                contentDiv.innerHTML = `<div class="text-center text-gray-400 my-4 font-sans">目前沒有未來的預排課程</div>`;
+            } else {
+                const daysMap = ['日','一','二','三','四','五','六'];
+                let listText = futureRecs.map((r, idx) => {
+                    const d = new Date(r.date.replace(' ', 'T'));
+                    const dayName = daysMap[d.getDay()];
+                    const dateStr = r.date.split(' ')[0];
+                    const timeStr = r.date.split(' ')[1];
+                    // 格式： 1. 2026-03-24 (二) 19:00
+                    return `${String(idx+1).padStart(2, ' ')}. ${dateStr} (${dayName}) ${timeStr}`;
+                }).join('\n');
+                
+                contentDiv.innerText = listText;
+            }
+            
+            document.getElementById('scheduleListModal').classList.remove('hidden');
+        }
+
+        // 💡 一鍵複製功能 (支援手機相容性)
+        function copyScheduleList() {
+            const text = document.getElementById('scheduleListContent').innerText;
+            if(!text || text.includes('目前沒有')) return alert("沒有內容可複製");
+            
+            const s = students.find(x => x.id == curSid);
+            const copyText = `【${s.name}】預定上課時間：\n${text}`;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(copyText).then(() => {
+                    alert("✅ 列表已複製，可直接複製貼上給學生確認！");
+                });
+            } else {
+                // 手機備用複製方案
+                const textArea = document.createElement("textarea");
+                textArea.value = copyText;
+                textArea.style.position = "fixed";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("✅ 列表已複製，可直接貼上到 LINE 給學生確認！");
+                } catch (err) {
+                    alert("複製失敗，請手動長按文字選取複製");
+                }
+                document.body.removeChild(textArea);
+            }
+        }
 
         // BINDINGS
         window.changeWeek = changeWeek; window.openDetail = openDetail; window.toggleCreateTrial = toggleCreateTrial; window.addCreateSlot = addCreateSlot; window.removeCreateSlot = removeCreateSlot; window.addSlot = addSlot; window.removeSlot = removeSlot; window.createStudent = createStudent; window.openContractSigner = openContractSigner; window.saveContractTemplate = saveContractTemplate; window.backupData = backupData; window.restoreData = restoreData; window.emergencyReset = emergencyReset; window.closePaintModal = closePaintModal; window.undoPaint = undoPaint; window.savePaint = savePaint; window.setPen = setPen; window.setEraser = setEraser; window.closeRenewModal = closeRenewModal; window.submitRenew = submitRenew; window.openRenewModal = openRenewModal; window.clearPad = clearPad; window.closeSignModal = closeSignModal; window.confirmSignModal = confirmSignModal; window.openSignModal = openSignModal; window.openActionModal = openActionModal; window.submitReschedule = submitReschedule; window.submitLeave = submitLeave; window.openDirectPaint = openDirectPaint; window.openProfileModal = openProfileModal; window.saveProfile = saveProfile; window.deleteStudent = deleteStudent; window.generateSchedule = generateSchedule; window.handleDirectUpload = handleDirectUpload; window.updateNote = updateNote; window.toggleArchivedStatusInModal = toggleArchivedStatusInModal; window.addNewRecord = addNewRecord; window.saveSettings = saveSettings; window.viewTempContract = viewTempContract; window.previewContractSetting = previewContractSetting;
@@ -1470,6 +2154,11 @@
         window.toggleSort = toggleSort;
         window.undoLeave = undoLeave;
         window.getFmtDate = getFmtDate;
+        window.submitNewRecord = submitNewRecord;
+        window.toggleNoRule = toggleNoRule;
+        window.toggleNoRuleModal = toggleNoRuleModal;
+        window.openScheduleListModal = openScheduleListModal;
+        window.copyScheduleList = copyScheduleList;
     </script>
 </body>
 </html>
