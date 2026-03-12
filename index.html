@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V18.0";
+        const APP_VERSION = "V18.1";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -791,7 +791,7 @@
         }
 
         // === Conflict Check Logic ===
-        function checkConflict(dateStr, excludeRecId = null) {
+        function checkConflict(dateStr, excludeRecId = null, currentSid = null) {
             try {
                 const excludeIdNum = Number(excludeRecId);
                 const conflictRec = records.find(rec => 
@@ -809,7 +809,11 @@
                     if(conflictRec.status === 'leave') statusText = "請假";
                     if(conflictRec.status === 'rescheduled') statusText = "改期";
 
-                    return `[${dateStr} ${name} (${statusText})]`;
+                    // 💡 判斷是跟自己的課撞期，還是跟別人的課撞期
+                    const isSelf = currentSid && (conflictRec.sid == currentSid);
+                    const whoMsg = isSelf ? "自己" : name;
+
+                    return `[${dateStr}] 與 ${whoMsg} 撞期 (${statusText})`;
                 }
                 return null;
             } catch(e) {
@@ -1448,7 +1452,7 @@
                 if(!val) return; 
                 const newDate = val.replace('T', ' '); 
                 
-                const conflictMsg = checkConflict(newDate, targetRecord.id); 
+                const conflictMsg = checkConflict(newDate, targetRecord.id, targetRecord.sid); 
                 if (conflictMsg) { 
                     if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) return; 
                 } 
@@ -1583,7 +1587,7 @@
             if(!dateVal) return alert("請選擇日期");
             const dateStr = `${dateVal} ${hr}:${min}`;
             
-            const conflictMsg = checkConflict(dateStr); 
+            const conflictMsg = checkConflict(dateStr, null, curSid);
             if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return; 
             
             const s = students.find(x => x.id == curSid); 
@@ -1876,8 +1880,7 @@
 
             if (isNoRule) {
                 if (confirm("⚠️ 因沒有排課規則，將把課程預排清除。\n\n是否確認執行？")) {
-                    // 💡 清除預排時，保留「手動插入」的課，只清除規則產生的
-                    records = records.filter(r => !(r.sid == curSid && r.status === 'planned' && r.note !== '手動插入'));
+                    records = records.filter(r => !(r.sid == curSid && r.status === 'planned' && !r.isManual && r.note !== '手動插入'));
                     s.rule = { slots: [] };
                     saveData(); alert("✅ 已清除所有規則預排課程！\n(手動新增與改期的課程已為您保留)");
                     document.getElementById('profileModal').classList.add('hidden'); openDetail(curSid);
@@ -1887,25 +1890,44 @@
 
             if(ruleSlots.length === 0) return alert("請至少新增一個上課時段與起始日"); 
             if(s.credits <= 0) return alert("額度不足，無法排課"); 
-            
-            // 💡 關鍵修復：計算「真正需要新排的堂數配額」
-            // 找出該學生目前佔用額度、且不會被刪除的課 (已改期、手動插入)
-            const existingRecs = records.filter(r => r.sid == curSid && (r.status === 'rescheduled' || (r.status === 'planned' && (r.isManual || r.note === '手動插入'))));
-            const targetCount = s.credits - existingRecs.length;
-
-            if (targetCount <= 0) {
-                document.getElementById('profileModal').classList.add('hidden');
-                return alert(`⚠️ 無需再排新課！\n目前剩餘堂數 ${s.credits} 堂，但未來已有 ${existingRecs.length} 堂「已改期」或「手動加課」，額度已滿。`);
-            }
 
             let earliestStart = "2099-12-31";
             ruleSlots.forEach(sl => { if(sl.startDate < earliestStart) earliestStart = sl.startDate; });
             if (earliestStart === "2099-12-31") earliestStart = getFmtDate(new Date());
 
-            let conflicts=0; let checkCount=0; let checkDate=new Date(earliestStart + "T00:00:00"); 
+            // 💡 修正 1：把 "T00:00" 改成 " 00:00"，解決空白與 T 的字串大小比較 Bug！
+            let keepPast = false;
+            let pastPlannedRecs = records.filter(r => r.sid == curSid && r.status === 'planned' && !r.isManual && r.date < earliestStart + " 00:00");
+            
+            if (pastPlannedRecs.length > 0) {
+                keepPast = confirm(`⚠️ 發現舊的預排課程\n\n在新的起始日 (${earliestStart}) 之前，這位學生還有 ${pastPlannedRecs.length} 堂「尚未上課」的預排。\n\n按【確定】👉 保留這些舊課程 (會佔用剩餘堂數)\n按【取消】👉 徹底清空舊課程 (把所有額度從起始日往後排)`);
+            }
+
+            // 建立「模擬沙盒」
+            const simulatedRecords = records.filter(r => {
+                if (r.sid != curSid) return true; 
+                if (r.status !== 'planned') return true; 
+                if (r.isManual || r.note === '手動插入') return true; 
+                if (keepPast && r.date < earliestStart + " 00:00") return true; // 💡 同樣修正字串比對
+                return false; 
+            });
+
+            // 只有「未來還會扣堂數」的課才佔用配額
+            const existingFutureRecs = simulatedRecords.filter(r => 
+                r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled')
+            );
+            const targetCount = s.credits - existingFutureRecs.length;
+
+            if (targetCount <= 0) {
+                document.getElementById('profileModal').classList.add('hidden');
+                return alert(`⚠️ 無需再排新課！\n目前剩餘堂數 ${s.credits} 堂，但未來已被「保留/改期/手動的舊課」佔滿了額度。`);
+            }
+
+            let conflictDetails = []; 
+            let checkCount=0; let checkDate=new Date(earliestStart + "T00:00:00"); 
             let safety1 = 0; 
             
-            // Phase 1: 衝突檢查 (只檢查 targetCount 的數量)
+            // Phase 1: 衝突檢查
             while(checkCount < targetCount && safety1 < 2000){ 
                 safety1++;
                 const slots=ruleSlots.filter(sl=>sl.day===checkDate.getDay()); 
@@ -1917,8 +1939,20 @@
                             const slotRefMonday = new Date(slotStartObj); slotRefMonday.setDate(slotStartObj.getDate() - (slotStartObj.getDay()===0?6:slotStartObj.getDay()-1));
                             const currMonday = new Date(checkDate); currMonday.setDate(checkDate.getDate() - (checkDate.getDay()===0?6:checkDate.getDay()-1));
                             const diffWeeks = Math.round((currMonday - slotRefMonday) / (86400000 * 7));
+                            
                             if (diffWeeks % sl.freq === 0) {
-                                if(checkConflict(dStr+" "+sl.time)) conflicts++; 
+                                const fullStr = dStr+" "+sl.time; 
+                                const conflictRec = simulatedRecords.find(r => r.date === fullStr && r.status !== 'canceled');
+                                
+                                if (conflictRec) {
+                                    // 💡 修正 2：如果撞到的是「自己」，直接靜默跳過不警告！
+                                    if (conflictRec.sid != curSid) {
+                                        const conflictStudent = students.find(st => st.id == conflictRec.sid);
+                                        const name = conflictStudent ? conflictStudent.name : "未知學生";
+                                        let statusText = conflictRec.status === 'done' ? '已完成' : (conflictRec.status === 'leave' ? '請假' : (conflictRec.status === 'rescheduled' ? '改期' : '預定'));
+                                        conflictDetails.push(`[${fullStr}] 與 ${name} 撞期 (${statusText})`);
+                                    }
+                                }
                                 checkCount++; 
                             }
                         }
@@ -1927,11 +1961,16 @@
                 checkDate.setDate(checkDate.getDate()+1); 
             } 
             
-            if(conflicts>0 && !confirm(`有 ${conflicts} 堂撞期，確定強制排入嗎？`)) return; 
+            if (conflictDetails.length > 0) {
+                let msg = `⚠️ 發現 ${conflictDetails.length} 堂與「其他學生」撞期：\n\n`;
+                msg += conflictDetails.slice(0, 5).join('\n');
+                if (conflictDetails.length > 5) msg += `\n...及其他 ${conflictDetails.length - 5} 堂`;
+                msg += `\n\n確定要強制排入嗎？`;
+                if (!confirm(msg)) return;
+            }
             
             // Phase 2: 正式排課
-            // 💡 清除原本的預排時，特別避開「手動插入」的課程
-            records = records.filter(r => !(r.sid == curSid && r.status === 'planned' && !r.isManual && r.note !== '手動插入'));; 
+            records = simulatedRecords; 
             
             let count=0; let curr=new Date(earliestStart+"T00:00:00"); 
             s.rule = { slots:[...ruleSlots] }; 
@@ -1939,7 +1978,6 @@
             let addedDates = []; 
             const daysMap = ['日','一','二','三','四','五','六'];
 
-            // 💡 只產生缺少的配額 (targetCount)
             while(count < targetCount && safety2 < 2000){ 
                 safety2++;
                 const sls=ruleSlots.filter(sl=>sl.day===curr.getDay()); 
@@ -1954,6 +1992,7 @@
                             
                             if (diffWeeks % sl.freq === 0) {
                                 const fullStr = dStr+" "+sl.time; 
+                                // 如果沙盒裡同時間已經有自己的課，就會在這裡被自動跳過，不佔用 count
                                 if(!records.some(r=>r.sid==curSid && r.date===fullStr)){ 
                                     records.push({id:Date.now()+Math.random(), sid:curSid, date:fullStr, status:'planned', note:'', imgs:[], sig:null}); 
                                     const dayName = daysMap[curr.getDay()];
@@ -1973,13 +2012,13 @@
                 datesDisplay = addedDates.slice(0, 10).map(d => `• ${d}`).join('\n') + `\n...及其他 ${addedDates.length - 10} 堂`;
             }
             
-            // 提示加上配額說明的細節
-            const offsetMsg = existingRecs.length > 0 ? `\n(已扣除 ${existingRecs.length} 堂已改期/手動加課)` : "";
+            const offsetMsg = existingFutureRecs.length > 0 ? `\n(已扣除 ${existingFutureRecs.length} 堂保留/改期/手動課)` : "";
             alert(`✅ 已根據規則為您安排缺少的 ${count} 堂課！${offsetMsg}\n\n排課列表：\n${datesDisplay || '無新排課程'}`); 
             
             document.getElementById('profileModal').classList.add('hidden'); 
             openDetail(curSid); 
         }
+        
         // === New Feature: Online Holidays ===
         async function updateOnlineHolidays() {
             if(!confirm("即將連線至 API (api.pin-yi.me) 下載明年假日。\n\n⚠️ 請確定電腦已連網再按確定！")) return;
