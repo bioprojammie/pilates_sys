@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V18.2";
+        const APP_VERSION = "V18.6";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -707,9 +707,10 @@
                     records = records.filter(r => r && r.date && typeof r.date === 'string');
 
                     // 🌟 【舊資料相容大升級】(統一在這裡執行，避免拖慢畫面)
+                    // 🌟 【舊資料相容大升級】(統一在這裡執行，避免拖慢畫面)
                     let needsSave = false;
 
-                    // 1. 升級舊學生的排課規則 (把外層的 freq, start 塞進 slots 裡面)
+                    // 1. 升級舊學生的排課規則
                     students.forEach(s => {
                         if (s && s.rule && s.rule.slots) {
                             s.rule.slots.forEach(slot => {
@@ -717,10 +718,50 @@
                                 if (!slot.startDate) { slot.startDate = s.rule.start || getFmtDate(new Date()); needsSave = true; }
                             });
                         }
+                        
+                        // 💡 3. 神奇回推術：幫舊學生自動補上「首購建檔」紀錄！
+                        const hasInitial = records.some(r => r.sid === s.id && r.isInitial);
+                        if (!hasInitial && !s.isArchived) { // 只幫還在線的學生回推
+                            const doneCount = records.filter(r => r.sid === s.id && r.status === 'done').length;
+                            const renewSum = records.filter(r => r.sid === s.id && r.type === 'renew' && !r.isInitial).reduce((sum, r) => sum + parseInt(r.amount || 0), 0);
+                            
+                            const initialCredits = s.credits + doneCount - renewSum;
+                            
+                            if (initialCredits > 0) {
+                                // 找尋這個學生最早的一堂課，當作建檔時間的參考
+                                const studentRecs = records.filter(r => r.sid === s.id).sort((a, b) => a.date.localeCompare(b.date));
+                                let pseudoDate = "系統早期建檔";
+                                if (studentRecs.length > 0) {
+                                    pseudoDate = studentRecs[0].date.split(' ')[0] + " 00:00"; 
+                                }
+
+                                records.push({
+                                    id: s.id - 1, // 確保這筆紀錄排在最前面
+                                    sid: s.id,
+                                    date: pseudoDate,
+                                    type: 'renew',
+                                    isInitial: true,
+                                    amount: initialCredits,
+                                    sigStudent: null,
+                                    sigTeacher: null
+                                });
+                                needsSave = true;
+                            }
+                        }
                     });
 
-                    // 2. 升級舊課程紀錄的標記 (把 note 轉為永久屬性，並清空筆記)
+                    // 2. 升級舊課程紀錄的標記與時間格式
                     records.forEach(r => {
+                        // 💡 統一時間格式：把舊版的 2026/3/12 轉成 2026-03-12
+                        if (r.date && r.date.includes('/')) {
+                            const p = r.date.split(' ');
+                            const dp = p[0].split('/');
+                            if (dp.length === 3) {
+                                r.date = `${dp[0]}-${dp[1].padStart(2,'0')}-${dp[2].padStart(2,'0')}${p[1] ? ' ' + p[1] : ''}`;
+                                needsSave = true;
+                            }
+                        }
+
                         if (r.note === '體驗課' && !r.isTrial) { 
                             r.isTrial = true; r.note = ''; needsSave = true; 
                         }
@@ -732,7 +773,7 @@
                     // 如果有發現舊資料並做了轉換，就在開機時安靜地存檔一次
                     if (needsSave) {
                         await db.put({ students, records, appSettings });
-                        console.log("✅ 系統已自動升級舊資料格式");
+                        console.log("✅ 系統已自動升級舊資料格式並回推初始堂數");
                     }
                 }
 
@@ -846,7 +887,9 @@
             
             if(r.type === 'renew') {
                 div.style.borderLeftColor = '#6366f1'; 
-                div.innerHTML = `<div class="flex justify-between font-bold text-indigo-800"><span><i class="fa-solid fa-receipt"></i> 購買紀錄</span><span>+${r.amount}</span></div><div class="text-right text-xs text-indigo-400 mt-1">${r.date}</div>`;
+                const titleText = r.isInitial ? "首購建檔" : "購買紀錄";
+                const iconClass = r.isInitial ? "fa-user-plus" : "fa-receipt";
+                div.innerHTML = `<div class="flex justify-between font-bold text-indigo-800"><span><i class="fa-solid ${iconClass}"></i> ${titleText}</span><span>+${r.amount}</span></div><div class="text-right text-xs text-indigo-400 mt-1">${r.date}</div>`;
                 return div;
             } 
 
@@ -1061,7 +1104,17 @@
                 const newSid = Date.now();
                 const contractImg = isTrial ? null : tempContractImg;
                 students.push({ id: newSid, name, credits, body: body||"無", contractImg, rule, isArchived: false, isTrial: isTrial });
-                
+                const createTime = getTimeString(); 
+                records.push({ 
+                    id: Date.now() - 1, // 確保這筆紀錄在時間軸上排在最前面
+                    sid: newSid, 
+                    date: createTime, 
+                    type: 'renew', 
+                    isInitial: true, // 標記這筆是「首購建檔」
+                    amount: credits, 
+                    sigStudent: null, 
+                    sigTeacher: null 
+                });
                 let addedDates = []; // 💡 收集排課日期
                 const daysMap = ['日','一','二','三','四','五','六'];
 
@@ -1252,7 +1305,9 @@
                 col.innerHTML = `<div class="text-xs font-bold ${isToday?'text-indigo-600 bg-indigo-50 rounded px-1': 'text-gray-400'} mb-2 uppercase text-center">${dayNames[i]} <span class="block text-lg ${holidayHtml?'text-red-500':''}">${dayDate.getDate()}</span></div>${holidayHtml}`;
                 
                 if(Array.isArray(records)) {
-                    const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr)).sort((a,b)=> a.date.localeCompare(b.date));
+                    // 💡 關鍵修復：加入 && r.type !== 'renew'，把購課紀錄與建檔紀錄從日曆上濾掉！
+                    const dayRecords = records.filter(r => r && r.date && r.date.startsWith(dayStr) && r.type !== 'renew').sort((a,b)=> a.date.localeCompare(b.date));
+                    
                     dayRecords.forEach(r => {
                         const s = students.find(x => x.id === r.sid); 
                         if(!s || s.isArchived) return;
@@ -1264,8 +1319,8 @@
                         if(r.status === 'leave') styleClass = "cal-leave";
                         if(r.status === 'canceled') styleClass = "cal-leave";
                         
-                        // 💡 首頁的格子，如果是手動插入，套用紫色邊框
-                        if(r.note === '手動插入') styleClass = "cal-manual"; 
+                        // 支援新版 isManual 與舊版筆記
+                        if(r.isManual || r.note === '手動插入') styleClass = "cal-manual"; 
                         
                         const card = document.createElement('div'); card.className = `cal-card ${styleClass}`; 
                         card.innerHTML = `<div class="cal-time">${time}</div><div class="cal-name truncate">${s.name}</div><div class="card-menu-btn" onclick="event.stopPropagation(); window.openActionModal(${r.id})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
@@ -1328,8 +1383,19 @@
         function renderTimeline() {
             const t = document.getElementById('timeline'); 
             const allRecs = records.filter(r => r.sid == curSid);
-            const history = allRecs.filter(r => r.status !== 'planned' && r.status !== 'rescheduled').sort((a,b)=> b.date.localeCompare(a.date));
-            const future = allRecs.filter(r => r.status === 'planned' || r.status === 'rescheduled').sort((a,b)=> a.date.localeCompare(b.date));
+            
+            // 💡 升級排序引擎：把字串轉成數字(時間戳記)，徹底解決格式不同造成的排序混亂
+            const getSortTime = (dStr) => {
+                if (!dStr || dStr.includes("系統早期建檔")) return 0; // 首購建檔永遠沉到底部
+                const cleanStr = dStr.replace(/\//g, '-'); // 把斜線轉成橫槓
+                return new Date(cleanStr).getTime() || 0;
+            };
+
+            const history = allRecs.filter(r => r.status !== 'planned' && r.status !== 'rescheduled')
+                                   .sort((a,b) => getSortTime(b.date) - getSortTime(a.date));
+            const future = allRecs.filter(r => r.status === 'planned' || r.status === 'rescheduled')
+                                  .sort((a,b) => getSortTime(a.date) - getSortTime(b.date));
+            
             t.innerHTML = '';
             if(future.length > 0) {
                 t.innerHTML += `<div class="text-xs font-bold text-indigo-600 mb-2 uppercase">預定課程</div>`;
@@ -1437,29 +1503,34 @@
             document.getElementById('actionModal').classList.remove('hidden');
         }
 
-        // === 2. 提交改期 (加入防呆) ===
+        // === 2. 提交改期 (加入防誤觸與撞期防呆) ===
         function submitReschedule() { 
             try { 
                 const targetRecord = records.find(x => x.id == targetRecId); 
                 if (!targetRecord) return alert("錯誤：找不到原始課程資料"); 
                 
-                // --- 修改點 A：放寬限制，允許 'leave' 狀態進行改期 ---
                 if (targetRecord.status !== 'planned' && targetRecord.status !== 'rescheduled' && targetRecord.status !== 'leave') {
                     return alert("❌ 此課程狀態無法改期 (已完成或已取消)");
                 }
 
                 const val = document.getElementById('actionNewTime').value; 
-                if(!val) return; 
+                if(!val) return alert("請選擇日期與時間！"); 
                 const newDate = val.replace('T', ' '); 
+                
+                // 💡 [18.6 新增防呆] 檢查時間是否真的有變動
+                if (newDate === targetRecord.date) {
+                    return alert("⚠️ 時間完全沒有變動喔！\n\n如果您沒有要改期，請直接點擊右上角的「X」關閉視窗即可。");
+                }
                 
                 const conflictMsg = checkConflict(newDate, targetRecord.id, targetRecord.sid); 
                 if (conflictMsg) { 
                     if (!confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制改期嗎？`)) return; 
                 } 
 
-                // --- 修改點 B：如果原本是請假狀態，現在改期代表要上課，需移除最後一堂補課 ---
                 if (targetRecord.status === 'leave') {
-                    removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
+                    if (typeof window.removeLastPlannedRecord === 'function') {
+                        window.removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
+                    }
                 }
                 
                 targetRecord.date = newDate; 
@@ -1468,6 +1539,9 @@
                 saveData(); 
                 document.getElementById('actionModal').classList.add('hidden'); 
                 if(currentView==='calendar') renderCalendar(); else renderTimeline(); 
+                
+                // 💡 順便加上口語化的成功提示
+                alert(`✅ 改期成功！\n已將課程移至：${newDate}`);
             } catch (error) { 
                 console.error(error); alert("程式執行錯誤：" + error.message); 
             } 
@@ -1652,7 +1726,11 @@
         }
         
         function addDays(d, days) { const result = new Date(d); result.setDate(result.getDate() + days); return result; }
-        function getTimeString() { return new Date().toLocaleString('zh-TW', { hour12: false }); }
+        function getTimeString() { 
+            const d = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
         function fileToDataURL(f){return new Promise(r=>{if(!f)r(null);const d=new FileReader();d.onload=(e)=>r(e.target.result);d.readAsDataURL(f);});}
         function compressImage(src,w,q){ return new Promise(r=>{ if(!src)r(null); const i=new Image(); i.onload=()=>{ const c=document.createElement('canvas'); let rw=i.width,rh=i.height; if(rw>w){rh=Math.round(rh*=w/rw);rw=w;} c.width=rw;c.height=rh; const x=c.getContext('2d'); x.fillStyle="#ffffff"; x.fillRect(0,0,rw,rh); x.drawImage(i,0,0,rw,rh); r(c.toDataURL('image/jpeg',q)); }; i.src=src; }); }
         function initPad(id){const c=document.getElementById(id); if(!c) return; const p=c.parentElement; const rsz=()=>{const r=Math.max(window.devicePixelRatio||1,1),w=p.clientWidth||300,h=p.clientHeight||150; c.width=w*r;c.height=h*r;c.style.width=w+"px";c.style.height=h+"px";const x=c.getContext('2d');x.scale(r,r);x.lineCap='round';x.lineJoin='round'; if(id==='canvasPaint'){const b=document.getElementById('canvasBg');if(b){b.width=w*r;b.height=h*r;bgCanvasCtx=b.getContext('2d');bgCanvasCtx.scale(r,r);}}else{x.fillStyle='#fff';x.fillRect(0,0,c.width/r,c.height/r);} }; new ResizeObserver(rsz).observe(p); rsz(); let d=false;const x=c.getContext('2d'); const gp=(e)=>{const b=c.getBoundingClientRect();return{x:(e.touches?e.touches[0].clientX:e.clientX)-b.left,y:(e.touches?e.touches[0].clientY:e.clientY)-b.top}}; const st=(e)=>{if(e.cancelable)e.preventDefault();if(id==='canvasPaint')saveH();d=true;x.beginPath();const p=gp(e);x.moveTo(p.x,p.y);}; const mv=(e)=>{if(!d)return;if(e.cancelable)e.preventDefault();const p=gp(e);x.lineTo(p.x,p.y);if(id!=='canvasPaint'){x.strokeStyle='#1f2937';x.lineWidth=2;}x.stroke();}; const ed=()=>d=false; c.addEventListener('touchstart',st,{passive:false});c.addEventListener('touchmove',mv,{passive:false});c.addEventListener('touchend',ed);c.addEventListener('mousedown',st);c.addEventListener('mousemove',mv);c.addEventListener('mouseup',ed); pads[id]={c,ctx:x};}
@@ -1670,14 +1748,46 @@
             const r = records.find(x => x.id === rid);
             if(r) {
                 const s = students.find(x => x.id === r.sid);
-                // 檢查堂數是否 <= 0
+                
+                // 1. 檢查堂數是否 <= 0
                 if(s && s.credits <= 0) {
                     if(confirm("⚠️ 此學生剩餘堂數已為 0，無法繼續簽到上課。\n\n是否立即前往購課 / 續約？")) {
                         window.openRenewModal(); // 直接打開購課視窗
                     }
                     return; // 阻擋開啟簽名板
                 }
+
+                // 💡 2. [18.5 新增] 檢查簽到時間是否合理 (防點錯日期)
+                // 將字串 2026-03-12 12:00 轉為 Date 物件 (相容 iOS Safari 的斜線格式)
+                const classTime = new Date(r.date.replace(/-/g, '/'));
+                const now = new Date();
+                
+                // 計算時間差 (以「分鐘」為單位)
+                const diffMins = (now.getTime() - classTime.getTime()) / (1000 * 60);
+                
+                // 判斷：早於 30 分鐘 (diffMins < -30) 或 晚於 90 分鐘 (diffMins > 90)
+                if (diffMins < -30 || diffMins > 90) {
+                    const isEarly = diffMins < 0;
+                    let msg = `⚠️ 簽到時間差異過大\n\n這堂課的預定時間是 [ ${r.date} ]。`;
+                    
+                    if (isEarly) {
+                        msg += `\n現在距離上課還有 ${Math.abs(Math.round(diffMins))} 分鐘，似乎太早了！`;
+                    } else {
+                        // 轉換成幾個小時幾分鐘，比較直覺
+                        const hrs = Math.floor(diffMins / 60);
+                        const mins = Math.round(diffMins % 60);
+                        const timeText = hrs > 0 ? `${hrs} 小時 ${mins} 分鐘` : `${mins} 分鐘`;
+                        msg += `\n現在距離上課已經過了 ${timeText}，似乎太晚了！`;
+                    }
+                    
+                    msg += `\n\n請問您確定沒有點錯卡片，要強制進行簽到嗎？`;
+                    
+                    if (!confirm(msg)) {
+                        return; // 老師點擊「取消」，立刻終止開啟簽名板
+                    }
+                }
             }
+            
             signingRecId = rid; 
             document.getElementById('signModal').classList.remove('hidden'); 
             requestAnimationFrame(() => initPad('padSignModal')); 
