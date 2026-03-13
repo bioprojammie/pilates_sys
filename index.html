@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V18.7";
+        const APP_VERSION = "V18.8";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -99,16 +99,17 @@
                 <div id="cTrialSetup" class="hidden bg-green-50 p-4 rounded-xl border border-green-100 space-y-3">
                     <div class="font-bold text-green-800 text-sm"><i class="fa-solid fa-leaf"></i> 體驗課安排</div>
                     
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="flex-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
                             <label class="text-xs text-gray-500 font-bold mb-1 block">體驗日期</label>
                             <input type="date" id="cTrialDate" class="w-full p-2 border rounded bg-white">
                         </div>
-                        <div class="flex-1">
+                        <div>
                             <label class="text-xs text-gray-500 font-bold mb-1 block">時間</label>
                             <div class="flex gap-2">
-                                <select id="cTrialHour" class="p-2 border rounded bg-white w-full"><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option></select>
-                                <select id="cTrialMin" class="p-2 border rounded bg-white w-full"><option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select>
+                                <select id="cTrialHour" class="p-2 border rounded bg-white flex-1 min-w-0"><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option></select>
+                                <span class="font-bold self-center text-gray-500">:</span>
+                                <select id="cTrialMin" class="p-2 border rounded bg-white flex-1 min-w-0"><option value="00">00</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option></select>
                             </div>
                         </div>
                     </div>
@@ -276,6 +277,20 @@
                         </label>
                     </div>
                 </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-clock text-indigo-500 mr-2"></i> 課程設定</h3>
+                    <div class="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div>
+                            <p class="font-bold text-gray-700 text-sm">每堂課程長度</p>
+                            <p class="text-xs text-gray-400 mt-0.5">用於課堂衝突時間重疊偵測</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="classDurationInput" min="10" max="240" step="5" class="w-20 p-2 border border-gray-300 rounded-lg text-center font-bold text-lg outline-none focus:ring-2 focus:ring-indigo-400" placeholder="50" onchange="window.saveSettings()">
+                            <span class="text-sm font-bold text-gray-500">分鐘</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <h3 class="font-bold text-lg text-gray-700 mb-4"><i class="fa-solid fa-calendar-days text-indigo-500 mr-2"></i> 國定假日設定</h3>
                     <p class="text-sm text-gray-600 mb-2">已內建 2026 台灣國定假日。如需更新未來年份，請點擊下方按鈕。</p>
@@ -615,7 +630,7 @@
         
         // State
         let students = [], records = []; 
-        let appSettings = { lastBackup: null, freq: '7', contractTemplate: null, holidays: {} };
+        let appSettings = { lastBackup: null, freq: '7', contractTemplate: null, holidays: {}, classDuration: 50 };
         let curSid = null, signingRecId = null, directEditRecId = null, paintImgIndex = -1;
         let isDirectEdit = false, paintHistory = [], bgCanvasCtx = null;
         let currentWeekStart = new Date();
@@ -836,34 +851,53 @@
         }
 
         // === Conflict Check Logic ===
-        function checkConflict(dateStr, excludeRecId = null, currentSid = null) {
+        // 核心：判斷兩個課程時間是否重疊
+        function isTimeOverlap(dateStrA, dateStrB) {
+            try {
+                const duration = (appSettings.classDuration || 50) * 60 * 1000; // 轉成毫秒
+                const startA = new Date(dateStrA.replace(' ', 'T')).getTime();
+                const startB = new Date(dateStrB.replace(' ', 'T')).getTime();
+                if (isNaN(startA) || isNaN(startB)) return false;
+                const endA = startA + duration;
+                const endB = startB + duration;
+                return startA < endB && startB < endA;
+            } catch(e) { return false; }
+        }
+
+        // 統一衝突檢查入口：改期、手動新增、建檔、續約 都用這一個
+        // dateStr      → 要檢查的完整時間 "2026-03-17 19:00"
+        // excludeRecId → 排除某一筆紀錄本身（改期用）
+        // excludeSid   → 排除的學生 sid（建檔/續約用）
+        function checkConflict(dateStr, excludeRecId = null, excludeSid = null) {
             try {
                 const excludeIdNum = Number(excludeRecId);
-                const conflictRec = records.find(rec => 
-                    (rec.status !== 'canceled') && 
-                    rec.date === dateStr && 
-                    rec.id != excludeIdNum
-                );
-                
-                if(conflictRec) {
-                    const conflictStudent = students.find(s => s.id == conflictRec.sid);
-                    const name = conflictStudent ? conflictStudent.name : "未知學生";
-                    
-                    let statusText = "預定";
-                    if(conflictRec.status === 'done') statusText = "已完成";
-                    if(conflictRec.status === 'leave') statusText = "請假";
-                    if(conflictRec.status === 'rescheduled') statusText = "改期";
+                const conflictRecs = records.filter(rec => {
+                    if (rec.status === 'canceled') return false;
+                    if (rec.id == excludeIdNum) return false;
+                    if (excludeSid && rec.sid == excludeSid) return false;
+                    if (rec.type === 'renew') return false;
+                    const recStudent = students.find(s => s.id == rec.sid);
+                    if (!recStudent || recStudent.isArchived) return false;
+                    return isTimeOverlap(dateStr, rec.date);
+                });
 
-                    // 💡 判斷是跟自己的課撞期，還是跟別人的課撞期
-                    const isSelf = currentSid && (conflictRec.sid == currentSid);
-                    const whoMsg = isSelf ? "自己" : name;
+                if (conflictRecs.length === 0) return null;
 
-                    return `[${dateStr}] 與 ${whoMsg} 撞期 (${statusText})`;
-                }
-                return null;
+                const names = [...new Set(conflictRecs.map(rec => {
+                    const st = students.find(s => s.id == rec.sid);
+                    return st ? st.name : "未知學生";
+                }))];
+
+                const first = conflictRecs[0];
+                let statusText = "預定";
+                if(first.status === 'done') statusText = "已完成";
+                if(first.status === 'leave') statusText = "請假";
+                if(first.status === 'rescheduled') statusText = "改期";
+
+                return `[${dateStr}] 與「${names.join('」、「')}」撞期 (${statusText})`;
             } catch(e) {
                 console.error("檢查衝突時發生錯誤:", e);
-                return null; 
+                return null;
             }
         }
 
@@ -1175,6 +1209,44 @@
                         }
                     }
                 }
+
+                // 💡 [V18.8] 批次衝突檢查 — 對所有準備新增的課程做重疊偵測
+                // 注意：新學生的 sid 是 newSid，此時課程已 push 進 records
+                // checkConflict 帶入 excludeSid=newSid 會自動忽略同學生自己的課
+                const conflictWarnings = [];
+                const newlyAddedRecs = records.filter(r => r.sid === newSid && r.status === 'planned');
+                newlyAddedRecs.forEach(r => {
+                    const conflictRecs = records.filter(rec => {
+                        if (rec.status === 'canceled') return false;
+                        if (rec.sid == newSid) return false;
+                        if (rec.type === 'renew') return false;
+                        const recStudent = students.find(s => s.id == rec.sid);
+                        if (!recStudent || recStudent.isArchived) return false;
+                        return isTimeOverlap(r.date, rec.date);
+                    });
+                    if (conflictRecs.length > 0) {
+                        const names = [...new Set(conflictRecs.map(rec => {
+                            const st = students.find(s => s.id == rec.sid);
+                            return st ? st.name : "未知學生";
+                        }))];
+                        conflictWarnings.push(`• [${r.date}] 與「${names.join('」、「')}」撞期`);
+                    }
+                });
+
+                if (conflictWarnings.length > 0) {
+                    let warnMsg = `⚠️ 發現 ${conflictWarnings.length} 堂課程與其他學生撞期：\n\n`;
+                    warnMsg += conflictWarnings.slice(0, 8).join('\n');
+                    if (conflictWarnings.length > 8) warnMsg += `\n...及其他 ${conflictWarnings.length - 8} 堂`;
+                    warnMsg += `\n\n是否仍要繼續建檔？（衝突課程仍會建立）`;
+                    if (!confirm(warnMsg)) {
+                        // 使用者取消 → 把剛才 push 的資料全部回滾
+                        students.pop();
+                        records = records.filter(r => r.sid !== newSid);
+                        btn.disabled = false; btn.innerHTML = `<span>完成建檔</span>`;
+                        return;
+                    }
+                }
+
                 await saveData();
                 document.getElementById('cName').value=''; document.getElementById('cCredits').value=''; document.getElementById('cBody').value=''; 
                 document.getElementById('cIsTrial').checked = false; toggleCreateTrial(document.getElementById('cIsTrial'));
@@ -1624,6 +1696,7 @@
         function renderSettingsPage() {
             const timeSpan = document.getElementById('lastBackupTime'); if (timeSpan) timeSpan.innerText = appSettings.lastBackup ? appSettings.lastBackup : "尚無紀錄";
             const freqSelect = document.getElementById('backupFreq'); if (freqSelect) freqSelect.value = appSettings.freq || "7";
+            const durInput = document.getElementById('classDurationInput'); if (durInput) durInput.value = appSettings.classDuration || 50;
             
             try {
                 const jsonStr = JSON.stringify({students, records, appSettings});
@@ -1637,7 +1710,14 @@
             checkBackupStatus();
         }
 
-        function saveSettings() { const freq = document.getElementById('backupFreq').value; appSettings.freq = freq; saveData(); checkBackupStatus(); }
+        function saveSettings() { 
+            const freq = document.getElementById('backupFreq').value; 
+            appSettings.freq = freq; 
+            const dur = parseInt(document.getElementById('classDurationInput').value);
+            if (dur && dur >= 10 && dur <= 240) appSettings.classDuration = dur;
+            saveData(); 
+            checkBackupStatus(); 
+        }
         function emergencyReset(){if(confirm("⚠️ 重置將清除所有資料，確定？")){ const req = indexedDB.deleteDatabase(DB_NAME); req.onsuccess = ()=>location.reload(); }}
         // 開啟插入新課程視窗 (取代原本的 prompt)
         // 開啟插入新課程視窗 (自動填入當前日期與就近的10分鐘)
@@ -1879,6 +1959,40 @@
                             datesDisplay = addedDates.slice(0, 10).map(d => `• ${d}`).join('\n') + `\n...及其他 ${addedDates.length - 10} 堂`;
                         }
                         autoScheduleMsg = `\n\n🔄 系統已自動往下預排 ${newlyAddedCount} 堂課程：\n${datesDisplay}`;
+
+                        // 💡 [V18.8] 續約後也做批次衝突檢查
+                        const renewConflicts = [];
+                        addedDates.forEach((_, idx) => {
+                            // 從剛加進去的 records 裡找對應的日期
+                        });
+                        // 直接掃描剛加入的課程（最新的 newlyAddedCount 筆）
+                        const justAdded = records.filter(r => r.sid == curSid && r.status === 'planned').slice(-newlyAddedCount);
+                        justAdded.forEach(r => {
+                            const conflictRecs = records.filter(rec => {
+                                if (rec.status === 'canceled') return false;
+                                if (rec.sid == curSid) return false;
+                                if (rec.type === 'renew') return false;
+                                const recStudent = students.find(s => s.id == rec.sid);
+                                if (!recStudent || recStudent.isArchived) return false;
+                                return isTimeOverlap(r.date, rec.date);
+                            });
+                            if (conflictRecs.length > 0) {
+                                const names = [...new Set(conflictRecs.map(rec => {
+                                    const st = students.find(s => s.id == rec.sid);
+                                    return st ? st.name : "未知學生";
+                                }))];
+                                renewConflicts.push(`• [${r.date}] 與「${names.join('」、「')}」撞期`);
+                            }
+                        });
+                        if (renewConflicts.length > 0) {
+                            let warnMsg = `⚠️ 發現 ${renewConflicts.length} 堂新排課程與其他學生撞期：\n\n`;
+                            warnMsg += renewConflicts.slice(0, 8).join('\n');
+                            if (renewConflicts.length > 8) warnMsg += `\n...及其他 ${renewConflicts.length - 8} 堂`;
+                            warnMsg += `\n\n課程已建立，請記得檢查並調整衝突時段。`;
+                            autoScheduleMsg += `\n\n⚠️ 注意：有 ${renewConflicts.length} 堂撞期！`;
+                            // 續約的衝突是在 saveData 之後才顯示（因為已無法回滾），改成告知性質
+                            setTimeout(() => alert(warnMsg), 500);
+                        }
                     }
                 }
 
@@ -2076,16 +2190,20 @@
                             
                             if (diffWeeks % sl.freq === 0) {
                                 const fullStr = dStr+" "+sl.time; 
-                                const conflictRec = simulatedRecords.find(r => r.date === fullStr && r.status !== 'canceled');
+                                const conflictRec = simulatedRecords.find(r => {
+                                    if (r.status === 'canceled') return false;
+                                    if (r.sid == curSid) return false;
+                                    if (r.type === 'renew') return false;
+                                    const recStudent = students.find(s => s.id == r.sid);
+                                    if (!recStudent || recStudent.isArchived) return false;
+                                    return isTimeOverlap(fullStr, r.date);
+                                });
                                 
                                 if (conflictRec) {
-                                    // 💡 修正 2：如果撞到的是「自己」，直接靜默跳過不警告！
-                                    if (conflictRec.sid != curSid) {
-                                        const conflictStudent = students.find(st => st.id == conflictRec.sid);
-                                        const name = conflictStudent ? conflictStudent.name : "未知學生";
-                                        let statusText = conflictRec.status === 'done' ? '已完成' : (conflictRec.status === 'leave' ? '請假' : (conflictRec.status === 'rescheduled' ? '改期' : '預定'));
-                                        conflictDetails.push(`[${fullStr}] 與 ${name} 撞期 (${statusText})`);
-                                    }
+                                    const conflictStudent = students.find(st => st.id == conflictRec.sid);
+                                    const name = conflictStudent ? conflictStudent.name : "未知學生";
+                                    let statusText = conflictRec.status === 'done' ? '已完成' : (conflictRec.status === 'leave' ? '請假' : (conflictRec.status === 'rescheduled' ? '改期' : '預定'));
+                                    conflictDetails.push(`[${fullStr}] 與「${name}」撞期 (${statusText})`);
                                 }
                                 checkCount++; 
                             }
@@ -2352,4 +2470,3 @@
     </script>
 </body>
 </html>
-
