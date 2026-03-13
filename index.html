@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        const APP_VERSION = "V18.1";
+        const APP_VERSION = "V18.2";
     </script>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1478,54 +1478,53 @@
             const targetRecord = records.find(x => x.id === targetRecId);
             if(!targetRecord) return;
             
-            // 防呆：再次檢查狀態
             if(targetRecord.status === 'leave') return alert("此課程已經是請假狀態！");
-
-            // 步驟 A: 先確認是否真的要請假
+            
+            // 💡 這裡保留唯一必要的確認：確認要請假嗎？
             if(!confirm("確定要幫這位學生請假嗎？")) return;
 
             const s = students.find(x => x.id === targetRecord.sid);
-            
-            // 標記為請假
             targetRecord.status = 'leave';
             let msg = "✅ 已標記為請假 (不扣堂)。";
             
-            // 步驟 B: 判斷是否有規則，有則「直接自動順延」，不跳視窗詢問
-            if(s && s.rule && s.rule.freq && s.rule.slots && s.rule.slots.length > 0) {
-                // 找出該學生所有「未來有效課程」的最後一天
+            if(s && s.rule && s.rule.slots && s.rule.slots.length > 0) {
                 const futureRecs = records.filter(r => r.sid === s.id && (r.status === 'planned' || r.status === 'rescheduled')).sort((a,b) => a.date.localeCompare(b.date));
                 
                 let baseDateObj;
                 if (futureRecs.length > 0) {
                     baseDateObj = new Date(futureRecs[futureRecs.length-1].date.split(' ')[0]);
                 } else {
-                    // 如果沒有未來課程，就從今天(請假這天)開始往後算
                     baseDateObj = new Date(targetRecord.date.split(' ')[0]);
                 }
                 
-                // 計算日期：最後日期 + (頻率 * 7)
-                const daysToAdd = parseInt(s.rule.freq) * 7;
+                const cancelDateObj = new Date(targetRecord.date.split(' ')[0]);
+                const cancelDay = cancelDateObj.getDay();
+                const matchedSlot = s.rule.slots.find(sl => sl.day === cancelDay && targetRecord.date.includes(sl.time));
+                const slot = matchedSlot || s.rule.slots.find(sl => sl.day === cancelDay) || s.rule.slots[0];
+                const freq = slot.freq || 1;
+                
+                const daysToAdd = parseInt(freq) * 7;
                 baseDateObj.setDate(baseDateObj.getDate() + daysToAdd);
                 
-                // 產生新日期字串
                 const timePart = targetRecord.date.split(' ')[1];
-                const newDateStr = getFmtDate(baseDateObj) + " " + timePart; // getFmtDate 需要存在於您的 helper 中
+                const newDateStr = getFmtDate(baseDateObj) + " " + timePart; 
                 
-                // 直接寫入新課程
                 records.push({ 
                     id: Date.now(), 
                     sid: s.id, 
                     date: newDateStr, 
                     status: 'planned', 
                     note: '自動順延補課', 
-                    isAutoExtension: true, // ✅ 新增標記，方便後續精準移除
+                    isAutoExtension: true, 
                     imgs: [], 
                     sig: null 
                 });
                 
-                msg += `\n\n🔄 系統已根據規則，自動順延一堂課至：${newDateStr}`;
+                // 💡 超級口語化的通知 (有規則)
+                msg += `\n\n🔄 因為您有設定排課規則，系統已自動幫您順延一堂課到：\n👉 ${newDateStr}`;
             } else {
-                msg += "\n(因無長期排課規則，故未執行自動順延)";
+                // 💡 超級口語化的通知 (無規則)
+                msg += "\n\n⚠️ 目前沒有設定排課規則，所以系統沒有幫您自動順延課程喔！";
             }
 
             saveData();
@@ -1587,7 +1586,7 @@
             if(!dateVal) return alert("請選擇日期");
             const dateStr = `${dateVal} ${hr}:${min}`;
             
-            const conflictMsg = checkConflict(dateStr, null, curSid);
+            const conflictMsg = checkConflict(dateStr, null, curSid); 
             if (conflictMsg && !confirm(`⚠️ 撞期警告：\n該時段已有 ${conflictMsg}。\n\n確定要強制插入嗎？`)) return; 
             
             const s = students.find(x => x.id == curSid); 
@@ -1596,19 +1595,30 @@
             const uncompletedRecs = records.filter(r => r.sid == curSid && (r.status === 'planned' || r.status === 'rescheduled'));
             
             let autoRemovedMsg = "";
+            
+            // 💡 判斷：未來的課是否已經等於或超過剩餘堂數？
             if (uncompletedRecs.length >= s.credits) {
-                const plannedRecs = uncompletedRecs.filter(r => r.status === 'planned').sort((a,b) => b.date.localeCompare(a.date));
+                // 試著找最後一堂「系統自動預排」來刪除 (避開手動加課與改期)
+                const plannedRecs = uncompletedRecs.filter(r => r.status === 'planned' && !r.isManual).sort((a,b) => b.date.localeCompare(a.date));
+                
                 if (plannedRecs.length > 0) {
+                    // 情況 A：有自動預排課可以刪，直接刪除替換
                     const latestRec = plannedRecs[0];
                     const idx = records.findIndex(r => r.id === latestRec.id);
                     if (idx > -1) {
                         records.splice(idx, 1); 
-                        autoRemovedMsg = `\n\n💡 為了維持總堂數相符 (剩餘 ${s.credits} 堂)\n系統已自動移除期末的預排課程：\n[ ${latestRec.date} ]`;
+                        autoRemovedMsg = `\n\n💡 為了維持總堂數正確，系統已自動幫您把最後一堂預排課刪除了：\n🗑️ ${latestRec.date}`;
                     }
+                } else {
+                    // 🚨 情況 B (也就是您說的極端情況)：全部都是手動加課或改期，沒東西可以刪！
+                    if (!confirm(`⚠️ 超額警告！\n\n學生剩餘 ${s.credits} 堂，但未來已被「手動加課/改期」排滿了。\n\n若強制插入，未來預排總數將超過他的剩餘額度！\n確定要強制加課嗎？`)) {
+                        return; // 老師按取消，立刻終止加課！
+                    }
+                    // 老師按確定，允許超額加課，並在最後的提示加上提醒
+                    autoRemovedMsg = `\n\n⚠️ 注意：此學生的未來預排堂數已超過剩餘額度！`;
                 }
             }
             
-            // 💡 關鍵修改：不寫入 note，而是加上 isManual: true 永久標記
             records.push({ id: Date.now(), sid: curSid, date: dateStr, status: 'planned', note: '', imgs: [], sig: null, isManual: true }); 
             saveData(); 
             
@@ -1828,7 +1838,8 @@
             const genBtn = document.getElementById('btnGenerateSchedule');
             if (genBtn) {
                 if (isNoRule) {
-                    genBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> 清除所有未上預排`;
+                    // 💡 修改點：改成更口語的「清除預排課程」
+                    genBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> 清除預排課程`;
                     genBtn.className = "w-full bg-red-500 text-white py-3 rounded-xl font-bold shadow hover:bg-red-600 active:scale-95 transition mt-2";
                 } else {
                     genBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> 重新安排預定課程`;
@@ -2075,33 +2086,47 @@
             renderList(); // 重新渲染
         }
         function removeLastPlannedRecord(sid, currentRid) {
-            // 優先找有 'isAutoExtension' 標記的補課，如果沒有，就找最後一堂 planned 課程
-            const studentPlannedRecs = records
-                .filter(r => r.sid === sid && r.status === 'planned' && r.id !== currentRid)
-                .sort((a, b) => b.date.localeCompare(a.date)); // 日期從晚到早排序
+            const s = students.find(x => x.id == sid);
+            if (!s) return null;
 
-            if (studentPlannedRecs.length > 0) {
-                // 優先刪除帶有標記的課程，若無則刪除最後一堂
-                const autoExtRec = studentPlannedRecs.find(r => r.isAutoExtension) || studentPlannedRecs[0];
-                
+            const allFuture = records.filter(r => r.sid === sid && (r.status === 'planned' || r.status === 'rescheduled') && r.id !== currentRid);
+            
+            const autoExtRec = allFuture.find(r => r.isAutoExtension);
+
+            if (autoExtRec) {
                 const idx = records.findIndex(r => r.id === autoExtRec.id);
                 if (idx > -1) {
+                    const deletedDate = autoExtRec.date;
                     records.splice(idx, 1);
-                    console.log("已自動移除因請假產生的補課:", autoExtRec.date);
+                    return deletedDate; // 💡 把刪除的時間傳出去
+                }
+            } else {
+                if (allFuture.length >= s.credits) {
+                    const plannedOnly = allFuture.filter(r => r.status === 'planned' && !r.isManual).sort((a, b) => b.date.localeCompare(a.date));
+                    if (plannedOnly.length > 0) {
+                        const idx = records.findIndex(r => r.id === plannedOnly[0].id);
+                        if (idx > -1) {
+                            const deletedDate = plannedOnly[0].date;
+                            records.splice(idx, 1);
+                            return deletedDate; // 💡 把刪除的時間傳出去
+                        }
+                    }
                 }
             }
+            return null;
         }
         async function undoLeave(rid) {
             try {
-                console.log("嘗試回復課程:", rid);
-                const targetRecord = records.find(x => x.id == rid); // 注意這裡用 == 避免型別問題
+                const targetRecord = records.find(x => x.id == rid);
                 if (!targetRecord) return alert("找不到課程紀錄");
 
-                if (!confirm("確定要取消請假並回復上課嗎？\n(系統將自動移除最後一堂補課)")) return;
+                // 💡 不囉唆，只問要不要取消請假
+                if (!confirm("確定要取消請假，回復成預定上課嗎？")) return;
 
-                // 1. 執行移除補課邏輯
+                // 1. 執行移除補課邏輯，並拿回被刪掉的時間
+                let deletedDate = null;
                 if (typeof window.removeLastPlannedRecord === 'function') {
-                    window.removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
+                    deletedDate = window.removeLastPlannedRecord(targetRecord.sid, targetRecord.id);
                 }
 
                 // 2. 修改狀態
@@ -2110,16 +2135,19 @@
                 // 3. 儲存
                 if (typeof saveData === 'function') {
                     saveData();
-                } else {
-                    // 如果你是用直接寫入 DB 的方式
-                    await db.records.put(targetRecord);
                 }
 
                 // 4. 關閉視窗與刷新
                 document.getElementById('actionModal').classList.add('hidden');
                 if (currentView === 'calendar') renderCalendar(); else renderTimeline();
                 
-                console.log("回復成功");
+                // 💡 執行完直接跳出結果通知
+                let msg = "✅ 已取消請假，回復上課狀態！";
+                if (deletedDate) {
+                    msg += `\n\n💡 為了維持總堂數正確，系統已自動幫您把最後一堂預排課刪除了：\n🗑️ ${deletedDate}`;
+                }
+                alert(msg);
+
             } catch (error) {
                 console.error("回復上課發生錯誤:", error);
                 alert("回復失敗，錯誤資訊請見 Console");
